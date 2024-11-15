@@ -59,55 +59,61 @@ local function draw_character(row, col, character, hl_group)
 end
 
 
-local function draw_bottom_block(row, col, character_index)
-	if character_index > 7 then
-		return
-	end
-	local character = BOTTOM_BLOCKS[character_index + 1]
-	draw_character(row, col, character)
-end
-
-
-local function draw_top_block(row, col, character_index)
-	if character_index < 1 then
-		return
-	end
-	local character = BOTTOM_BLOCKS[character_index + 1]
-	draw_character(row, col, character, color.hl_group_inverted)
+local function draw_partial_block(row, col, character_list, character_index, hl_group)
+	local character = character_list[character_index + 1]
+	draw_character(row, col, character, hl_group)
 end
 
 
 local function draw_vertically_shifted_block(row_float, col)
 	local row = math.floor(row_float)
 	local character_index = math.floor((row_float - row) * 8 + 0.5)
-	draw_bottom_block(row, col, character_index)
-	draw_top_block(row + 1, col, character_index)
-end
 
-
-local function draw_right_block(row, col, character_index)
-	if character_index > 7 then
-		return
+	if character_index < 7 then
+		draw_partial_block(
+			row,
+			col,
+			BOTTOM_BLOCKS,
+			character_index,
+			color.hl_group
+		)
 	end
-	local character = LEFT_BLOCKS[character_index + 1]
-	draw_character(row, col, character, color.hl_group_inverted)
-end
 
-
-local function draw_left_block(row, col, character_index)
-	if character_index < 1 then
-		return
+	if character_index > 0 then
+		draw_partial_block(
+			row + 1,
+			col,
+			BOTTOM_BLOCKS,
+			character_index - 1,
+			color.hl_group_inverted
+		)
 	end
-	local character = LEFT_BLOCKS[character_index + 1]
-	draw_character(row, col, character)
 end
 
 
 local function draw_horizontally_shifted_block(row, col_float)
 	local col = math.floor(col_float)
 	local character_index = math.floor((col_float - col) * 8 + 0.5)
-	draw_right_block(row, col, character_index)
-	draw_left_block(row, col + 1, character_index)
+
+	if character_index < 7 then
+		draw_partial_block(
+			row,
+			col,
+			LEFT_BLOCKS,
+			character_index,
+			color.hl_group_inverted
+		)
+	end
+
+	if character_index > 0 then
+		draw_partial_block(
+			row,
+			col + 1,
+			LEFT_BLOCKS,
+			character_index - 1,
+			color.hl_group
+		)
+	end
 end
 
 
