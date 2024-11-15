@@ -18,8 +18,12 @@ local previous_cursor_position = {1, 1}
 
 M.on_cursor_moved = function()
 	local row, col = M.get_cursor_position()
+
+	if config.DONT_ERASE then draw.clear() end
 	draw.draw_line(previous_cursor_position[1], previous_cursor_position[2], row, col)
 	previous_cursor_position = {row, col}
+
+	if config.DONT_ERASE then return end
 	vim.defer_fn(draw.clear, config.PERSISTENCE)
 end
 

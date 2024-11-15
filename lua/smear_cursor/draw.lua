@@ -69,7 +69,7 @@ local function draw_vertically_shifted_block(row_float, col)
 	local row = math.floor(row_float)
 	local character_index = math.floor((row_float - row) * 8 + 0.5)
 
-	if character_index < 7 then
+	if character_index < 8 then
 		draw_partial_block(
 			row,
 			col,
@@ -84,7 +84,7 @@ local function draw_vertically_shifted_block(row_float, col)
 			row + 1,
 			col,
 			BOTTOM_BLOCKS,
-			character_index - 1,
+			character_index,
 			color.hl_group_inverted
 		)
 	end
@@ -110,7 +110,7 @@ local function draw_horizontally_shifted_block(row, col_float)
 			row,
 			col + 1,
 			LEFT_BLOCKS,
-			character_index - 1,
+			character_index,
 			color.hl_group
 		)
 	end
