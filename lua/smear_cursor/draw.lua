@@ -203,7 +203,44 @@ end
 
 
 local function draw_diagonal_vertical_block(row, col_float, row_start, col_start, row_end, col_end, slope)
-	draw_vertical_ish_line(row_start, col_start, row_end, col_end)
+	local col = math.floor(col_float + 0.5)
+	local shift = col_float - col
+	-- Matrix of lit quarters
+	local m = {
+		{0, 0, 0, 0, 0, 0}, -- Top
+		{0, 0, 0, 0, 0, 0}  -- Bottom
+	} -- c-1    c    c+1
+
+	-- Lit from the top
+	local shift_top = shift - 0.5 / slope
+	local half_row_top = math.floor(shift_top * 2 + 0.5)
+	m[1][3 + half_row_top] = 1
+	m[1][4 + half_row_top] = 1
+
+	-- Lit from center
+	local half_row = math.floor(shift * 2 + 0.5)
+	m[1][3 + half_row] = 1
+	m[1][4 + half_row] = 1
+	m[2][3 + half_row] = 1
+	m[2][4 + half_row] = 1
+
+	-- Lit from the bottom
+	local shift_bottom = shift + 0.5 / slope
+	local half_row_bottom = math.floor(shift_bottom * 2 + 0.5)
+	m[2][3 + half_row_bottom] = 1
+	m[2][4 + half_row_bottom] = 1
+
+	for i = -1, 1 do
+		local col_i = col + i
+		if not (row == row_end and col_i == col_end)
+			and not (col_i < math.min(col_start, col_end))
+			and not (col_i > math.max(col_start, col_end)) then
+			draw_matrix_character(row, col_i, {
+				{m[1][2 * i + 3], m[1][2 * i + 4]},
+				{m[2][2 * i + 3], m[2][2 * i + 4]}
+			})
+		end
+	end
 end
 
 
@@ -220,7 +257,7 @@ local function draw_diagonal_horizontal_line(row_start, col_start, row_end, col_
 end
 
 
-local function draw_diagonal_vertical_line(row_start, col_start, row_end, col_end, slope)
+local function draw_diagonal_vertical_line(row_start, col_start, row_end, col_end)
 	local distance = math.abs(row_end - row_start)
 	local direction = row_end > row_start and 1 or -1
 	local slope = (row_end - row_start) / (col_end - col_start)
