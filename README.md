@@ -11,10 +11,14 @@ _Neovim plugin to animate the cursor with a smear effect_
 - [ ] Better persistence management
 - [ ] Sub-character smear
 - [ ] Color gradient smear
+- [ ] Reduce size with speed
+- [ ] Smear when jumping to commands
+- [ ] Smear when jumping between windows
 
 ## Fixes
 
-- [ ] Transition to a buffer with less lines than the current cursor row
+- [ ] Smear outside buffer (further than the last line)
+  - [ ] Transition to a buffer with less lines than the current cursor row
 - [ ] Drawing smear through folded lines
 - [ ] Drawing smear through wrapped lines
 - [ ] Remove smear when exiting insert mode
