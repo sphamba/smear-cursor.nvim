@@ -6,6 +6,7 @@ local M = {}
 
 BOTTOM_BLOCKS = {"█", "▇", "▆", "▅", "▄", "▃", "▂", "▁", " "}
 LEFT_BLOCKS   = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}
+MATRIX_CHARACTERS = {" ", "▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "▚", "▐", "▜", "▄", "▙", "▟", "█"}
 
 
 -- Create a namespace for the extmarks
@@ -67,7 +68,8 @@ end
 
 local function draw_vertically_shifted_block(row_float, col)
 	local row = math.floor(row_float)
-	local character_index = math.floor((row_float - row) * 8 + 0.5)
+	local shift = row_float - row
+	local character_index = math.floor(shift * 8 + 0.5)
 
 	if character_index < 8 then
 		draw_partial_block(
@@ -93,7 +95,8 @@ end
 
 local function draw_horizontally_shifted_block(row, col_float)
 	local col = math.floor(col_float)
-	local character_index = math.floor((col_float - col) * 8 + 0.5)
+	local shift = col_float - col
+	local character_index = math.floor(shift * 8 + 0.5)
 
 	if character_index < 7 then
 		draw_partial_block(
@@ -129,9 +132,9 @@ local function draw_horizontal_ish_line(row_start, col_start, row_end, col_end)
 	local direction = col_end > col_start and 1 or -1
 
 	for i = 0, distance - 1 do
-		local row = row_start + (row_end - row_start) * i / distance
+		local row_float = row_start + (row_end - row_start) * i / distance
 		local col = col_start + direction * i
-		draw_vertically_shifted_block(row, col)
+		draw_vertically_shifted_block(row_float, col)
 	end
 end
 
@@ -142,24 +145,90 @@ local function draw_vertical_ish_line(row_start, col_start, row_end, col_end)
 
 	for i = 0, distance - 1 do
 		local row = row_start + direction * i
-		local col = col_start + (col_end - col_start) * i / distance
-		draw_horizontally_shifted_block(row, col)
+		local col_float = col_start + (col_end - col_start) * i / distance
+		draw_horizontally_shifted_block(row, col_float)
 	end
 end
 
 
-local function draw_diagonal_line(row_start, col_start, row_end, col_end)
-	local distance = math.sqrt((row_end - row_start)^2 + (col_end - col_start)^2)
-	if distance < 1 then
-		return
-	end
+local function draw_matrix_character(row, col, matrix)
+	local index = matrix[1][1] * 1 + matrix[1][2] * 2 + matrix[2][1] * 4 + matrix[2][2] * 8
+	if index == 0 then return end
+	local character = MATRIX_CHARACTERS[index + 1]
+	draw_character(row, col, character)
+end
 
-	for i = 0, distance - 1 do
-		local row = row_start + (row_end - row_start) * i / distance
-		local col = col_start + (col_end - col_start) * i / distance
-		row = math.floor(row + 0.5)
-		col = math.floor(col + 0.5)
-		draw_character(row, col)
+
+local function draw_diagonal_horizontal_block(row_float, col, row_start, col_start, row_end, col_end, slope)
+	local row = math.floor(row_float + 0.5)
+	local shift = row_float - row
+	-- Matrix of lit quarters
+	local m = {
+		{0, 0}, -- Top of row above
+		{0, 0}, -- Bottom of row above
+		{0, 0}, -- Top of current row
+		{0, 0}, -- Bottom of current row
+		{0, 0}, -- Top of row below
+		{0, 0}  -- Bottom of row below
+	}
+
+	-- Lit from the left
+	local shift_left = shift - 0.5 * slope
+	local half_row_left = math.floor(shift_left * 2 + 0.5)
+	m[3 + half_row_left][1] = 1
+	m[4 + half_row_left][1] = 1
+
+	-- Lit from center
+	local half_row = math.floor(shift * 2 + 0.5)
+	m[3 + half_row][1] = 1
+	m[4 + half_row][1] = 1
+	m[3 + half_row][2] = 1
+	m[4 + half_row][2] = 1
+
+	-- Lit from the right
+	local shift_right = shift + 0.5 * slope
+	local half_row_right = math.floor(shift_right * 2 + 0.5)
+	m[3 + half_row_right][2] = 1
+	m[4 + half_row_right][2] = 1
+
+	for i = -1, 1 do
+		local row_i = row + i
+		if not (row_i == row_end and col == col_end)
+			and not (row_i < math.min(row_start, row_end))
+			and not (row_i > math.max(row_start, row_end)) then
+			draw_matrix_character(row_i, col, {m[2 * i + 3], m[2 * i + 4]})
+		end
+	end
+end
+
+
+local function draw_diagonal_vertical_block(row, col_float, row_start, col_start, row_end, col_end, slope)
+	draw_vertical_ish_line(row_start, col_start, row_end, col_end)
+end
+
+
+local function draw_diagonal_horizontal_line(row_start, col_start, row_end, col_end)
+	local distance = math.abs(col_end - col_start)
+	local direction = col_end > col_start and 1 or -1
+	local slope = (row_end - row_start) / (col_end - col_start)
+
+	for i = 0, distance do
+		local row_float = row_start + (row_end - row_start) * i / distance
+		local col = col_start + direction * i
+		draw_diagonal_horizontal_block(row_float, col, row_start, col_start, row_end, col_end, slope)
+	end
+end
+
+
+local function draw_diagonal_vertical_line(row_start, col_start, row_end, col_end, slope)
+	local distance = math.abs(row_end - row_start)
+	local direction = row_end > row_start and 1 or -1
+	local slope = (row_end - row_start) / (col_end - col_start)
+
+	for i = 0, distance do
+		local row = row_start + direction * i
+		local col_float = col_start + (col_end - col_start) * i / distance
+		draw_diagonal_vertical_block(row, col_float, row_start, col_start, row_end, col_end, slope)
 	end
 end
 
@@ -180,9 +249,15 @@ M.draw_line = function(row_start, col_start, row_end, col_end)
 		draw_vertical_ish_line(row_start, col_start, row_end, col_end)
 		return
 	end
-	
-	logging.debug("Drawing diagonal line")
-	draw_diagonal_line(row_start, col_start, row_end, col_end)
+
+	if vertical_shift <= horizontal_shift then
+		logging.debug("Drawing diagonal-horizontal line")
+		draw_diagonal_horizontal_line(row_start, col_start, row_end, col_end)
+		return
+	end
+
+	logging.debug("Drawing diagonal-vertical line")
+	draw_diagonal_vertical_line(row_start, col_start, row_end, col_end)
 end
 
 
