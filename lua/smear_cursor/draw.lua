@@ -15,10 +15,6 @@ M.cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
 
 local function draw_character(row, col, character, hl_group)
-	if character == nil then
-		character = "█"
-	end
-
 	if hl_group == nil then
 		hl_group = color.hl_group
 	end
@@ -248,6 +244,13 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 	L.col_direction = L.col_shift >= 0 and 1 or -1
 	L.slope = L.row_shift / L.col_shift
 	L.slope_abs = math.abs(L.slope)
+
+	if L.slope ~= L.slope then
+		if not L.skip_end then
+			draw_character(L.row_end_rounded, L.col_end_rounded, "█")
+		end
+		return
+	end
 
 	if L.slope_abs <= config.MAX_SLOPE_HORIZONTAL then
 		-- logging.debug("Drawing horizontal-ish line")
