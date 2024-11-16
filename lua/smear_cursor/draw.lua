@@ -236,8 +236,8 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 		skip_end = skip_end
 	}
 
-	L.left = math.min(L.col_start, L.col_end)
-	L.right = math.max(L.col_start, L.col_end)
+	L.left = math.min(L.col_start_rounded, L.col_end_rounded)
+	L.right = math.max(L.col_start_rounded, L.col_end_rounded)
 	L.top = math.min(L.row_start, L.row_end)
 	L.bottom = math.max(L.row_start, L.row_end)
 	L.row_direction = L.row_shift >= 0 and 1 or -1
