@@ -10,8 +10,9 @@ local animating = false
 
 
 local function update()
-	current_position[1] = current_position[1] + (target_position[1] - current_position[1]) * config.STIFFNESS
-	current_position[2] = current_position[2] + (target_position[2] - current_position[2]) * config.STIFFNESS
+	local stiffness = config.STIFFNESS + (math.random() - 0.5) * config.STIFFNESS_VARIATION
+	current_position[1] = current_position[1] + (target_position[1] - current_position[1]) * stiffness
+	current_position[2] = current_position[2] + (target_position[2] - current_position[2]) * stiffness
 end
 
 

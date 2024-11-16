@@ -10,6 +10,7 @@ M.MIN_SLOPE_VERTICAL = 2
 
 M.DISTANCE_STOP_ANIMATING = 0.2 -- characters
 M.STIFFNESS = 0.7 -- 1: instantaneous, 0: no movement
+M.STIFFNESS_VARIATION = 0.2 -- range of randomness in stiffness
 M.TRAILING = 0.5 -- 1: full trailing, 0: no trailing
 
 
