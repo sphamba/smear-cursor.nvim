@@ -3,6 +3,27 @@
 _Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's animated cursor](https://neovide.dev/features.html#animated-cursor)._
 
 
+# Installation
+
+## Using [vim-plug](https://github.com/junegunn/vim-plug)
+
+In your `init.vim`, add:
+
+```vim
+call plug#begin()
+Plug 'sphamba/smear-cursor.nvim'
+call plug#end()
+```
+
+
+# Configuration
+
+In your `init.vim`, add:
+```vim
+lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color set by your terminal
+```
+
+
 # Development TODOs
 
 ## Features
@@ -11,7 +32,9 @@ _Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's
 - [ ] Reduce size with speed
 - [ ] Smear when jumping to commands
 - [ ] Smear when jumping between windows
-- [ ] Easily set cursor color
+- [ ] Configurable animation parameters
+- [ ] Lazy.nvim configuration
+- [ ] Help documentation
 
 ## Fixes
 
