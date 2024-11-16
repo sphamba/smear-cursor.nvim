@@ -1,5 +1,4 @@
-local config = require("smear_cursor.config")
-local draw = require("smear_cursor.draw")
+local animation = require("smear_cursor.animation")
 local logging = require("smear_cursor.logging")
 local M = {}
 
@@ -8,23 +7,13 @@ local M = {}
 M.get_cursor_position = function()
 	local row = vim.api.nvim_win_get_cursor(0)[1]
 	local col = vim.fn.virtcol(".", 1)[1] -- Take into account wide characters
-	logging.debug("Cursor position (" .. row .. ", " .. col .. ")")
 	return row, col
 end
 
 
-local previous_cursor_position = {1, 1}
-
-
 M.on_cursor_moved = function()
 	local row, col = M.get_cursor_position()
-
-	if config.DONT_ERASE then draw.clear() end
-	draw.draw_line(previous_cursor_position[1], previous_cursor_position[2], row, col)
-	previous_cursor_position = {row, col}
-
-	if config.DONT_ERASE then return end
-	vim.defer_fn(draw.clear, config.PERSISTENCE)
+	animation.change_target_position(row, col)
 end
 
 

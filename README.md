@@ -7,9 +7,6 @@ _Neovim plugin to animate the cursor with a smear effect_
 
 ## Features
 
-- [ ] Cursor speed
-- [ ] Better persistence management
-- [ ] Sub-character smear
 - [ ] Color gradient smear
 - [ ] Reduce size with speed
 - [ ] Smear when jumping to commands
