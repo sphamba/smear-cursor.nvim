@@ -1,6 +1,6 @@
 # Smear cursor for Neovim
 
-_Neovim plugin to animate the cursor with a smear effect_
+_Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's animated cursor](https://neovide.dev/features.html#animated-cursor)._
 
 
 # Development TODOs
@@ -11,6 +11,7 @@ _Neovim plugin to animate the cursor with a smear effect_
 - [ ] Reduce size with speed
 - [ ] Smear when jumping to commands
 - [ ] Smear when jumping between windows
+- [ ] Easily set cursor color
 
 ## Fixes
 
