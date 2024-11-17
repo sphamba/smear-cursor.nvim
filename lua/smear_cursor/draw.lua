@@ -22,6 +22,9 @@ M.draw_character = function(screen_row, screen_col, character, hl_group)
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 
 	local buffer_id, row, col = screen.screen_to_buffer(screen_row, screen_col)
+	if buffer_id == nil then
+		return
+	end
 
 	-- Add extra lines to the buffer if necessary
 	-- local line_count = vim.api.nvim_buf_line_count(buffer_id)

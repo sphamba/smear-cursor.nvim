@@ -31,7 +31,6 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 - [ ] Color gradient smear
 - [ ] Reduce size with speed
 - [ ] Smear when jumping to commands
-- [ ] Smear when jumping between windows
 - [ ] Configurable animation parameters
 - [ ] Lazy.nvim configuration
 - [ ] Help documentation
@@ -40,7 +39,6 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 
 - [ ] Smear outside buffer (further than the last line)
   - [ ] Transition to a buffer with less lines than the current cursor row
-- [ ] Drawing smear through folded lines
 - [ ] Drawing smear through wrapped lines
 - [ ] Remove smear when exiting insert mode
 - [ ] Wrong background color over non-normal text
