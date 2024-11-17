@@ -1,6 +1,7 @@
 local color = require("smear_cursor.color")
 local config = require("smear_cursor.config")
 local logging = require("smear_cursor.logging")
+local screen = require("smear_cursor.screen")
 local M = {}
 
 
@@ -13,15 +14,14 @@ MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "�
 M.cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
 
-M.draw_character = function(row, col, character, hl_group)
+M.draw_character = function(screen_row, screen_col, character, hl_group)
 	if hl_group == nil then
 		hl_group = color.hl_group
 	end
 
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 
-	-- Retrieve the current buffer
-	local buffer_id = vim.api.nvim_get_current_buf()
+	local buffer_id, row, col = screen.screen_to_buffer(screen_row, screen_col)
 
 	-- Add extra lines to the buffer if necessary
 	-- local line_count = vim.api.nvim_buf_line_count(buffer_id)
@@ -275,8 +275,11 @@ end
 
 
 M.clear = function()
-	local buffer_id = vim.api.nvim_get_current_buf()
-	vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
+	local buffer_ids = vim.api.nvim_list_bufs()
+
+	for _, buffer_id in ipairs(buffer_ids) do
+		vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
+	end
 end
 
 

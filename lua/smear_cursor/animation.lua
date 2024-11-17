@@ -1,11 +1,13 @@
 local config = require("smear_cursor.config")
 local draw = require("smear_cursor.draw")
 local logging = require("smear_cursor.logging")
+local screen = require("smear_cursor.screen")
 local M = {}
 
 
-local target_position = {1, 1}
-local current_position = {1, 1}
+local cursor_row, cursor_col = screen.get_screen_cursor_position()
+local target_position = {cursor_row, cursor_col}
+local current_position = {cursor_row, cursor_col}
 local animating = false
 
 
