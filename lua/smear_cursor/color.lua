@@ -1,4 +1,33 @@
+local logging = require("smear_cursor.logging")
 local M = {}
+
+
+-- TODO: does not work
+M.get_hl_group = function(row, col)
+	-- Retrieve the current buffer
+	local buffer_id = vim.api.nvim_get_current_buf()
+
+    local extmarks = vim.api.nvim_buf_get_extmarks(
+		buffer_id,
+		-1,
+		{row, col},
+		{row, col + 1},
+		{
+			details = true,
+			overlap = true,
+		}
+	)
+	logging.debug(vim.inspect(extmarks))
+
+    if #extmarks > 0 then
+        local extmark = extmarks[1]
+        if extmark[4] and extmark[4].hl_group then
+            return extmark[4].hl_group
+        end
+    end
+
+    return "Normal"
+end
 
 
 -- Get a color from a highlight group

@@ -14,7 +14,7 @@ MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "�
 M.cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
 
-local function draw_character(row, col, character, hl_group)
+M.draw_character = function(row, col, character, hl_group)
 	if hl_group == nil then
 		hl_group = color.hl_group
 	end
@@ -66,7 +66,7 @@ end
 
 local function draw_partial_block(row, col, character_list, character_index, hl_group)
 	local character = character_list[character_index + 1]
-	draw_character(row, col, character, hl_group)
+	M.draw_character(row, col, character, hl_group)
 end
 
 
@@ -74,7 +74,7 @@ local function draw_matrix_character(row, col, matrix)
 	local index = matrix[1][1] * 1 + matrix[1][2] * 2 + matrix[2][1] * 4 + matrix[2][2] * 8
 	if index == 0 then return end
 	local character = MATRIX_CHARACTERS[index]
-	draw_character(row, col, character)
+	M.draw_character(row, col, character)
 end
 
 
@@ -247,7 +247,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 
 	if L.slope ~= L.slope then
 		if not L.skip_end then
-			draw_character(L.row_end_rounded, L.col_end_rounded, "█")
+			M.draw_character(L.row_end_rounded, L.col_end_rounded, "█")
 		end
 		return
 	end

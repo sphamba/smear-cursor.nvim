@@ -43,3 +43,4 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 - [ ] Drawing smear through folded lines
 - [ ] Drawing smear through wrapped lines
 - [ ] Remove smear when exiting insert mode
+- [ ] Wrong background color over non-normal text
