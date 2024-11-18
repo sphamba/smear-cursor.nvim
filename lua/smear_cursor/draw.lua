@@ -1,6 +1,7 @@
 local color = require("smear_cursor.color")
 local config = require("smear_cursor.config")
 local logging = require("smear_cursor.logging")
+local round = require("smear_cursor.math").round
 local screen = require("smear_cursor.screen")
 local M = {}
 
@@ -85,7 +86,7 @@ local function draw_vertically_shifted_block(row_float, col, L)
 
 	local row = math.floor(row_float)
 	local shift = row_float - row
-	local character_index = vim.fn.round(shift * 8)
+	local character_index = round(shift * 8)
 
 	if character_index < 8 then
 		draw_partial_block(row, col, BOTTOM_BLOCKS, character_index, color.hl_group)
@@ -102,7 +103,7 @@ local function draw_horizontally_shifted_block(row, col_float, L)
 
 	local col = math.floor(col_float)
 	local shift = col_float - col
-	local character_index = vim.fn.round(shift * 8)
+	local character_index = round(shift * 8)
 
 	if character_index < 7 then
 		draw_partial_block(row, col, LEFT_BLOCKS, character_index, color.hl_group_inverted)
@@ -115,7 +116,7 @@ end
 
 
 local function draw_diagonal_horizontal_block(row_float, col, L)
-	local row = vim.fn.round(row_float)
+	local row = round(row_float)
 	local shift = row_float - row
 	-- Matrix of lit quarters
 	local m = {
@@ -130,13 +131,13 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 	-- Lit from the left
 	if col ~= L.left then
 		local shift_left = shift - 0.5 * L.slope
-		local half_row_left = vim.fn.round(shift_left * 2)
+		local half_row_left = round(shift_left * 2)
 		m[3 + half_row_left][1] = 1
 		m[4 + half_row_left][1] = 1
 	end
 
 	-- Lit from center
-	local half_row = vim.fn.round(shift * 2)
+	local half_row = round(shift * 2)
 	m[3 + half_row][1] = 1
 	m[4 + half_row][1] = 1
 	m[3 + half_row][2] = 1
@@ -145,7 +146,7 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 	-- Lit from the right
 	if col ~= L.right then
 		local shift_right = shift + 0.5 * L.slope
-		local half_row_right = vim.fn.round(shift_right * 2)
+		local half_row_right = round(shift_right * 2)
 		m[3 + half_row_right][2] = 1
 		m[4 + half_row_right][2] = 1
 	end
@@ -161,7 +162,7 @@ end
 
 
 local function draw_diagonal_vertical_block(row, col_float, L)
-	local col = vim.fn.round(col_float)
+	local col = round(col_float)
 	local shift = col_float - col
 	-- Matrix of lit quarters
 	local m = {
@@ -172,13 +173,13 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 	-- Lit from the top
 	if row ~= L.top then
 		local shift_top = shift - 0.5 / L.slope
-		local half_row_top = vim.fn.round(shift_top * 2)
+		local half_row_top = round(shift_top * 2)
 		m[1][3 + half_row_top] = 1
 		m[1][4 + half_row_top] = 1
 	end
 
 	-- Lit from center
-	local half_row = vim.fn.round(shift * 2)
+	local half_row = round(shift * 2)
 	m[1][3 + half_row] = 1
 	m[1][4 + half_row] = 1
 	m[2][3 + half_row] = 1
@@ -187,7 +188,7 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 	-- Lit from the bottom
 	if row ~= L.bottom then
 		local shift_bottom = shift + 0.5 / L.slope
-		local half_row_bottom = vim.fn.round(shift_bottom * 2)
+		local half_row_bottom = round(shift_bottom * 2)
 		m[2][3 + half_row_bottom] = 1
 		m[2][4 + half_row_bottom] = 1
 	end
@@ -229,10 +230,10 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 		col_start = col_start,
 		row_end = row_end,
 		col_end = col_end,
-		row_start_rounded = vim.fn.round(row_start),
-		col_start_rounded = vim.fn.round(col_start),
-		row_end_rounded = vim.fn.round(row_end),
-		col_end_rounded = vim.fn.round(col_end),
+		row_start_rounded = round(row_start),
+		col_start_rounded = round(col_start),
+		row_end_rounded = round(row_end),
+		col_end_rounded = round(col_end),
 		row_shift = row_end - row_start,
 		col_shift = col_end - col_start,
 		skip_end = skip_end
