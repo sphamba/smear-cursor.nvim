@@ -129,7 +129,7 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 	}
 
 	-- Lit from the left
-	if col ~= L.left then
+	if col > L.left then
 		local shift_left = shift - 0.5 * L.slope
 		local half_row_left = round(shift_left * 2)
 		m[3 + half_row_left][1] = 1
@@ -144,7 +144,7 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 	m[4 + half_row][2] = 1
 
 	-- Lit from the right
-	if col ~= L.right then
+	if col < L.right then
 		local shift_right = shift + 0.5 * L.slope
 		local half_row_right = round(shift_right * 2)
 		m[3 + half_row_right][2] = 1
@@ -153,8 +153,8 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 
 	for i = -1, 1 do
 		local row_i = row + i
-		if not L.skip_end or row_i ~= L.row_end or col ~= L.col_end then
-		-- Equivalent to `not (skip_end and row_i == row_end and col == col_end)`
+		if not L.skip_end or row_i ~= L.row_end_rounded or col ~= L.col_end_rounded then
+		-- Equivalent to `not (skip_end and row_i == row_end_rounded and col == col_end_rounded)`
 			draw_matrix_character(row_i, col, {m[2 * i + 3], m[2 * i + 4]})
 		end
 	end
@@ -171,7 +171,7 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 	} -- c-1    c    c+1
 
 	-- Lit from the top
-	if row ~= L.top then
+	if row > L.top then
 		local shift_top = shift - 0.5 / L.slope
 		local half_row_top = round(shift_top * 2)
 		m[1][3 + half_row_top] = 1
@@ -186,7 +186,7 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 	m[2][4 + half_row] = 1
 
 	-- Lit from the bottom
-	if row ~= L.bottom then
+	if row < L.bottom then
 		local shift_bottom = shift + 0.5 / L.slope
 		local half_row_bottom = round(shift_bottom * 2)
 		m[2][3 + half_row_bottom] = 1
@@ -195,8 +195,8 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 
 	for i = -1, 1 do
 		local col_i = col + i
-		if not L.skip_end or row ~= L.row_end or col_i ~= L.col_end then
-		-- Equivalent to `if not (skip_end and row == row_end and col_i == col_end)`
+		if (not L.skip_end or row ~= L.row_end_rounded or col_i ~= L.col_end_rounded) then
+		-- Equivalent to `if not (skip_end and row == row_end_rounded and col_i == col_end_rounded)`
 			draw_matrix_character(row, col_i, {
 				{m[1][2 * i + 3], m[1][2 * i + 4]},
 				{m[2][2 * i + 3], m[2][2 * i + 4]}

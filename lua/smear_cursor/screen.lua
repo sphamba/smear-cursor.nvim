@@ -2,29 +2,16 @@ local logging = require("smear_cursor.logging")
 local M = {}
 
 
-M.get_window_cursor_position = function(window_id)
-	if window_id == nil then
-		window_id = vim.api.nvim_get_current_win()
-	end
-
-	local window_position = vim.api.nvim_win_get_position(window_id)
-	local window_row = window_position[1]
-	local window_col = window_position[2]
-
-	return window_row, window_col
-end
-
-
 M.get_screen_cursor_position = function(window_id)
 	if window_id == nil then
 		window_id = vim.api.nvim_get_current_win()
 	end
 
-	local window_origin = vim.fn.win_screenpos(window_id)
+	local window_origin = vim.api.nvim_win_get_position(window_id)
 	local window_row = window_origin[1]
 	local window_col = window_origin[2]
-	local screen_row = window_row + vim.fn.winline() - 1
-	local screen_col = window_col + vim.fn.wincol() - 1
+	local screen_row = window_row + vim.fn.winline()
+	local screen_col = window_col + vim.fn.wincol()
 
 	return screen_row, screen_col
 end
@@ -34,9 +21,9 @@ local function get_window_containing_position(screen_row, screen_col)
 	local window_ids = vim.api.nvim_list_wins()
 
 	for _, window_id in ipairs(window_ids) do
-		local window_origin = vim.fn.win_screenpos(window_id)
-		local window_row = window_origin[1]
-		local window_col = window_origin[2]
+		local window_origin = vim.api.nvim_win_get_position(window_id)
+		local window_row = window_origin[1] + 1
+		local window_col = window_origin[2] + 1
 		local window_height = vim.api.nvim_win_get_height(window_id)
 		local window_width = vim.api.nvim_win_get_width(window_id)
 

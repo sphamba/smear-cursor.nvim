@@ -25,7 +25,7 @@ M.listen = function()
 
 		augroup SmearCursorJump
 			autocmd!
-			autocmd CursorMovedI,WinScrolled * lua require("smear_cursor.events").jump_cursor()
+			autocmd CursorMovedI * lua require("smear_cursor.events").jump_cursor()
 		augroup END
 	]], false)
 end
