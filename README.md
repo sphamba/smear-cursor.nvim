@@ -40,6 +40,5 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 - [ ] Smear outside buffer (further than the last line)
   - [ ] Transition to a buffer with less lines than the current cursor row
 - [ ] Drawing smear through wrapped lines
-- [ ] Remove smear when exiting insert mode
 - [ ] Wrong background color over non-normal text
 - [ ] Smears appear on duplicated buffer

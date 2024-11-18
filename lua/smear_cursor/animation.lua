@@ -45,7 +45,8 @@ local function animate()
 end
 
 
-M.change_target_position = function(row, col)
+M.change_target_position = function(row, col, jump)
+	if jump == nil then jump = false end
 	if config.DONT_ERASE then draw.clear() end
 
 	if animating then
@@ -54,6 +55,9 @@ M.change_target_position = function(row, col)
 	end
 
 	target_position = {row, col}
+	if jump then
+		current_position = {row, col}
+	end
 
 	if not animating then
 		animate()

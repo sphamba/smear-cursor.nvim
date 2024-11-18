@@ -4,17 +4,28 @@ local screen = require("smear_cursor.screen")
 local M = {}
 
 
-M.on_cursor_moved = function()
+M.move_cursor = function()
 	local row, col = screen.get_screen_cursor_position()
 	animation.change_target_position(row, col)
 end
 
 
+M.jump_cursor = function()
+	local row, col = screen.get_screen_cursor_position()
+	animation.change_target_position(row, col, true)
+end
+
+
 M.listen = function()
 	vim.api.nvim_exec([[
-		augroup GetCursorPosition
+		augroup SmearCursor
 			autocmd!
-			autocmd CursorMoved * lua require("smear_cursor.events").on_cursor_moved()
+			autocmd CursorMoved * lua require("smear_cursor.events").move_cursor()
+		augroup END
+
+		augroup SmearCursorJump
+			autocmd!
+			autocmd CursorMovedI,WinScrolled * lua require("smear_cursor.events").jump_cursor()
 		augroup END
 	]], false)
 end
