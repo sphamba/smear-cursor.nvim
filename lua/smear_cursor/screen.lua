@@ -51,9 +51,10 @@ M.screen_to_buffer = function(screen_row, screen_col)
 	local col_shift = 0 -- To draw to the left of wrapped lines, positive
 
 	-- Find the buffer row corresponding to the screen row
-	-- Take into account folds
+	-- Take into account folds and wrapped lines
 	local buffer_row = start_row
 	local current_screen_row = buffer_origin.row
+
 	while (current_screen_row < screen_row) do
 		if vim.fn.foldclosed(buffer_row) ~= -1 then
 			buffer_row = vim.fn.foldclosedend(buffer_row) + 1
@@ -61,10 +62,18 @@ M.screen_to_buffer = function(screen_row, screen_col)
 
 		else
 
-			local text_height = vim.api.nvim_win_text_height(window_id, {
-				start_row = buffer_row - 1,
-				end_row = buffer_row - 1,
-			})
+			local text_height
+			local success = pcall(function()
+				text_height = vim.api.nvim_win_text_height(window_id, {
+					start_row = buffer_row - 1,
+					end_row = buffer_row - 1,
+				})
+			end)
+
+			if not success then -- line is not visible
+				return nil
+			end
+
 			buffer_row = buffer_row + 1
 			current_screen_row = current_screen_row + text_height.all
 		end
