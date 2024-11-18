@@ -4,6 +4,9 @@ local screen = require("smear_cursor.screen")
 local M = {}
 
 
+local switching_buffer = false
+
+
 M.move_cursor = function()
 	local row, col = screen.get_screen_cursor_position()
 	animation.change_target_position(row, col)
@@ -12,7 +15,16 @@ end
 
 M.jump_cursor = function()
 	local row, col = screen.get_screen_cursor_position()
-	animation.change_target_position(row, col, true)
+
+	if not switching_buffer then
+		animation.change_target_position(row, col, true)
+		switching_buffer = false
+	end
+end
+
+
+M.flag_switching_buffer = function()
+	switching_buffer = true
 end
 
 
@@ -21,11 +33,8 @@ M.listen = function()
 		augroup SmearCursor
 			autocmd!
 			autocmd CursorMoved * lua require("smear_cursor.events").move_cursor()
-		augroup END
-
-		augroup SmearCursorJump
-			autocmd!
-			autocmd CursorMovedI * lua require("smear_cursor.events").jump_cursor()
+			autocmd CursorMovedI,WinScrolled * lua require("smear_cursor.events").jump_cursor()
+			autocmd BufLeave * lua require("smear_cursor.events").flag_switching_buffer()
 		augroup END
 	]], false)
 end
