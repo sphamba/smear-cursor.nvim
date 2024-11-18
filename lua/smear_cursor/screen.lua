@@ -52,18 +52,29 @@ M.screen_to_buffer = function(screen_row, screen_col)
 
 	-- Find the buffer row corresponding to the screen row
 	-- Take into account folds
-	local row = start_row
-	for current_screen_row = buffer_origin.row, screen_row - 1 do
-		if vim.fn.foldclosed(row) ~= -1 then
-			row = vim.fn.foldclosedend(row) + 1
+	local buffer_row = start_row
+	local current_screen_row = buffer_origin.row
+	while (current_screen_row < screen_row) do
+		if vim.fn.foldclosed(buffer_row) ~= -1 then
+			buffer_row = vim.fn.foldclosedend(buffer_row) + 1
+			current_screen_row = current_screen_row + 1
 
 		else
 
-			row = row + 1
+			local text_height = vim.api.nvim_win_text_height(window_id, {
+				start_row = buffer_row - 1,
+				end_row = buffer_row - 1,
+			})
+			buffer_row = buffer_row + 1
+			current_screen_row = current_screen_row + text_height.all
 		end
 	end
 
-	return buffer_id, row, col, col_shift
+	if current_screen_row > screen_row then
+		return nil
+	end
+
+	return buffer_id, buffer_row, col, col_shift
 end
 
 
