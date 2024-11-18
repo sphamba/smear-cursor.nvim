@@ -18,8 +18,9 @@ M.jump_cursor = function()
 
 	if not switching_buffer then
 		animation.change_target_position(row, col, true)
-		switching_buffer = false
 	end
+
+	switching_buffer = false
 end
 
 

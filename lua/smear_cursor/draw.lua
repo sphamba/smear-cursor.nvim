@@ -82,34 +82,30 @@ end
 
 
 local function draw_vertically_shifted_block(row_float, col, L)
-	if L.skip_end and col == L.col_end_rounded then return end
-
 	local row = math.floor(row_float)
 	local shift = row_float - row
 	local character_index = round(shift * 8)
 
-	if character_index < 8 then
+	if character_index < 8 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
 		draw_partial_block(row, col, BOTTOM_BLOCKS, character_index, color.hl_group)
 	end
 
-	if character_index > 0 then
+	if character_index > 0 and (not L.skip_end or row + 1 ~= L.row_end_rounded or col ~= L.col_end_rounded) then
 		draw_partial_block(row + 1, col, BOTTOM_BLOCKS, character_index, color.hl_group_inverted)
 	end
 end
 
 
 local function draw_horizontally_shifted_block(row, col_float, L)
-	if L.skip_end and row == L.row_end_rounded then return end
-
 	local col = math.floor(col_float)
 	local shift = col_float - col
 	local character_index = round(shift * 8)
 
-	if character_index < 7 then
+	if character_index < 7 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
 		draw_partial_block(row, col, LEFT_BLOCKS, character_index, color.hl_group_inverted)
 	end
 
-	if character_index > 0 then
+	if character_index > 0 and (not L.skip_end or row ~= L.row_end_rounded or col + 1 ~= L.col_end_rounded) then
 		draw_partial_block(row, col + 1, LEFT_BLOCKS, character_index, color.hl_group)
 	end
 end
@@ -222,6 +218,15 @@ local function draw_vertical_ish_line(L, draw_block_function)
 end
 
 
+local function draw_ending(L)
+	-- Apply factors to reduce size of diagonal partial blocks
+	local row_shift = L.row_shift * (1 - math.abs(L.col_shift))
+	local col_shift = L.col_shift * (1 - math.abs(L.row_shift))
+	draw_vertically_shifted_block(L.row_end_rounded - row_shift, L.col_end_rounded, L)
+	draw_horizontally_shifted_block(L.row_end_rounded, L.col_end_rounded - col_shift, L)
+end
+
+
 M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 	-- logging.debug("Drawing line from (" .. row_start .. ", " .. col_start .. ") to (" .. row_end .. ", " .. col_end .. ")")
 
@@ -239,10 +244,10 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 		skip_end = skip_end
 	}
 
-	L.left = math.min(L.col_start_rounded, L.col_end_rounded)
-	L.right = math.max(L.col_start_rounded, L.col_end_rounded)
 	L.top = math.min(L.row_start, L.row_end)
 	L.bottom = math.max(L.row_start, L.row_end)
+	L.left = math.min(L.col_start_rounded, L.col_end_rounded)
+	L.right = math.max(L.col_start_rounded, L.col_end_rounded)
 	L.row_direction = L.row_shift >= 0 and 1 or -1
 	L.col_direction = L.col_shift >= 0 and 1 or -1
 	L.slope = L.row_shift / L.col_shift
@@ -252,6 +257,11 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 		if not L.skip_end then
 			M.draw_character(L.row_end_rounded, L.col_end_rounded, "█")
 		end
+		return
+	end
+
+	if L.skip_end and L.row_shift^2 + L.col_shift^2 < 1 then
+		draw_ending(L)
 		return
 	end
 
