@@ -28,7 +28,6 @@ local function draw_character_floating_window(row, col, character, hl_group)
 	vim.api.nvim_buf_set_option(buffer_id, "bufhidden", "wipe")
 	vim.api.nvim_buf_set_option(buffer_id, "swapfile", false)
 	vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, { character })
-	vim.api.nvim_buf_add_highlight(buffer_id, -1, hl_group, 0, 0, -1)
 
 	local window_id = vim.api.nvim_open_win(buffer_id, false, {
 		relative = "editor",
@@ -39,7 +38,7 @@ local function draw_character_floating_window(row, col, character, hl_group)
 		style = "minimal",
 		focusable = false,
 	})
-	vim.wo[window_id].statusline = ''
+	vim.api.nvim_win_set_option(window_id, "winhl", "Normal:" .. hl_group)
 
 	table.insert(window_ids, window_id)
 end
@@ -51,6 +50,8 @@ local function clear_floating_windows()
 			vim.api.nvim_win_close(window_id, true)
 		end
 	end
+
+	window_ids = {}
 end
 
 
