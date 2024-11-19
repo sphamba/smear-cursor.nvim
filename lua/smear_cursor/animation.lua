@@ -44,10 +44,10 @@ end
 
 M.change_target_position = function(row, col, jump)
 	if jump == nil then jump = false end
-	if config.DONT_ERASE then draw.clear() end
+	draw.clear()
 
 	if animating then
-		draw.draw_line(trailing_position[1], current_position[2], trailing_position[1], target_position[2])
+		draw.draw_line(trailing_position[1], target_position[2], trailing_position[1], target_position[2])
 		current_position = {target_position[1], target_position[2]}
 		trailing_position = {target_position[1], target_position[2]}
 	end
