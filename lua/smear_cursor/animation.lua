@@ -45,6 +45,7 @@ end
 
 M.change_target_position = function(row, col, jump)
 	if jump == nil then jump = false end
+	if (target_position[1] == row and target_position[2] == col) then return end
 	draw.clear()
 
 	if animating then
