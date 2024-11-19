@@ -47,7 +47,7 @@ M.change_target_position = function(row, col, jump)
 	draw.clear()
 
 	if animating then
-		draw.draw_line(trailing_position[1], target_position[2], trailing_position[1], target_position[2])
+		draw.draw_line(trailing_position[1], trailing_position[2], target_position[1], target_position[2])
 		current_position = {target_position[1], target_position[2]}
 		trailing_position = {target_position[1], target_position[2]}
 	end
