@@ -6,9 +6,9 @@ local M = {}
 
 
 local cursor_row, cursor_col = screen.get_screen_cursor_position()
-local target_position = {cursor_row, cursor_col}
-local current_position = {cursor_row, cursor_col}
-local trailing_position = {cursor_row, cursor_col}
+local target_position = {cursor_row + 1, cursor_col + 1} -- Not sure why +1 is needed
+local current_position = {target_position[1], target_position[2]}
+local trailing_position = {target_position[1], target_position[2]}
 local animating = false
 
 

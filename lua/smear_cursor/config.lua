@@ -2,6 +2,7 @@ local M = {}
 
 
 M.LOGGING_LEVEL = vim.log.levels.INFO
+M.USE_FLOATING_WINDOWS = false -- Better capabilities but can have bad berformance with some plugins
 
 M.TIME_INTERVAL = 17 -- milliseconds
 M.DONT_ERASE = false -- Set to true for debugging

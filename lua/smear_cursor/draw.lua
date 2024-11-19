@@ -13,9 +13,48 @@ MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "�
 
 -- Create a namespace for the extmarks
 M.cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
+local window_ids = {}
 
 
-M.draw_character = function(screen_row, screen_col, character, hl_group)
+local function draw_character_floating_window(row, col, character, hl_group)
+	if hl_group == nil then
+		hl_group = color.hl_group
+	end
+
+	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
+
+	local buffer_id = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_option(buffer_id, "buftype", "nofile")
+	vim.api.nvim_buf_set_option(buffer_id, "bufhidden", "wipe")
+	vim.api.nvim_buf_set_option(buffer_id, "swapfile", false)
+	vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, { character })
+	vim.api.nvim_buf_add_highlight(buffer_id, -1, hl_group, 0, 0, -1)
+
+	local window_id = vim.api.nvim_open_win(buffer_id, false, {
+		relative = "editor",
+		row = row - 1,
+		col = col - 1,
+		width = 1,
+		height = 1,
+		style = "minimal",
+		focusable = false,
+	})
+	vim.wo[window_id].statusline = ''
+
+	table.insert(window_ids, window_id)
+end
+
+
+local function clear_floating_windows()
+	for _, window_id in ipairs(window_ids) do
+		if vim.api.nvim_win_is_valid(window_id) then
+			vim.api.nvim_win_close(window_id, true)
+		end
+	end
+end
+
+
+local function draw_character_extmark(screen_row, screen_col, character, hl_group)
 	if hl_group == nil then
 		hl_group = color.hl_group
 	end
@@ -26,17 +65,6 @@ M.draw_character = function(screen_row, screen_col, character, hl_group)
 	if buffer_id == nil then
 		return
 	end
-
-	-- Add extra lines to the buffer if necessary
-	-- local line_count = vim.api.nvim_buf_line_count(buffer_id)
-	-- if row > line_count then
-	-- 	local new_lines = {}
-	-- 	for _ = 1, row - line_count do
-	-- 		table.insert(new_lines, "")
-	-- 	end
-	-- 	logging.debug("Adding lines to the buffer from " .. line_count .. " to " .. row)
-	-- 	vim.api.nvim_buf_set_lines(buffer_id, line_count, line_count, false, new_lines)
-	-- end
 
 	-- Place new extmark with the determined position
 	local success, extmark_id = pcall(function ()
@@ -49,21 +77,24 @@ M.draw_character = function(screen_row, screen_col, character, hl_group)
 	if not success then
 		logging.debug("Failed to draw character at (" .. row .. ", " .. col .. ")")
 	end
-
-	-- Clean extra lines
-	-- if row > line_count then
-	-- 	logging.debug("Removing extra lines from " .. line_count .. " to " .. row)
-	-- 	vim.api.nvim_buf_set_lines(buffer_id, line_count, row, false, {})
-	-- end
-
-	return extmark_id
 end
 
 
-M.remove_character = function(extmark_id)
-	local buffer_id = vim.api.nvim_get_current_buf()
-	vim.api.nvim_buf_del_extmark(buffer_id, M.cursor_namespace, extmark_id)
-	logging.debug("Removed character")
+local function clear_extmarks()
+	local buffer_ids = vim.api.nvim_list_bufs()
+
+	for _, buffer_id in ipairs(buffer_ids) do
+		vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
+	end
+end
+
+
+if config.USE_FLOATING_WINDOWS then
+	M.draw_character = draw_character_floating_window
+	M.clear = clear_floating_windows
+else
+	M.draw_character = draw_character_extmark
+	M.clear = clear_extmarks
 end
 
 
@@ -285,15 +316,6 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 
 	-- logging.debug("Drawing diagonal-vertical line")
 	draw_vertical_ish_line(L, draw_diagonal_vertical_block)
-end
-
-
-M.clear = function()
-	local buffer_ids = vim.api.nvim_list_bufs()
-
-	for _, buffer_id in ipairs(buffer_ids) do
-		vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
-	end
 end
 
 
