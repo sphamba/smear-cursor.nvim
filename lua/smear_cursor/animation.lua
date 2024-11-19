@@ -24,6 +24,7 @@ end
 
 
 local function animate()
+	if not animating then return end
 	update()
 
 	if not config.DONT_ERASE then draw.clear() end
@@ -56,9 +57,11 @@ M.change_target_position = function(row, col, jump)
 	if jump then
 		current_position = {row, col}
 		trailing_position = {row, col}
+		return
 	end
 
 	if not animating then
+		animating = true
 		animate()
 	end
 end
