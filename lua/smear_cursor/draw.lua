@@ -6,9 +6,18 @@ local screen = require("smear_cursor.screen")
 local M = {}
 
 
-BOTTOM_BLOCKS = {"█", "▇", "▆", "▅", "▄", "▃", "▂", "▁", " "}
-LEFT_BLOCKS   = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}
-MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "▚", "▐", "▜", "▄", "▙", "▟", "█"}
+local BOTTOM_BLOCKS = {"█", "▇", "▆", "▅", "▄", "▃", "▂", "▁", " "}
+local LEFT_BLOCKS   = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}
+local MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "▚", "▐", "▜", "▄", "▙", "▟", "█"}
+local TOP_BLOCKS, RIGHT_BLOCKS
+
+if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
+	TOP_BLOCKS   = {" ", "▔", "🮂", "🮃", "▀", "🮄", "🮅", "🮆", "█"}
+	RIGHT_BLOCKS = {"█", "🮋", "🮊", "🮉", "▐", "🮈", "🮇", "▕", " "}
+else
+	TOP_BLOCKS   = {" ", "▔", "▔", "▀", "▀", "▀", "▀", "█", "█"}
+	RIGHT_BLOCKS = {"█", "█", "▐", "▐", "▐", "▐", "▕", "▕", " "}
+end
 
 
 -- Create buffer and floating window
@@ -26,7 +35,7 @@ local window_id = vim.api.nvim_open_win(buffer_id, false, {
 	style = "minimal",
 	focusable = false,
 })
-vim.api.nvim_win_set_option(window_id, "winblend", 30)
+vim.api.nvim_win_set_option(window_id, "winblend", 100)
 vim.api.nvim_win_set_option(window_id, "winhl", "Normal:" .. color.hl_group)
 
 
@@ -138,7 +147,11 @@ local function draw_vertically_shifted_block(row_float, col, L)
 	end
 
 	if character_index > 0 and (not L.skip_end or row + 1 ~= L.row_end_rounded or col ~= L.col_end_rounded) then
-		draw_partial_block(row + 1, col, BOTTOM_BLOCKS, character_index, color.hl_group_inverted, L)
+		if config.USE_FLOATING_WINDOWS then
+			draw_partial_block(row + 1, col, TOP_BLOCKS, character_index, color.hl_group, L)
+		else
+			draw_partial_block(row + 1, col, BOTTOM_BLOCKS, character_index, color.hl_group_inverted, L)
+		end
 	end
 end
 
@@ -149,7 +162,11 @@ local function draw_horizontally_shifted_block(row, col_float, L)
 	local character_index = round(shift * 8)
 
 	if character_index < 7 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
-		draw_partial_block(row, col, LEFT_BLOCKS, character_index, color.hl_group_inverted, L)
+		if config.USE_FLOATING_WINDOWS then
+			draw_partial_block(row, col, RIGHT_BLOCKS, character_index, color.hl_group, L)
+		else
+			draw_partial_block(row, col, LEFT_BLOCKS, character_index, color.hl_group_inverted, L)
+		end
 	end
 
 	if character_index > 0 and (not L.skip_end or row ~= L.row_end_rounded or col + 1 ~= L.col_end_rounded) then

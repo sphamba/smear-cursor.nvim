@@ -3,6 +3,7 @@ local M = {}
 
 M.LOGGING_LEVEL = vim.log.levels.DEBUG
 M.USE_FLOATING_WINDOWS = false -- Better capabilities but can have bad berformance with some plugins
+M.LEGACY_COMPUTING_SYMBOLS_SUPPORT = false
 
 M.TIME_INTERVAL = 17 -- milliseconds
 M.DONT_ERASE = false -- Set to true for debugging
