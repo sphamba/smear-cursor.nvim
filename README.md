@@ -41,4 +41,6 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
   - [ ] Transition to a buffer with less lines than the current cursor row
 - [ ] Drawing smear through wrapped lines
 - [ ] Wrong background color over non-normal text
-- [ ] Smears appear on duplicated buffer
+- [ ] Smears appear on duplicated buffer (only with extmarks)
+- [ ] Fold open and close not registering as a cursor movement
+- [ ] Regular cursor still visible and moves instantly
