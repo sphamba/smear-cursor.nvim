@@ -24,6 +24,14 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 ```
 
 
+# Known issues
+
+When using extmarks:
+- Smears appear on duplicated buffer
+- No mear outside buffer (further than the last line)
+- No smear through wrapped lines
+
+
 # Development TODOs
 
 ## Features
@@ -37,10 +45,9 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 
 ## Fixes
 
-- [ ] Smear outside buffer (further than the last line)
-  - [ ] Transition to a buffer with less lines than the current cursor row
-- [ ] Drawing smear through wrapped lines
 - [ ] Wrong background color over non-normal text
 - [ ] Smears appear on duplicated buffer (only with extmarks)
 - [ ] Fold open and close not registering as a cursor movement
 - [ ] Regular cursor still visible and moves instantly
+- [ ] Wrong smear placement in nerdtree (due to extmarks?)
+- [ ] Occasional flickering when using floating windows
