@@ -153,13 +153,28 @@ end
 local function draw_vertically_shifted_block(row_float, col, L)
 	local row = math.floor(row_float)
 	local shift = row_float - row
-	local character_index = round(shift * 8)
+	local micro_shift = shift * 8
+	local character_index = round(micro_shift)
 
-	if character_index < 8 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
+	if micro_shift > 7 then
+		local shade = 1 - (micro_shift - 7)
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index > 0 then
+			draw_partial_block(row, col, BOTTOM_BLOCKS, 7, color.hl_groups[hl_group_index], L)
+		end
+
+	elseif character_index < 8 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
 		draw_partial_block(row, col, BOTTOM_BLOCKS, character_index, color.hl_group, L)
 	end
 
-	if character_index > 0 and (not L.skip_end or row + 1 ~= L.row_end_rounded or col ~= L.col_end_rounded) then
+	if micro_shift < 1 then
+		local shade = micro_shift
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index > 0 then
+			draw_partial_block(row + 1, col, BOTTOM_BLOCKS, 1, color.hl_groups_inverted[hl_group_index], L)
+		end
+
+	elseif character_index > 0 and (not L.skip_end or row + 1 ~= L.row_end_rounded or col ~= L.col_end_rounded) then
 		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
 			draw_partial_block(row + 1, col, TOP_BLOCKS, character_index, color.hl_group, L)
 		else
@@ -172,9 +187,18 @@ end
 local function draw_horizontally_shifted_block(row, col_float, L)
 	local col = math.floor(col_float)
 	local shift = col_float - col
-	local character_index = round(shift * 8)
+	local micro_shift = shift * 8
+	local character_index = round(micro_shift)
 
-	if character_index < 7 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
+
+	if micro_shift > 7 then
+		local shade = 1 - (micro_shift - 7)
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index > 0 then
+			draw_partial_block(row, col, LEFT_BLOCKS, 7, color.hl_groups_inverted[hl_group_index], L)
+		end
+
+	elseif character_index < 8 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
 		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
 			draw_partial_block(row, col, RIGHT_BLOCKS, character_index, color.hl_group, L)
 		else
@@ -182,7 +206,14 @@ local function draw_horizontally_shifted_block(row, col_float, L)
 		end
 	end
 
-	if character_index > 0 and (not L.skip_end or row ~= L.row_end_rounded or col + 1 ~= L.col_end_rounded) then
+	if micro_shift < 1 then
+		local shade = micro_shift
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index > 0 then
+			draw_partial_block(row, col + 1, LEFT_BLOCKS, 1, color.hl_groups[hl_group_index], L)
+		end
+
+	elseif character_index > 0 and (not L.skip_end or row ~= L.row_end_rounded or col + 1 ~= L.col_end_rounded) then
 		draw_partial_block(row, col + 1, LEFT_BLOCKS, character_index, color.hl_group, L)
 	end
 end
@@ -301,9 +332,15 @@ end
 
 
 local function draw_ending(L)
+	-- Apply correction to avoid jump before stop animating
+	local correction = config.DISTANCE_STOP_ANIMATING + (1 - config.DISTANCE_STOP_ANIMATING) * L.shift
+	local row_shift = L.row_shift * correction
+	local col_shift = L.col_shift * correction
+
 	-- Apply factors to reduce size of diagonal partial blocks
-	local row_shift = L.row_shift * (1 - math.abs(L.col_shift))
-	local col_shift = L.col_shift * (1 - math.abs(L.row_shift))
+	row_shift = row_shift * (1 - math.abs(col_shift))
+	col_shift = col_shift * (1 - math.abs(row_shift))
+
 	draw_vertically_shifted_block(L.row_end_rounded - row_shift, L.col_end_rounded, L)
 	draw_horizontally_shifted_block(L.row_end_rounded, L.col_end_rounded - col_shift, L)
 end
@@ -334,6 +371,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 	L.col_direction = L.col_shift >= 0 and 1 or -1
 	L.slope = L.row_shift / L.col_shift
 	L.slope_abs = math.abs(L.slope)
+	L.shift = math.sqrt(L.row_shift^2 + L.col_shift^2)
 
 	if L.slope ~= L.slope then
 		if not L.skip_end then
@@ -342,7 +380,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 		return
 	end
 
-	if L.skip_end and L.row_shift^2 + L.col_shift^2 < 1 then
+	if L.skip_end and L.shift < 1 then
 		draw_ending(L)
 		return
 	end
