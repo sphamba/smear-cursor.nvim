@@ -1,4 +1,6 @@
+local config = require("smear_cursor.config")
 local logging = require("smear_cursor.logging")
+local round = require("smear_cursor.math").round
 local M = {}
 
 
@@ -45,15 +47,52 @@ local cursor_fg = get_hl_color("Normal", "foreground") -- Cursor color
 local normal_bg = get_hl_color("Normal", "background") -- Normal background
 
 
+local function hex_to_rgb(hex)
+    hex = hex:gsub('#', '')
+    local r, g, b = hex:match('(..)(..)(..)')
+    return tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)
+end
+
+local function rgb_to_hex(r, g, b)
+    return string.format("#%02X%02X%02X", r, g, b)
+end
+
+local function interpolate_colors(hex1, hex2, t)
+    local r1, g1, b1 = hex_to_rgb(hex1)
+    local r2, g2, b2 = hex_to_rgb(hex2)
+
+    local r = round(r1 + t * (r2 - r1))
+    local g = round(g1 + t * (g2 - g1))
+    local b = round(b1 + t * (b2 - b1))
+
+    return rgb_to_hex(r, g, b)
+end
+
+
 local function set_hl_groups()
 	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_fg, bg = normal_bg })
-	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = normal_bg, bg = cursor_fg })
+	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = cursor_fg, bg = normal_bg, reverse = true })
+
+	M.hl_groups = {}
+	M.hl_groups_inverted = {}
+
+	for i = 1, config.COLOR_LEVELS do
+		local blended_cursor_fg = interpolate_colors(normal_bg, cursor_fg, (i / config.COLOR_LEVELS)^(1 / config.GAMMA))
+		local blended_hl_group = M.hl_group .. i
+		local blended_hl_group_inverted = M.hl_group_inverted .. i
+		M.hl_groups[i] = blended_hl_group
+		M.hl_groups_inverted[i] = blended_hl_group_inverted
+		vim.api.nvim_set_hl(0, blended_hl_group, { fg = blended_cursor_fg, bg = normal_bg })
+		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = blended_cursor_fg, bg = normal_bg, reverse = true })
+	end
 end
 
 
 -- Define new highlight groups using the retrieved colors
-M.hl_group = "SmearCursor"
-M.hl_group_inverted = "SmearCursorInverted"
+M.hl_group = "SmearCursorNormal"
+M.hl_group_inverted = "SmearCursorNormalInverted"
+M.hl_groups = {}
+M.hl_groups_inverted = {}
 set_hl_groups()
 
 

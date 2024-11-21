@@ -132,10 +132,21 @@ end
 
 
 local function draw_matrix_character(row, col, matrix, L)
-	local index = matrix[1][1] * 1 + matrix[1][2] * 2 + matrix[2][1] * 4 + matrix[2][2] * 8
+	local bit_1 = math.ceil(matrix[1][1])
+	local bit_2 = math.ceil(matrix[1][2])
+	local bit_3 = math.ceil(matrix[2][1])
+	local bit_4 = math.ceil(matrix[2][2])
+
+	local index = bit_1 * 1 + bit_2 * 2 + bit_3 * 4 + bit_4 * 8
 	if index == 0 then return end
+
 	local character = MATRIX_CHARACTERS[index]
-	M.draw_character(row, col, character, color.hl_group, L)
+	local shade = matrix[1][1] + matrix[1][2] + matrix[2][1] + matrix[2][2]
+	local max_shade = bit_1 + bit_2 + bit_3 + bit_4
+	local hl_group_index = round(shade / max_shade * config.COLOR_LEVELS)
+	if hl_group_index == 0 then return end
+
+	M.draw_character(row, col, character, color.hl_groups[hl_group_index], L)
 end
 
 
@@ -177,6 +188,15 @@ local function draw_horizontally_shifted_block(row, col_float, L)
 end
 
 
+local function fill_matrix_vertically(matrix, col, row_float)
+	local row = math.floor(row_float)
+	local shift = row_float - row
+	matrix[row][col] = math.max(matrix[row][col], 1 - shift)
+	matrix[row + 1][col] = 1
+	matrix[row + 2][col] = math.max(matrix[row + 2][col], shift)
+end
+
+
 local function draw_diagonal_horizontal_block(row_float, col, L)
 	local row = round(row_float)
 	local shift = row_float - row
@@ -193,24 +213,17 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 	-- Lit from the left
 	if col > L.left then
 		local shift_left = shift - 0.5 * L.slope
-		local half_row_left = round(shift_left * 2)
-		m[3 + half_row_left][1] = 1
-		m[4 + half_row_left][1] = 1
+		fill_matrix_vertically(m, 1, 3 + 2 * shift_left)
 	end
 
 	-- Lit from center
-	local half_row = round(shift * 2)
-	m[3 + half_row][1] = 1
-	m[4 + half_row][1] = 1
-	m[3 + half_row][2] = 1
-	m[4 + half_row][2] = 1
+	fill_matrix_vertically(m, 1, 3 + 2 * shift)
+	fill_matrix_vertically(m, 2, 3 + 2 * shift)
 
 	-- Lit from the right
 	if col < L.right then
 		local shift_right = shift + 0.5 * L.slope
-		local half_row_right = round(shift_right * 2)
-		m[3 + half_row_right][2] = 1
-		m[4 + half_row_right][2] = 1
+		fill_matrix_vertically(m, 2, 3 + 2 * shift_right)
 	end
 
 	for i = -1, 1 do
@@ -220,6 +233,15 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 			draw_matrix_character(row_i, col, {m[2 * i + 3], m[2 * i + 4]}, L)
 		end
 	end
+end
+
+
+local function fill_matrix_horizontally(matrix, row, col_float)
+	local col = math.floor(col_float)
+	local shift = col_float - col
+	matrix[row][col] = math.min(matrix[row][col] + 1 - shift, 1)
+	matrix[row][col + 1] = 1
+	matrix[row][col + 2] = math.min(matrix[row][col + 2] + shift, 1)
 end
 
 
@@ -235,24 +257,18 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 	-- Lit from the top
 	if row > L.top then
 		local shift_top = shift - 0.5 / L.slope
-		local half_row_top = round(shift_top * 2)
-		m[1][3 + half_row_top] = 1
-		m[1][4 + half_row_top] = 1
+		fill_matrix_horizontally(m, 1, 3 + 2 * shift_top)
 	end
 
 	-- Lit from center
 	local half_row = round(shift * 2)
-	m[1][3 + half_row] = 1
-	m[1][4 + half_row] = 1
-	m[2][3 + half_row] = 1
-	m[2][4 + half_row] = 1
+	fill_matrix_horizontally(m, 1, 3 + half_row)
+	fill_matrix_horizontally(m, 2, 3 + half_row)
 
 	-- Lit from the bottom
 	if row < L.bottom then
 		local shift_bottom = shift + 0.5 / L.slope
-		local half_row_bottom = round(shift_bottom * 2)
-		m[2][3 + half_row_bottom] = 1
-		m[2][4 + half_row_bottom] = 1
+		fill_matrix_horizontally(m, 2, 3 + 2 * shift_bottom)
 	end
 
 	for i = -1, 1 do

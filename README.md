@@ -36,7 +36,6 @@ When using extmarks:
 
 ## Features
 
-- [ ] Color gradient smear
 - [ ] Reduce size with speed
 - [ ] Smear when jumping to commands
 - [ ] Configurable animation parameters
