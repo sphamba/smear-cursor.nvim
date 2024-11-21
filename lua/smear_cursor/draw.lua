@@ -84,13 +84,16 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 			style = "minimal",
 			focusable = false,
 		})
+		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
 
 		table.insert(window_ids, window_id)
 	end
 
 	vim.api.nvim_win_set_option(window_id, "winblend", config.LEGACY_COMPUTING_SYMBOLS_SUPPORT and 100 or 0)
-	vim.api.nvim_win_set_option(window_id, "winhl", "Normal:" .. hl_group)
-	vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, { character })
+	vim.api.nvim_buf_set_extmark(buffer_id, M.cursor_namespace, 0, 0, {
+		virt_text = {{character, hl_group}},
+		virt_text_win_col = 0,
+	})
 end
 
 
@@ -99,14 +102,14 @@ local function clear_floating_windows()
 	for i = 1, n_active_windows do
 		local window_id = window_ids[i]
 		local buffer_id = vim.api.nvim_win_get_buf(window_id)
+
+		vim.api.nvim_win_set_option(window_id, "winblend", 100)
+		vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
 		vim.api.nvim_win_set_config(window_id, {
 			relative = "editor",
 			row = 0,
 			col = 0,
 		})
-		vim.api.nvim_win_set_option(window_id, "winblend", 100)
-		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:" .. color.hl_group)
-		vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, { " " })
 	end
 
 	n_active_windows = 0
