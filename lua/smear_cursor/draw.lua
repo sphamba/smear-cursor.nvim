@@ -14,7 +14,7 @@ local MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗
 
 
 -- Create a namespace for the extmarks
-M.cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
+local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
 local window_ids = {}
 local n_active_windows = 0
@@ -30,7 +30,7 @@ local function draw_character_extmark(screen_row, screen_col, character, hl_grou
 
 	-- Place new extmark with the determined position
 	local success, extmark_id = pcall(function ()
-		vim.api.nvim_buf_set_extmark(buffer_id, M.cursor_namespace, row - 1, 0, {
+		vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, row - 1, 0, {
 			virt_text = {{character, hl_group}},
 			virt_text_win_col = col - 1,
 		})
@@ -46,7 +46,7 @@ local function clear_extmarks()
 	local buffer_ids = vim.api.nvim_list_bufs()
 
 	for _, buffer_id in ipairs(buffer_ids) do
-		vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
+		vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
 	end
 end
 
@@ -90,7 +90,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 	end
 
 	vim.api.nvim_win_set_option(window_id, "winblend", config.LEGACY_COMPUTING_SYMBOLS_SUPPORT and 100 or 0)
-	vim.api.nvim_buf_set_extmark(buffer_id, M.cursor_namespace, 0, 0, {
+	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
 		virt_text = {{character, hl_group}},
 		virt_text_win_col = 0,
 	})
@@ -104,7 +104,7 @@ local function clear_floating_windows()
 		local buffer_id = vim.api.nvim_win_get_buf(window_id)
 
 		vim.api.nvim_win_set_option(window_id, "winblend", 100)
-		vim.api.nvim_buf_clear_namespace(buffer_id, M.cursor_namespace, 0, -1)
+		vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
 		vim.api.nvim_win_set_config(window_id, {
 			relative = "editor",
 			row = 0,
