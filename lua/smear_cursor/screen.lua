@@ -45,6 +45,12 @@ M.screen_to_buffer = function(screen_row, screen_col)
 
 	local buffer_id = vim.api.nvim_win_get_buf(window_id)
 
+	-- If buffer appears in another visible window, return nil
+	local buffer_window_ids = vim.fn.getbufinfo(buffer_id)[1].windows
+	if #buffer_window_ids > 1 then
+		return nil
+	end
+
 	local start_row = vim.fn.line("w0", window_id)
 	local buffer_origin = vim.fn.screenpos(window_id, start_row, 1)
 	local col = screen_col - buffer_origin.col + 1
@@ -80,7 +86,7 @@ M.screen_to_buffer = function(screen_row, screen_col)
 	end
 
 	if current_screen_row > screen_row then
-		return nil
+		return nil -- in wrapped line
 	end
 
 	return buffer_id, buffer_row, col, col_shift

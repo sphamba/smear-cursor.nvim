@@ -26,9 +26,9 @@ lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color se
 
 # Known issues
 
-When using extmarks:
-- Smears appear on duplicated buffer
-- No mear outside buffer (further than the last line)
+When not using floating windows fallback:
+- No smear when buffer is duplicated
+- No smear outside buffer (further than the last line)
 - No smear through wrapped lines
 
 
@@ -45,8 +45,11 @@ When using extmarks:
 ## Fixes
 
 - [ ] Wrong background color over non-normal text
-- [ ] Smears appear on duplicated buffer (only with extmarks)
 - [ ] Fold open and close not registering as a cursor movement
 - [ ] Regular cursor still visible and moves instantly
 - [ ] Wrong smear placement in nerdtree (due to extmarks?)
-- [ ] Occasional flickering when using floating windows
+- [ ] Flickering of cursor at target location
+- [ ] Occasional flickering over line numbers when using floating windows
+- [ ] Smear freezes
+  - [ ] when opening command line
+  - [ ] when inputing incomplete keybindings

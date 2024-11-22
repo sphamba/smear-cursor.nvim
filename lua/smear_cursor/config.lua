@@ -2,7 +2,7 @@ local M = {}
 
 
 M.LOGGING_LEVEL = vim.log.levels.INFO
-M.USE_FLOATING_WINDOWS = true -- Better capabilities but can have bad berformance with some plugins
+M.USE_FLOATING_WINDOWS = true -- Fallback when extmarks cannot be drawn
 M.LEGACY_COMPUTING_SYMBOLS_SUPPORT = false -- Allow for blending of background colors
 
 M.TIME_INTERVAL = 17 -- milliseconds
@@ -14,8 +14,8 @@ M.GAMMA = 2.2
 
 M.DISTANCE_STOP_ANIMATING = 0.1 -- characters
 M.STIFFNESS = 0.6 -- 1: instantaneous, 0: no movement
-M.TRAILING_STIFFNESS = 0.2
-M.TRAILING_EXPONENT = 0.15 -- trailing stifness is multiplied by trailing_distance^TRAILING_EXPONENT
+M.TRAILING_STIFFNESS = 0.3
+M.TRAILING_EXPONENT = 0.1 -- trailing stifness is multiplied by trailing_distance^TRAILING_EXPONENT
 
 
 if M.DONT_ERASE then
