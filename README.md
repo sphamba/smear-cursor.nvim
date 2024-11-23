@@ -3,6 +3,11 @@
 _Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's animated cursor](https://neovide.dev/features.html#animated-cursor)._
 
 
+# Demo
+
+[Demo](https://private-user-images.githubusercontent.com/17217484/389234673-d0f17a00-af93-4081-a6be-9888698d8a22.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzI0MDU1OTAsIm5iZiI6MTczMjQwNTI5MCwicGF0aCI6Ii8xNzIxNzQ4NC8zODkyMzQ2NzMtZDBmMTdhMDAtYWY5My00MDgxLWE2YmUtOTg4ODY5OGQ4YTIyLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDExMjMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQxMTIzVDIzNDEzMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTNhYjk0M2MxMTVmNWVmYmFjOGUzMWU1YTJkODdjMzdhNWIwNWY0YzI5MDlmNWQ1YmY1MTllODg4NTA4YzJlMGMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.cUT045fhETUlOT3W60mTYcSm2R6e81V_UmYZEOzd81E)
+
+
 # Installation
 
 ## Using [lazy.nvim](https://lazy.folke.io/)
