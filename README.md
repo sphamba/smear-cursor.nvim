@@ -46,7 +46,6 @@ When not using floating windows fallback:
 
 - [ ] Wrong background color over non-normal text
 - [ ] Fold open and close not registering as a cursor movement
-- [ ] Regular cursor still visible and moves instantly
 - [ ] Wrong smear placement in nerdtree (due to extmarks?)
 - [ ] Flickering of cursor at target location
 - [ ] Occasional flickering over line numbers when using floating windows

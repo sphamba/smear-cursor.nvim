@@ -1,3 +1,4 @@
+local color = require("smear_cursor.color")
 local config = require("smear_cursor.config")
 local draw = require("smear_cursor.draw")
 local round = require("smear_cursor.math").round
@@ -28,8 +29,11 @@ local function animate()
 	update()
 
 	if not config.DONT_ERASE then draw.clear() end
-	local skip_end = round(current_position[1]) == target_position[1] and round(current_position[2]) == target_position[2]
-	draw.draw_line(trailing_position[1], trailing_position[2], current_position[1], current_position[2], skip_end)
+	local end_reached = round(current_position[1]) == target_position[1] and round(current_position[2]) == target_position[2]
+	draw.draw_line(trailing_position[1], trailing_position[2], current_position[1], current_position[2], end_reached)
+	if not end_reached and config.HIDE_TARGET_HACK then
+		draw.draw_character(target_position[1], target_position[2], "█", color.hl_group)
+	end
 
 	local trailing_distance = math.sqrt((target_position[1] - trailing_position[1])^2 + (target_position[2] - trailing_position[2])^2)
 	if trailing_distance > config.DISTANCE_STOP_ANIMATING then
