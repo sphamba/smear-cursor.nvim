@@ -143,10 +143,11 @@ end
 
 
 local function draw_matrix_character(row, col, matrix, L)
-	local bit_1 = (matrix[1][1] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
-	local bit_2 = (matrix[1][2] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
-	local bit_3 = (matrix[2][1] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
-	local bit_4 = (matrix[2][2] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
+	local threshold = config.DIAGONAL_PIXEL_VALUE_THRESHOLD * math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
+	local bit_1 = (matrix[1][1] > threshold) and 1 or 0
+	local bit_2 = (matrix[1][2] > threshold) and 1 or 0
+	local bit_3 = (matrix[2][1] > threshold) and 1 or 0
+	local bit_4 = (matrix[2][2] > threshold) and 1 or 0
 	local index = bit_1 * 1 + bit_2 * 2 + bit_3 * 4 + bit_4 * 8
 	if index == 0 then return end
 

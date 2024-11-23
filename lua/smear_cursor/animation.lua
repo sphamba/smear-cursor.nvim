@@ -43,6 +43,7 @@ local function animate()
 		animating = false
 		if not config.DONT_ERASE then draw.clear() end
 		current_position = {target_position[1], target_position[2]}
+		trailing_position = {target_position[1], target_position[2]}
 	end
 end
 

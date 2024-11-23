@@ -17,9 +17,9 @@ M.DISTANCE_STOP_ANIMATING = 0.1 -- characters
 M.STIFFNESS = 0.6 -- 1: instantaneous, 0: no movement
 M.TRAILING_STIFFNESS = 0.3
 M.TRAILING_EXPONENT = 0.1 -- trailing stifness is multiplied by trailing_distance^TRAILING_EXPONENT
-M.DIAGONAL_PIXEL_VALUE_THRESHOLD = 0.25 -- 0: more pixels, 0.5: less pixels
+M.DIAGONAL_PIXEL_VALUE_THRESHOLD = 0.5 -- 0.1: more pixels, 0.9: less pixels
 M.DIAGONAL_THICKNESS_FACTOR = 0.7 -- put less than 1 to reduce diagonal smear fatness
-M.THICKNESS_REDUCTION = 0.2 -- 0: no reduction, 1: full reduction
+M.THICKNESS_REDUCTION = 0.3 -- 0: no reduction, 1: full reduction
 
 
 if M.DONT_ERASE then
