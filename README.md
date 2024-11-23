@@ -36,7 +36,6 @@ When not using floating windows fallback:
 
 ## Features
 
-- [ ] Reduce size with speed
 - [ ] Smear when jumping to commands
 - [ ] Configurable animation parameters
 - [ ] Lazy.nvim configuration

@@ -143,11 +143,10 @@ end
 
 
 local function draw_matrix_character(row, col, matrix, L)
-	local bit_1 = math.ceil(matrix[1][1])
-	local bit_2 = math.ceil(matrix[1][2])
-	local bit_3 = math.ceil(matrix[2][1])
-	local bit_4 = math.ceil(matrix[2][2])
-
+	local bit_1 = (matrix[1][1] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
+	local bit_2 = (matrix[1][2] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
+	local bit_3 = (matrix[2][1] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
+	local bit_4 = (matrix[2][2] > config.DIAGONAL_PIXEL_VALUE_THRESHOLD) and 1 or 0
 	local index = bit_1 * 1 + bit_2 * 2 + bit_3 * 4 + bit_4 * 8
 	if index == 0 then return end
 
@@ -155,87 +154,142 @@ local function draw_matrix_character(row, col, matrix, L)
 	local shade = matrix[1][1] + matrix[1][2] + matrix[2][1] + matrix[2][2]
 	local max_shade = bit_1 + bit_2 + bit_3 + bit_4
 	local hl_group_index = round(shade / max_shade * config.COLOR_LEVELS)
+	hl_group_index = math.min(hl_group_index, config.COLOR_LEVELS)
 	if hl_group_index == 0 then return end
 
 	M.draw_character(row, col, character, color.hl_groups[hl_group_index], L)
 end
 
 
-local function draw_vertically_shifted_block(row_float, col, L)
-	local row = math.floor(row_float)
-	local shift = row_float - row
-	local micro_shift = shift * 8
-	local character_index = round(micro_shift)
+local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
+	if row_top >= row_bottom then return end
+	-- logging.debug("top: " .. row_top .. ", bottom: " .. row_bottom .. ", col: " .. col)
 
-	if micro_shift > 7 then
-		local shade = 1 - (micro_shift - 7)
+	local row = math.floor(row_top)
+	local center = (row_top + row_bottom) / 2 % 1
+	local thickness = row_bottom - row_top
+	local character_list, character_index, hl_group
+
+	if center < 0.5 then
+		local micro_shift = center * 16
+		character_index = math.ceil(micro_shift)
+		if character_index == 0 then return end
+
+		local character_thickness = character_index / 8
+		local shade = thickness / character_thickness
 		local hl_group_index = round(shade * config.COLOR_LEVELS)
-		if hl_group_index > 0 then
-			draw_partial_block(row, col, BOTTOM_BLOCKS, 7, color.hl_groups[hl_group_index], L)
-		end
+		if hl_group_index == 0 then return end
 
-	elseif character_index < 8 then
-		draw_partial_block(row, col, BOTTOM_BLOCKS, character_index, color.hl_group, L)
-	end
-
-	if micro_shift < 1 then
-		local shade = micro_shift
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
-		if hl_group_index > 0 then
-			draw_partial_block(row + 1, col, BOTTOM_BLOCKS, 1, color.hl_groups_inverted[hl_group_index], L)
-		end
-
-	elseif character_index > 0 then
 		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
-			draw_partial_block(row + 1, col, TOP_BLOCKS, character_index, color.hl_group, L)
+			character_list = TOP_BLOCKS
+			hl_group = color.hl_groups[hl_group_index]
 		else
-			draw_partial_block(row + 1, col, BOTTOM_BLOCKS, character_index, color.hl_group_inverted, L)
+			character_list = BOTTOM_BLOCKS
+			hl_group = color.hl_groups_inverted[hl_group_index]
+		end
+	else
+		local micro_shift = center * 16 - 8
+		character_index = math.floor(micro_shift)
+		if character_index == 9 then return end
+
+		local character_thickness = 1 - character_index / 8
+		local shade = thickness / character_thickness
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index == 0 then return end
+
+		character_list = BOTTOM_BLOCKS
+		hl_group = color.hl_groups[hl_group_index]
+	end
+
+	draw_partial_block(row, col, character_list, character_index, hl_group, L)
+end
+
+
+local function draw_vertically_shifted_block(row_float, col, L)
+	local top = row_float + 0.5 - L.thickness / 2
+	local bottom = top + L.thickness
+	local row = math.floor(row_float)
+
+	draw_vertically_shifted_sub_block(top, row, col, L)
+	draw_vertically_shifted_sub_block(math.max(top, row), math.min(bottom, row + 1), col, L)
+	draw_vertically_shifted_sub_block(row + 1, bottom, col, L)
+end
+
+
+local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
+	if col_left >= col_right then return end
+	-- logging.debug("row: " .. row .. ", left: " .. col_left .. ", right: " .. col_right)
+
+	local col = math.floor(col_left)
+	local center = (col_left + col_right) / 2 % 1
+	local thickness = col_right - col_left
+	local character_list, character_index, hl_group
+
+	if center < 0.5 then
+		local micro_shift = center * 16
+		character_index = math.ceil(micro_shift)
+		if character_index == 0 then return end
+
+		local character_thickness = character_index / 8
+		local shade = thickness / character_thickness
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index == 0 then return end
+
+		character_list = LEFT_BLOCKS
+		hl_group = color.hl_groups[hl_group_index]
+	else
+		local micro_shift = center * 16 - 8
+		character_index = math.floor(micro_shift)
+		if character_index == 9 then return end
+
+		local character_thickness = 1 - character_index / 8
+		local shade = thickness / character_thickness
+		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		if hl_group_index == 0 then return end
+
+		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
+			character_list = RIGHT_BLOCKS
+			hl_group = color.hl_groups[hl_group_index]
+		else
+			character_list = LEFT_BLOCKS
+			hl_group = color.hl_groups_inverted[hl_group_index]
 		end
 	end
+
+	draw_partial_block(row, col, character_list, character_index, hl_group, L)
 end
 
 
 local function draw_horizontally_shifted_block(row, col_float, L)
+	local left = col_float + 0.5 - L.thickness / 2
+	local right = left + L.thickness
 	local col = math.floor(col_float)
-	local shift = col_float - col
-	local micro_shift = shift * 8
-	local character_index = round(micro_shift)
 
-
-	if micro_shift > 7 then
-		local shade = 1 - (micro_shift - 7)
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
-		if hl_group_index > 0 then
-			draw_partial_block(row, col, LEFT_BLOCKS, 7, color.hl_groups_inverted[hl_group_index], L)
-		end
-
-	elseif character_index < 8 then
-		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
-			draw_partial_block(row, col, RIGHT_BLOCKS, character_index, color.hl_group, L)
-		else
-			draw_partial_block(row, col, LEFT_BLOCKS, character_index, color.hl_group_inverted, L)
-		end
-	end
-
-	if micro_shift < 1 then
-		local shade = micro_shift
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
-		if hl_group_index > 0 then
-			draw_partial_block(row, col + 1, LEFT_BLOCKS, 1, color.hl_groups[hl_group_index], L)
-		end
-
-	elseif character_index > 0 then
-		draw_partial_block(row, col + 1, LEFT_BLOCKS, character_index, color.hl_group, L)
-	end
+	draw_horizontally_shifted_sub_block(row, left, col, L)
+	draw_horizontally_shifted_sub_block(row, math.max(left, col), math.min(right, col + 1), L)
+	draw_horizontally_shifted_sub_block(row, col + 1, right, L)
 end
 
 
-local function fill_matrix_vertically(matrix, col, row_float)
+local function fill_matrix_vertical_sub_block(matrix, row_top, row_bottom, col)
+	if row_top >= row_bottom then return end
+	local row = math.floor(row_top)
+	if row < 1 then return end
+	local shade = row_bottom - row_top
+	matrix[row][col] = math.max(matrix[row][col], shade)
+end
+
+
+local function fill_matrix_vertically(matrix, row_float, col, thickness)
+	local top = row_float + 0.5 - thickness * config.DIAGONAL_THICKNESS_FACTOR
+	local bottom = top + 2 * thickness * config.DIAGONAL_THICKNESS_FACTOR
 	local row = math.floor(row_float)
-	local shift = row_float - row
-	matrix[row][col] = math.max(matrix[row][col], 1 - shift)
-	matrix[row + 1][col] = 1
-	matrix[row + 2][col] = math.max(matrix[row + 2][col], shift)
+	-- logging.debug("top: " .. top .. ", bottom: " .. bottom)
+
+	fill_matrix_vertical_sub_block(matrix, top, row, col)
+	fill_matrix_vertical_sub_block(matrix, math.max(top, row), math.min(bottom, row + 1), col)
+	fill_matrix_vertical_sub_block(matrix, math.max(top, row + 1), math.min(bottom, row + 2), col)
+	fill_matrix_vertical_sub_block(matrix, row + 2, bottom, col)
 end
 
 
@@ -255,17 +309,17 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 	-- Lit from the left
 	if col > L.left then
 		local shift_left = shift - 0.5 * L.slope
-		fill_matrix_vertically(m, 1, 3 + 2 * shift_left)
+		fill_matrix_vertically(m, 3 + 2 * shift_left, 1, L.thickness)
 	end
 
 	-- Lit from center
-	fill_matrix_vertically(m, 1, 3 + 2 * shift)
-	fill_matrix_vertically(m, 2, 3 + 2 * shift)
+	fill_matrix_vertically(m, 3 + 2 * shift, 1, L.thickness)
+	fill_matrix_vertically(m, 3 + 2 * shift, 2, L.thickness)
 
 	-- Lit from the right
 	if col < L.right then
 		local shift_right = shift + 0.5 * L.slope
-		fill_matrix_vertically(m, 2, 3 + 2 * shift_right)
+		fill_matrix_vertically(m, 3 + 2 * shift_right, 2, L.thickness)
 	end
 
 	for i = -1, 1 do
@@ -275,12 +329,25 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 end
 
 
-local function fill_matrix_horizontally(matrix, row, col_float)
+local function fill_matrix_horizontal_sub_block(matrix, row, col_left, col_right)
+	if col_left >= col_right then return end
+	local col = math.floor(col_left)
+	if col < 1 then return end
+	local shade = col_right - col_left
+	matrix[row][col] = math.max(matrix[row][col], shade)
+end
+
+
+local function fill_matrix_horizontally(matrix, row, col_float, thickness)
+	local left = col_float + 0.5 - thickness * config.DIAGONAL_THICKNESS_FACTOR
+	local right = left + 2 * thickness * config.DIAGONAL_THICKNESS_FACTOR
 	local col = math.floor(col_float)
-	local shift = col_float - col
-	matrix[row][col] = math.min(matrix[row][col] + 1 - shift, 1)
-	matrix[row][col + 1] = 1
-	matrix[row][col + 2] = math.min(matrix[row][col + 2] + shift, 1)
+	-- logging.debug("left: " .. left .. ", right: " .. right)
+
+	fill_matrix_horizontal_sub_block(matrix, row, left, col)
+	fill_matrix_horizontal_sub_block(matrix, row, math.max(left, col), math.min(right, col + 1))
+	fill_matrix_horizontal_sub_block(matrix, row, math.max(left, col + 1), math.min(right, col + 2))
+	fill_matrix_horizontal_sub_block(matrix, row, col + 2, right)
 end
 
 
@@ -296,18 +363,18 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 	-- Lit from the top
 	if row > L.top then
 		local shift_top = shift - 0.5 / L.slope
-		fill_matrix_horizontally(m, 1, 3 + 2 * shift_top)
+		fill_matrix_horizontally(m, 1, 3 + 2 * shift_top, L.thickness)
 	end
 
 	-- Lit from center
 	local half_row = round(shift * 2)
-	fill_matrix_horizontally(m, 1, 3 + half_row)
-	fill_matrix_horizontally(m, 2, 3 + half_row)
+	fill_matrix_horizontally(m, 1, 3 + half_row, L.thickness)
+	fill_matrix_horizontally(m, 2, 3 + half_row, L.thickness)
 
 	-- Lit from the bottom
 	if row < L.bottom then
 		local shift_bottom = shift + 0.5 / L.slope
-		fill_matrix_horizontally(m, 2, 3 + 2 * shift_bottom)
+		fill_matrix_horizontally(m, 2, 3 + 2 * shift_bottom, L.thickness)
 	end
 
 	for i = -1, 1 do
@@ -377,7 +444,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	L.slope = L.row_shift / L.col_shift
 	L.slope_abs = math.abs(L.slope)
 	L.shift = math.sqrt(L.row_shift^2 + L.col_shift^2)
-	L.thickness = math.min(1 / L.shift, 1)
+	L.thickness = math.min(1 / L.shift, 1)^config.THICKNESS_REDUCTION
 
 	if L.slope ~= L.slope then
 		M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.hl_group, L)
