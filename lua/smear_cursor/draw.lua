@@ -91,6 +91,9 @@ end
 
 
 local function draw_character_extmark(screen_row, screen_col, character, hl_group, L)
+	if L ~= nil and L.end_reached and screen_row == L.row_end_rounded and screen_col == L.col_end_rounded then
+		return
+	end
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 
 	local buffer_id, row, col = screen.screen_to_buffer(screen_row, screen_col)
@@ -171,7 +174,7 @@ local function draw_vertically_shifted_block(row_float, col, L)
 			draw_partial_block(row, col, BOTTOM_BLOCKS, 7, color.hl_groups[hl_group_index], L)
 		end
 
-	elseif character_index < 8 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
+	elseif character_index < 8 then
 		draw_partial_block(row, col, BOTTOM_BLOCKS, character_index, color.hl_group, L)
 	end
 
@@ -182,7 +185,7 @@ local function draw_vertically_shifted_block(row_float, col, L)
 			draw_partial_block(row + 1, col, BOTTOM_BLOCKS, 1, color.hl_groups_inverted[hl_group_index], L)
 		end
 
-	elseif character_index > 0 and (not L.skip_end or row + 1 ~= L.row_end_rounded or col ~= L.col_end_rounded) then
+	elseif character_index > 0 then
 		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
 			draw_partial_block(row + 1, col, TOP_BLOCKS, character_index, color.hl_group, L)
 		else
@@ -206,7 +209,7 @@ local function draw_horizontally_shifted_block(row, col_float, L)
 			draw_partial_block(row, col, LEFT_BLOCKS, 7, color.hl_groups_inverted[hl_group_index], L)
 		end
 
-	elseif character_index < 8 and (not L.skip_end or row ~= L.row_end_rounded or col ~= L.col_end_rounded) then
+	elseif character_index < 8 then
 		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
 			draw_partial_block(row, col, RIGHT_BLOCKS, character_index, color.hl_group, L)
 		else
@@ -221,7 +224,7 @@ local function draw_horizontally_shifted_block(row, col_float, L)
 			draw_partial_block(row, col + 1, LEFT_BLOCKS, 1, color.hl_groups[hl_group_index], L)
 		end
 
-	elseif character_index > 0 and (not L.skip_end or row ~= L.row_end_rounded or col + 1 ~= L.col_end_rounded) then
+	elseif character_index > 0 then
 		draw_partial_block(row, col + 1, LEFT_BLOCKS, character_index, color.hl_group, L)
 	end
 end
@@ -267,10 +270,7 @@ local function draw_diagonal_horizontal_block(row_float, col, L)
 
 	for i = -1, 1 do
 		local row_i = row + i
-		if not L.skip_end or row_i ~= L.row_end_rounded or col ~= L.col_end_rounded then
-		-- Equivalent to `not (skip_end and row_i == row_end_rounded and col == col_end_rounded)`
-			draw_matrix_character(row_i, col, {m[2 * i + 3], m[2 * i + 4]}, L)
-		end
+		draw_matrix_character(row_i, col, {m[2 * i + 3], m[2 * i + 4]}, L)
 	end
 end
 
@@ -312,13 +312,10 @@ local function draw_diagonal_vertical_block(row, col_float, L)
 
 	for i = -1, 1 do
 		local col_i = col + i
-		if (not L.skip_end or row ~= L.row_end_rounded or col_i ~= L.col_end_rounded) then
-		-- Equivalent to `if not (skip_end and row == row_end_rounded and col_i == col_end_rounded)`
-			draw_matrix_character(row, col_i, {
-				{m[1][2 * i + 3], m[1][2 * i + 4]},
-				{m[2][2 * i + 3], m[2][2 * i + 4]}
-			}, L)
-		end
+		draw_matrix_character(row, col_i, {
+			{m[1][2 * i + 3], m[1][2 * i + 4]},
+			{m[2][2 * i + 3], m[2][2 * i + 4]}
+		}, L)
 	end
 end
 
@@ -354,7 +351,7 @@ local function draw_ending(L)
 end
 
 
-M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
+M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	-- logging.debug("Drawing line from (" .. row_start .. ", " .. col_start .. ") to (" .. row_end .. ", " .. col_end .. ")")
 
 	local L = {
@@ -368,7 +365,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 		col_end_rounded = round(col_end),
 		row_shift = row_end - row_start,
 		col_shift = col_end - col_start,
-		skip_end = skip_end
+		end_reached = end_reached
 	}
 
 	L.top = math.min(L.row_start_rounded, L.row_end_rounded)
@@ -380,15 +377,14 @@ M.draw_line = function(row_start, col_start, row_end, col_end, skip_end)
 	L.slope = L.row_shift / L.col_shift
 	L.slope_abs = math.abs(L.slope)
 	L.shift = math.sqrt(L.row_shift^2 + L.col_shift^2)
+	L.thickness = math.min(1 / L.shift, 1)
 
 	if L.slope ~= L.slope then
-		if not L.skip_end then
-			M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.hl_group, L)
-		end
+		M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.hl_group, L)
 		return
 	end
 
-	if L.skip_end and L.shift < 1 then
+	if L.end_reached and L.shift < 1 then
 		draw_ending(L)
 		return
 	end
