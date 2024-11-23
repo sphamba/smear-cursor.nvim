@@ -1,30 +1,25 @@
 local M = {}
 
 
-M.LOGGING_LEVEL = vim.log.levels.INFO
-M.USE_FLOATING_WINDOWS = true -- Fallback when extmarks cannot be drawn
-M.LEGACY_COMPUTING_SYMBOLS_SUPPORT = false -- Allow for blending of background colors
-M.HIDE_TARGET_HACK = true -- Attempt to hide true cursor by drawing a character below it
+M.logging_level = vim.log.levels.INFO
+M.dont_erase = false -- Set to true for debugging
 
-M.TIME_INTERVAL = 17 -- milliseconds
-M.DONT_ERASE = false -- Set to true for debugging
-M.MAX_SLOPE_HORIZONTAL = 0.5
-M.MIN_SLOPE_VERTICAL = 2
-M.COLOR_LEVELS = 16 -- Minimum 1
-M.GAMMA = 2.2
+M.use_floating_windows = true -- Fallback when extmarks cannot be drawn
+M.legacy_computing_symbols_support = false -- Allow for blending of background colors
+M.hide_target_hack = true -- Attempt to hide true cursor by drawing a character below it
 
-M.DISTANCE_STOP_ANIMATING = 0.1 -- characters
-M.STIFFNESS = 0.6 -- 1: instantaneous, 0: no movement
-M.TRAILING_STIFFNESS = 0.3
-M.TRAILING_EXPONENT = 0.1 -- trailing stifness is multiplied by trailing_distance^TRAILING_EXPONENT
-M.DIAGONAL_PIXEL_VALUE_THRESHOLD = 0.5 -- 0.1: more pixels, 0.9: less pixels
-M.DIAGONAL_THICKNESS_FACTOR = 0.7 -- put less than 1 to reduce diagonal smear fatness
-M.THICKNESS_REDUCTION = 0.3 -- 0: no reduction, 1: full reduction
-
-
-if M.DONT_ERASE then
-	M.TRAILING = 1
-end
+M.time_interval = 17 -- milliseconds
+M.max_slope_horizontal = 0.5
+M.min_slope_vertical = 2
+M.color_levels = 16 -- Minimum 1
+M.gamma = 2.2
+M.distance_stop_animating = 0.1 -- characters
+M.stiffness = 0.6 -- 1: instantaneous, 0: no movement
+M.trailing_stiffness = 0.3
+M.trailing_exponent = 0.1 -- trailing stifness is multiplied by trailing_distance^TRAILING_EXPONENT
+M.diagonal_pixel_value_threshold = 0.5 -- 0.1: more pixels, 0.9: less pixels
+M.diagonal_thickness_factor = 0.7 -- put less than 1 to reduce diagonal smear fatness
+M.thickness_reduction = 0.2 -- 0: no reduction, 1: full reduction
 
 
 return M

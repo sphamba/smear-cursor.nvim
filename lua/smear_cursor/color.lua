@@ -43,7 +43,7 @@ end
 
 
 -- Get cursor foreground color and normal background color
-local cursor_fg = get_hl_color("Normal", "foreground") -- Cursor color
+local cursor_color = get_hl_color("Normal", "foreground") -- Cursor color
 local normal_bg = get_hl_color("Normal", "background") -- Normal background
 
 
@@ -70,20 +70,20 @@ end
 
 
 local function set_hl_groups()
-	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_fg, bg = normal_bg })
-	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = cursor_fg, bg = normal_bg, reverse = true })
+	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_color, bg = normal_bg })
+	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = cursor_color, bg = normal_bg, reverse = true })
 
 	M.hl_groups = {}
 	M.hl_groups_inverted = {}
 
-	for i = 1, config.COLOR_LEVELS do
-		local blended_cursor_fg = interpolate_colors(normal_bg, cursor_fg, (i / config.COLOR_LEVELS)^(1 / config.GAMMA))
+	for i = 1, config.color_levels do
+		local blended_cursor_color = interpolate_colors(normal_bg, cursor_color, (i / config.color_levels)^(1 / config.gamma))
 		local blended_hl_group = M.hl_group .. i
 		local blended_hl_group_inverted = M.hl_group_inverted .. i
 		M.hl_groups[i] = blended_hl_group
 		M.hl_groups_inverted[i] = blended_hl_group_inverted
-		vim.api.nvim_set_hl(0, blended_hl_group, { fg = blended_cursor_fg, bg = normal_bg })
-		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = blended_cursor_fg, bg = normal_bg, reverse = true })
+		vim.api.nvim_set_hl(0, blended_hl_group, { fg = blended_cursor_color, bg = normal_bg })
+		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = blended_cursor_color, bg = normal_bg, reverse = true })
 	end
 end
 
@@ -98,24 +98,16 @@ set_hl_groups()
 
 local metatable = {
 	__index = function(table, key)
-		if key == "cursor_fg" then
-			return cursor_fg
-		end
-
-		if key == "normal_bg" then
-			return normal_bg
+		if key == "cursor_color" then
+			return cursor_color
 		end
 
 		return nil
 	end,
 
 	__newindex = function(table, key, value)
-		if key == "cursor_fg" then
-			cursor_fg = value
-			set_hl_groups()
-
-		elseif key == "normal_bg" then
-			normal_bg = value
+		if key == "cursor_color" then
+			cursor_color = value
 			set_hl_groups()
 
 		else

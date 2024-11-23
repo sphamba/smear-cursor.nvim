@@ -5,6 +5,16 @@ _Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's
 
 # Installation
 
+## Using [lazy.nvim](https://lazy.folke.io/)
+
+Add to your lazy.vim configuration:
+```lua
+  {
+    "sphamba/smear-cursor.nvim",
+  },
+```
+
+
 ## Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 In your `init.vim`, add:
@@ -13,14 +23,35 @@ In your `init.vim`, add:
 call plug#begin()
 Plug 'sphamba/smear-cursor.nvim'
 call plug#end()
+
+lua require('smear_cursor').enabled = true
 ```
 
 
 # Configuration
 
-In your `init.vim`, add:
+## Using [lazy.nvim](https://lazy.folke.io/)
+
+Here are the default configuration options:
+```lua
+  {
+    "sphamba/smear-cursor.nvim",
+    opts = {
+      cursor_color = '#d3cdc3', -- defaults to Normal foreground color
+      use_floating_windows = true,
+      legacy_computing_symbols_support = false,
+      hide_target_hack = true,
+    },
+  },
+```
+Some terminals override the cursor color set by Neovim. If that is the case, manually set the cursor color as shown above.
+
+
+## Using `init.vim`
+
+You can set the configuration variables in your `init.vim` file like this:
 ```vim
-lua require('smear_cursor.color').cursor_fg = '#d3cdc3' "Put the cursor color set by your terminal
+lua require('smear_cursor').cursor_color = '#d3cdc3'
 ```
 
 
@@ -37,8 +68,6 @@ When not using floating windows fallback:
 ## Features
 
 - [ ] Smear when jumping to commands
-- [ ] Configurable animation parameters
-- [ ] Lazy.nvim configuration
 - [ ] Help documentation
 
 ## Fixes

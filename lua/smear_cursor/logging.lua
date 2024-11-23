@@ -10,7 +10,7 @@ level_names[vim.log.levels.ERROR] = "ERROR"
 
 
 local function log(message, level)
-	local logging_level = require("smear_cursor.config").LOGGING_LEVEL
+	local logging_level = require("smear_cursor.config").logging_level
 	local level_name = vim.log.levels[level + 1]
 
 	if logging_level <= level then

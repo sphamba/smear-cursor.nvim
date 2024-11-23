@@ -58,7 +58,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 		table.insert(window_ids, window_id)
 	end
 
-	vim.api.nvim_win_set_option(window_id, "winblend", config.LEGACY_COMPUTING_SYMBOLS_SUPPORT and 100 or 0)
+	vim.api.nvim_win_set_option(window_id, "winblend", config.legacy_computing_symbols_support and 100 or 0)
 	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
 		virt_text = {{character, hl_group}},
 		virt_text_win_col = 0,
@@ -67,7 +67,7 @@ end
 
 
 local function clear_floating_windows(clear_extmarks)
-	if clear_extmarks == nil then clear_extmarks = true end
+	clear_extmarks = clear_extmarks or true
 
 	-- Hide the windows without deleting them
 	for i = 1, n_active_windows do
@@ -98,7 +98,7 @@ local function draw_character_extmark(screen_row, screen_col, character, hl_grou
 
 	local buffer_id, row, col = screen.screen_to_buffer(screen_row, screen_col)
 	if buffer_id == nil then
-		if config.USE_FLOATING_WINDOWS then
+		if config.use_floating_windows then
 			draw_character_floating_window(screen_row, screen_col, character, hl_group, L)
 		end
 		return
@@ -112,7 +112,7 @@ local function draw_character_extmark(screen_row, screen_col, character, hl_grou
 		})
 	end)
 
-	if not success and config.USE_FLOATING_WINDOWS then
+	if not success and config.use_floating_windows then
 		draw_character_floating_window(screen_row, screen_col, character, hl_group, L)
 	end
 end
@@ -143,7 +143,7 @@ end
 
 
 local function draw_matrix_character(row, col, matrix, L)
-	local threshold = config.DIAGONAL_PIXEL_VALUE_THRESHOLD * math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
+	local threshold = config.diagonal_pixel_value_threshold * math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
 	local bit_1 = (matrix[1][1] > threshold) and 1 or 0
 	local bit_2 = (matrix[1][2] > threshold) and 1 or 0
 	local bit_3 = (matrix[2][1] > threshold) and 1 or 0
@@ -154,8 +154,8 @@ local function draw_matrix_character(row, col, matrix, L)
 	local character = MATRIX_CHARACTERS[index]
 	local shade = matrix[1][1] + matrix[1][2] + matrix[2][1] + matrix[2][2]
 	local max_shade = bit_1 + bit_2 + bit_3 + bit_4
-	local hl_group_index = round(shade / max_shade * config.COLOR_LEVELS)
-	hl_group_index = math.min(hl_group_index, config.COLOR_LEVELS)
+	local hl_group_index = round(shade / max_shade * config.color_levels)
+	hl_group_index = math.min(hl_group_index, config.color_levels)
 	if hl_group_index == 0 then return end
 
 	M.draw_character(row, col, character, color.hl_groups[hl_group_index], L)
@@ -178,10 +178,10 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 
 		local character_thickness = character_index / 8
 		local shade = thickness / character_thickness
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then return end
 
-		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
+		if config.legacy_computing_symbols_support then
 			character_list = TOP_BLOCKS
 			hl_group = color.hl_groups[hl_group_index]
 		else
@@ -195,7 +195,7 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 
 		local character_thickness = 1 - character_index / 8
 		local shade = thickness / character_thickness
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then return end
 
 		character_list = BOTTOM_BLOCKS
@@ -233,7 +233,7 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 
 		local character_thickness = character_index / 8
 		local shade = thickness / character_thickness
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then return end
 
 		character_list = LEFT_BLOCKS
@@ -245,10 +245,10 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 
 		local character_thickness = 1 - character_index / 8
 		local shade = thickness / character_thickness
-		local hl_group_index = round(shade * config.COLOR_LEVELS)
+		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then return end
 
-		if config.LEGACY_COMPUTING_SYMBOLS_SUPPORT then
+		if config.legacy_computing_symbols_support then
 			character_list = RIGHT_BLOCKS
 			hl_group = color.hl_groups[hl_group_index]
 		else
@@ -282,8 +282,8 @@ end
 
 
 local function fill_matrix_vertically(matrix, row_float, col, thickness)
-	local top = row_float + 0.5 - thickness * config.DIAGONAL_THICKNESS_FACTOR
-	local bottom = top + 2 * thickness * config.DIAGONAL_THICKNESS_FACTOR
+	local top = row_float + 0.5 - thickness * config.diagonal_thickness_factor
+	local bottom = top + 2 * thickness * config.diagonal_thickness_factor
 	local row = math.floor(row_float)
 	-- logging.debug("top: " .. top .. ", bottom: " .. bottom)
 
@@ -340,8 +340,8 @@ end
 
 
 local function fill_matrix_horizontally(matrix, row, col_float, thickness)
-	local left = col_float + 0.5 - thickness * config.DIAGONAL_THICKNESS_FACTOR
-	local right = left + 2 * thickness * config.DIAGONAL_THICKNESS_FACTOR
+	local left = col_float + 0.5 - thickness * config.diagonal_thickness_factor
+	local right = left + 2 * thickness * config.diagonal_thickness_factor
 	local col = math.floor(col_float)
 	-- logging.debug("left: " .. left .. ", right: " .. right)
 
@@ -406,7 +406,7 @@ end
 
 local function draw_ending(L)
 	-- Apply correction to avoid jump before stop animating
-	local correction = config.DISTANCE_STOP_ANIMATING + (1 - config.DISTANCE_STOP_ANIMATING) * L.shift
+	local correction = config.distance_stop_animating + (1 - config.distance_stop_animating) * L.shift
 	local row_shift = L.row_shift * correction
 	local col_shift = L.col_shift * correction
 
@@ -445,7 +445,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	L.slope = L.row_shift / L.col_shift
 	L.slope_abs = math.abs(L.slope)
 	L.shift = math.sqrt(L.row_shift^2 + L.col_shift^2)
-	L.thickness = math.min(1 / L.shift, 1)^config.THICKNESS_REDUCTION
+	L.thickness = math.min(1 / L.shift, 1)^config.thickness_reduction
 
 	if L.slope ~= L.slope then
 		M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.hl_group, L)
@@ -457,13 +457,13 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 		return
 	end
 
-	if L.slope_abs <= config.MAX_SLOPE_HORIZONTAL then
+	if L.slope_abs <= config.max_slope_horizontal then
 		-- logging.debug("Drawing horizontal-ish line")
 		draw_horizontal_ish_line(L, draw_vertically_shifted_block)
 		return
 	end
 
-	if L.slope_abs >= config.MIN_SLOPE_VERTICAL then
+	if L.slope_abs >= config.min_slope_vertical then
 		-- logging.debug("Drawing vertical-ish line")
 		draw_vertical_ish_line(L, draw_horizontally_shifted_block)
 		return

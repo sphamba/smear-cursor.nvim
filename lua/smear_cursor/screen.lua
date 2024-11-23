@@ -3,9 +3,7 @@ local M = {}
 
 
 M.get_screen_cursor_position = function(window_id)
-	if window_id == nil then
-		window_id = vim.api.nvim_get_current_win()
-	end
+	window_id = window_id or vim.api.nvim_get_current_win()
 
 	local window_origin = vim.api.nvim_win_get_position(window_id)
 	local window_row = window_origin[1]

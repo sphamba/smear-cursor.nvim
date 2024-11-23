@@ -41,4 +41,13 @@ M.listen = function()
 end
 
 
+M.unlisten = function()
+	vim.api.nvim_exec([[
+		augroup SmearCursor
+			autocmd!
+		augroup END
+	]], false)
+end
+
+
 return M
