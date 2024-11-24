@@ -191,7 +191,7 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 	else
 		local micro_shift = center * 16 - 8
 		character_index = math.floor(micro_shift)
-		if character_index == 9 then return end
+		if character_index == 8 then return end
 
 		local character_thickness = 1 - character_index / 8
 		local shade = thickness / character_thickness
@@ -241,7 +241,7 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 	else
 		local micro_shift = center * 16 - 8
 		character_index = math.floor(micro_shift)
-		if character_index == 9 then return end
+		if character_index == 8 then return end
 
 		local character_thickness = 1 - character_index / 8
 		local shade = thickness / character_thickness
@@ -275,14 +275,14 @@ end
 local function fill_matrix_vertical_sub_block(matrix, row_top, row_bottom, col)
 	if row_top >= row_bottom then return end
 	local row = math.floor(row_top)
-	if row < 1 then return end
+	if row < 1 or row > #matrix then return end
 	local shade = row_bottom - row_top
 	matrix[row][col] = math.max(matrix[row][col], shade)
 end
 
 
 local function fill_matrix_vertically(matrix, row_float, col, thickness)
-	local top = row_float + 0.5 - thickness * config.diagonal_thickness_factor
+	local top = row_float + 1 - thickness * config.diagonal_thickness_factor
 	local bottom = top + 2 * thickness * config.diagonal_thickness_factor
 	local row = math.floor(row_float)
 	-- logging.debug("top: " .. top .. ", bottom: " .. bottom)
@@ -295,7 +295,7 @@ end
 
 
 local function draw_diagonal_horizontal_block(row_float, col, L)
-	local row = round(row_float)
+	local row = math.floor(row_float)
 	local shift = row_float - row
 	-- Matrix of lit quarters
 	local m = {
@@ -333,14 +333,14 @@ end
 local function fill_matrix_horizontal_sub_block(matrix, row, col_left, col_right)
 	if col_left >= col_right then return end
 	local col = math.floor(col_left)
-	if col < 1 then return end
+	if col < 1 or col > #matrix[1] then return end
 	local shade = col_right - col_left
 	matrix[row][col] = math.max(matrix[row][col], shade)
 end
 
 
 local function fill_matrix_horizontally(matrix, row, col_float, thickness)
-	local left = col_float + 0.5 - thickness * config.diagonal_thickness_factor
+	local left = col_float + 1 - thickness * config.diagonal_thickness_factor
 	local right = left + 2 * thickness * config.diagonal_thickness_factor
 	local col = math.floor(col_float)
 	-- logging.debug("left: " .. left .. ", right: " .. right)
@@ -353,7 +353,7 @@ end
 
 
 local function draw_diagonal_vertical_block(row, col_float, L)
-	local col = round(col_float)
+	local col = math.floor(col_float)
 	local shift = col_float - col
 	-- Matrix of lit quarters
 	local m = {
