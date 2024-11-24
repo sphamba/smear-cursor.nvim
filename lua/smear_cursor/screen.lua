@@ -9,7 +9,8 @@ end
 
 
 local function get_window_containing_position(screen_row, screen_col)
-	local window_ids = vim.api.nvim_list_wins()
+	local current_tab = vim.api.nvim_get_current_tabpage()
+	local window_ids = vim.api.nvim_tabpage_list_wins(current_tab)
 
 	for _, window_id in ipairs(window_ids) do
 		local window_origin = vim.api.nvim_win_get_position(window_id)
@@ -38,8 +39,12 @@ M.screen_to_buffer = function(screen_row, screen_col)
 
 	-- If buffer appears in another visible window, return nil
 	local buffer_window_ids = vim.fn.getbufinfo(buffer_id)[1].windows
-	if #buffer_window_ids > 1 then
-		return nil
+	local current_tab = vim.api.nvim_get_current_tabpage()
+	local tab_window_ids = vim.api.nvim_tabpage_list_wins(current_tab)
+	for _, other_window_id in ipairs(tab_window_ids) do
+		if other_window_id ~= window_id and vim.tbl_contains(buffer_window_ids, other_window_id) then
+			return nil
+		end
 	end
 
 	local start_row = vim.fn.line("w0", window_id)

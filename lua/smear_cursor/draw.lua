@@ -16,20 +16,31 @@ local MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
-local window_ids = {}
-local n_active_windows = 0
+local window_ids = {{}}
+local n_active_windows = {0}
+
+
+M.initialize_lists = function()
+	for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+		if window_ids[tab] == nil then
+			window_ids[tab] = {}
+			n_active_windows[tab] = 0
+		end
+	end
+end
 
 
 local function draw_character_floating_window(row, col, character, hl_group, L)
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
+	local current_tab = vim.api.nvim_get_current_tabpage()
 
-	n_active_windows = n_active_windows + 1
+	n_active_windows[current_tab] = n_active_windows[current_tab] + 1
 	local window_id
 	local buffer_id
 
-	if #window_ids >= n_active_windows then
+	if #window_ids[current_tab] >= n_active_windows[current_tab] then
 		-- Get existing window
-		window_id = window_ids[n_active_windows]
+		window_id = window_ids[current_tab][n_active_windows[current_tab]]
 		buffer_id = vim.api.nvim_win_get_buf(window_id)
 		vim.api.nvim_win_set_config(window_id, {
 			relative = "editor",
@@ -55,7 +66,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 		})
 		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
 
-		table.insert(window_ids, window_id)
+		table.insert(window_ids[current_tab], window_id)
 	end
 
 	vim.api.nvim_win_set_option(window_id, "winblend", config.legacy_computing_symbols_support and 100 or 0)
@@ -70,23 +81,25 @@ local function clear_floating_windows(clear_extmarks)
 	clear_extmarks = clear_extmarks or true
 
 	-- Hide the windows without deleting them
-	for i = 1, n_active_windows do
-		local window_id = window_ids[i]
-		vim.api.nvim_win_set_option(window_id, "winblend", 100)
+	for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+		for i = 1, n_active_windows[tab] do
+			local window_id = window_ids[tab][i]
+			vim.api.nvim_win_set_option(window_id, "winblend", 100)
 
-		if clear_extmarks then
-			local buffer_id = vim.api.nvim_win_get_buf(window_id)
-			vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
+			if clear_extmarks then
+				local buffer_id = vim.api.nvim_win_get_buf(window_id)
+				vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
+			end
+
+			vim.api.nvim_win_set_config(window_id, {
+				relative = "editor",
+				row = 0,
+				col = 0,
+			})
 		end
 
-		vim.api.nvim_win_set_config(window_id, {
-			relative = "editor",
-			row = 0,
-			col = 0,
-		})
+		n_active_windows[tab] = 0
 	end
-
-	n_active_windows = 0
 end
 
 
