@@ -84,7 +84,7 @@ local function set_hl_groups()
 		M.hl_groups[i] = blended_hl_group
 		M.hl_groups_inverted[i] = blended_hl_group_inverted
 		vim.api.nvim_set_hl(0, blended_hl_group, { fg = blended_cursor_color, bg = normal_bg })
-		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = blended_cursor_color, bg = normal_bg, reverse = true })
+		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = normal_bg, bg = blended_cursor_color })
 	end
 end
 
