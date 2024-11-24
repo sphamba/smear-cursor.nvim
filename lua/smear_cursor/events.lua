@@ -1,4 +1,5 @@
 local animation = require("smear_cursor.animation")
+local config = require("smear_cursor.config")
 local logging = require("smear_cursor.logging")
 local screen = require("smear_cursor.screen")
 local M = {}
@@ -9,18 +10,16 @@ local switching_buffer = false
 
 M.move_cursor = function()
 	local row, col = screen.get_screen_cursor_position()
-	animation.change_target_position(row, col)
+	local jump = not config.smear_between_buffers and switching_buffer
+	animation.change_target_position(row, col, jump)
+
+	switching_buffer = false
 end
 
 
 M.jump_cursor = function()
 	local row, col = screen.get_screen_cursor_position()
-
-	if not switching_buffer then
-		animation.change_target_position(row, col, true)
-	end
-
-	switching_buffer = false
+	animation.change_target_position(row, col, true)
 end
 
 

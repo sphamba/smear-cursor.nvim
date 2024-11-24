@@ -36,7 +36,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 			row = row - 1,
 			col = col - 1,
 		})
-	
+
 	else
 		-- Create new window
 		buffer_id = vim.api.nvim_create_buf(false, true)

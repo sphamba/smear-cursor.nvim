@@ -50,6 +50,9 @@ return {
     -- Background color. Defaults to Normal gui background color
     normal_bg = "#282828",
 
+    -- Smear cursor when switching buffers
+    smear_between_buffers = true,
+
     -- Use floating windows to display smears outside buffers.
     -- May have performance issues with other plugins.
     use_floating_windows = true,

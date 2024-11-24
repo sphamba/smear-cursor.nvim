@@ -4,6 +4,7 @@ local M = {}
 M.logging_level = vim.log.levels.INFO
 M.dont_erase = false -- Set to true for debugging
 
+M.smear_between_buffers = true -- Smear cursor when switching buffers
 M.use_floating_windows = true -- Fallback when extmarks cannot be drawn
 M.legacy_computing_symbols_support = false -- Allow for blending of background colors
 M.hide_target_hack = true -- Attempt to hide true cursor by drawing a character below it
