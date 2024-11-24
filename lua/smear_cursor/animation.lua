@@ -55,7 +55,7 @@ end
 
 
 M.change_target_position = function(row, col, jump)
-	jump = jump or false
+	jump = jump or (not config.smear_between_neighbor_lines and math.abs(row - current_position[1]) <= 1)
 	if (target_position[1] == row and target_position[2] == col) then return end
 	draw.clear()
 

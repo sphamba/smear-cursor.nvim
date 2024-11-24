@@ -53,6 +53,9 @@ return {
     -- Smear cursor when switching buffers
     smear_between_buffers = true,
 
+    -- Smear cursor when moving within line or to neighbor lines
+    smear_between_neighbor_lines = true,
+
     -- Use floating windows to display smears outside buffers.
     -- May have performance issues with other plugins.
     use_floating_windows = true,
@@ -66,7 +69,7 @@ return {
   },
 }
 ```
-Some terminals override the cursor color set by Neovim. If that is the case, manually set the cursor color as shown above. Refer to `lua/smear_cursor/config.lua` for the full list of configuration options.
+Some terminals override the cursor color set by Neovim. If that is the case, manually set the cursor color as shown above. Refer to `lua/smear_cursor/config.lua` for the full list of configuration options that can be set with `opts`.
 
 
 ## Using `init.vim`
@@ -79,12 +82,11 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
 
 # Known issues
 
-Likely not compatible with othe plugins that modify the cursor.
-
-When not using floating windows fallback:
-- No smear when buffer is duplicated
-- No smear outside buffer (further than the last line)
-- No smear through wrapped lines
+- Likely not compatible with other plugins that modify the cursor.
+- When not using floating windows fallback:
+  - No smear when buffer is duplicated
+  - No smear outside buffer (further than the last line)
+  - No smear through wrapped lines
 
 
 # Development TODOs
@@ -103,4 +105,4 @@ When not using floating windows fallback:
 - [ ] Occasional flickering over line numbers when using floating windows
 - [ ] Smear freezes
   - [ ] when opening command line
-  - [ ] when inputing incomplete keybindings
+  - [ ] when input incomplete keybindings
