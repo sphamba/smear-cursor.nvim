@@ -13,8 +13,8 @@ local metatable = {
 			return enabled
 		end
 
-		if key == "cursor_color" then
-			return color.cursor_color
+		if key == "cursor_color" or key == "normal_bg" then
+			return color[key]
 		end
 
 		if config[key] ~= nil then
@@ -33,8 +33,8 @@ local metatable = {
 				events.unlisten()
 			end
 
-		elseif key == "cursor_color" then
-			color.cursor_color = value
+		elseif key == "cursor_color" or key == "normal_bg" then
+			color[key] = value
 
 		elseif config[key] ~= nil then
 			config[key] = value

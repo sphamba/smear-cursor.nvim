@@ -45,11 +45,12 @@ end
 -- Get cursor foreground color and normal background color
 local cursor_color = get_hl_color("Normal", "foreground") -- Cursor color
 local normal_bg = get_hl_color("Normal", "background") -- Normal background
+normal_bg = normal_bg or "#282828"
 
 
 local function hex_to_rgb(hex)
-    hex = hex:gsub('#', '')
-    local r, g, b = hex:match('(..)(..)(..)')
+    hex = hex:gsub("#", "")
+    local r, g, b = hex:match("(..)(..)(..)")
     return tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)
 end
 
@@ -102,12 +103,20 @@ local metatable = {
 			return cursor_color
 		end
 
+		if key == "normal_bg" then
+			return normal_bg
+		end
+
 		return nil
 	end,
 
 	__newindex = function(table, key, value)
 		if key == "cursor_color" then
 			cursor_color = value
+			set_hl_groups()
+
+		elseif key == "normal_bg" then
+			normal_bg = value
 			set_hl_groups()
 
 		else

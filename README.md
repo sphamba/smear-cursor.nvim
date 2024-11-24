@@ -44,8 +44,11 @@ return {
   "sphamba/smear-cursor.nvim",
 
   opts = {
-    -- Cursor color. Defaults to Normal foreground color
+    -- Cursor color. Defaults to Normal gui foreground color
     cursor_color = "#d3cdc3",
+
+    -- Background color. Defaults to Normal gui background color
+    normal_bg = "#282828",
 
     -- Use floating windows to display smears outside buffers.
     -- May have performance issues with other plugins.
