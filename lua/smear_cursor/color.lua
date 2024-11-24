@@ -72,7 +72,7 @@ end
 
 local function set_hl_groups()
 	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_color, bg = normal_bg })
-	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = cursor_color, bg = normal_bg, reverse = true })
+	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = normal_bg, bg = cursor_color })
 
 	M.hl_groups = {}
 	M.hl_groups_inverted = {}
