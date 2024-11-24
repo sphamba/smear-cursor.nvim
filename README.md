@@ -2,6 +2,8 @@
 
 _Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's animated cursor](https://neovide.dev/features.html#animated-cursor)._
 
+This plugin is intended for terminals/GUIs that can only display text and do not have graphical capabilities (unlike [Neovide](https://neovide.dev/), or the [Kitty](https://sw.kovidgoyal.net/kitty/) terminal). Also, check out the [karb94/neoscroll.nvim](https://github.com/karb94/neoscroll.nvim) plugin for smooth scrolling!
+
 
 # Demo
 
@@ -96,7 +98,7 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
 - [ ] Smear when jumping to commands
 - [ ] Help documentation
 
-## Fixes
+## Bugs
 
 - [ ] Wrong background color over non-normal text
 - [ ] Fold open and close not registering as a cursor movement
