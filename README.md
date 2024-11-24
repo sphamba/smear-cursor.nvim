@@ -79,6 +79,8 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
 
 # Known issues
 
+Likely not compatible with othe plugins that modify the cursor.
+
 When not using floating windows fallback:
 - No smear when buffer is duplicated
 - No smear outside buffer (further than the last line)
@@ -96,7 +98,7 @@ When not using floating windows fallback:
 
 - [ ] Wrong background color over non-normal text
 - [ ] Fold open and close not registering as a cursor movement
-- [ ] Wrong smear placement in nerdtree (due to extmarks?)
+- [ ] Wrong smear placement when concealed characters are present
 - [ ] Flickering of cursor at target location
 - [ ] Occasional flickering over line numbers when using floating windows
 - [ ] Smear freezes
