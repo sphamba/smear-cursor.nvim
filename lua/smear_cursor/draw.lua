@@ -63,6 +63,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 			height = 1,
 			style = "minimal",
 			focusable = false,
+			noautocmd = true,
 		})
 		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
 
