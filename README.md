@@ -65,13 +65,35 @@ return {
     -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
     -- Smears will blend better on all backgrounds.
     legacy_computing_symbols_support = false,
-
-    -- Attempt to hide the real cursor when smearing.
-    hide_target_hack = true,
   },
 }
 ```
-Some terminals override the cursor color set by Neovim. If that is the case, manually set the cursor color as shown above. Refer to `lua/smear_cursor/config.lua` for the full list of configuration options that can be set with `opts`.
+Some terminals override the cursor color set by Neovim. If that is the case, manually change the cursor color as shown above.
+
+Refer to `lua/smear_cursor/config.lua` for the full list of configuration options that can be set with `opts`. For example, you can tune the smear dynamics to be snappier:
+```lua
+  opts = {
+    -- How fast the smear's head moves towards the target.
+    -- 0: no movement, 1: instantaneous, default: 0.6
+    stiffness = 0.8,
+
+    -- How fast the smear's tail moves towards the head.
+    -- 0: no movement, 1: instantaneous, default: 0.3
+    trailing_stiffness = 0.6,
+
+    -- How much the tail slows down when getting close to the head.
+    -- 0: no slowdown, more: more slowdown, default: 0.1
+    trailing_exponent = 0,
+
+    -- Stop animating when the smear's tail is within this distance (in characters) from the target.
+    -- Default: 0.1
+    distance_stop_animating = 0.5,
+
+    -- Attempt to hide the real cursor when smearing.
+    -- Default: true
+    hide_target_hack = false,
+  },
+```
 
 
 ## Using `init.vim`
@@ -84,6 +106,7 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
 
 # Known issues
 
+- There is a shadow around the smear (text become invisible). This is inherent to the way the smear is rendered, as Neovim is not able to render superimposed characters. The shadow is less noticeable when the smear is moving faster (see configuration options).
 - Likely not compatible with other plugins that modify the cursor.
 - When not using floating windows fallback:
   - No smear when buffer is duplicated
