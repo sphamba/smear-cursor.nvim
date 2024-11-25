@@ -42,9 +42,12 @@ local function get_hl_color(group, attr)
 end
 
 
--- Get cursor foreground color and normal background color
-local cursor_color = get_hl_color("Normal", "foreground") -- Cursor color
-local normal_bg = get_hl_color("Normal", "background") -- Normal background
+-- Get cursor color and normal background color
+local cursor_color = get_hl_color("Cursor", "background")
+cursor_color = cursor_color or get_hl_color("Normal", "foreground")
+cursor_color = cursor_color or "#d0d0d0"
+
+local normal_bg = get_hl_color("Normal", "background")
 normal_bg = normal_bg or "#282828"
 
 

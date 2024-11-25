@@ -46,7 +46,7 @@ return {
   "sphamba/smear-cursor.nvim",
 
   opts = {
-    -- Cursor color. Defaults to Normal gui foreground color
+    -- Cursor color. Defaults to Cursor gui color
     cursor_color = "#d3cdc3",
 
     -- Background color. Defaults to Normal gui background color
