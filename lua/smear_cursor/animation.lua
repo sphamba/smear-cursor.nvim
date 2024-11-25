@@ -6,17 +6,11 @@ local screen = require("smear_cursor.screen")
 local M = {}
 
 
-local target_position = {0, 0}
-local current_position = {0, 0}
-local trailing_position = {0, 0}
+local cursor_row, cursor_col = screen.get_screen_cursor_position()
+local target_position = {cursor_row + 1, cursor_col + 1} -- Not sure why +1 is needed
+local current_position = {target_position[1], target_position[2]}
+local trailing_position = {target_position[1], target_position[2]}
 local animating = false
-
-vim.defer_fn(function()
-	local cursor_row, cursor_col = screen.get_screen_cursor_position()
-	target_position = {cursor_row, cursor_col}
-	current_position = {cursor_row, cursor_col}
-	trailing_position = {cursor_row, cursor_col}
-end, 0)
 
 
 local function update()

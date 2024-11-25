@@ -8,8 +8,7 @@ local M = {}
 local switching_buffer = false
 
 
-
-local function move_cursor()
+M.move_cursor = function()
 	local row, col = screen.get_screen_cursor_position()
 	local jump = not config.smear_between_buffers and switching_buffer
 	animation.change_target_position(row, col, jump)
@@ -17,18 +16,10 @@ local function move_cursor()
 	switching_buffer = false
 end
 
-M.move_cursor = function()
-	vim.defer_fn(move_cursor, 0) -- for screen.get_screen_cursor_position()
-end
-
-
-local function jump_cursor()
-	local row, col = screen.get_screen_cursor_position()
-	animation.change_target_position(row, col, true)
-end
 
 M.jump_cursor = function()
-	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
+	local row, col = screen.get_screen_cursor_position()
+	animation.change_target_position(row, col, true)
 end
 
 
