@@ -58,7 +58,7 @@ return {
     -- Smear cursor when moving within line or to neighbor lines
     smear_between_neighbor_lines = true,
 
-    -- Use floating windows to display smears outside buffers.
+    -- Use floating windows to display smears over wrapped lines or outside buffers.
     -- May have performance issues with other plugins.
     use_floating_windows = true,
 
@@ -70,28 +70,14 @@ return {
 ```
 Some terminals override the cursor color set by Neovim. If that is the case, manually change the cursor color as shown above.
 
-Refer to `lua/smear_cursor/config.lua` for the full list of configuration options that can be set with `opts`. For example, you can tune the smear dynamics to be snappier:
+Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) for the full list of configuration options that can be set with `opts`. For example, you can tune the smear dynamics to be snappier:
 ```lua
-  opts = {
-    -- How fast the smear's head moves towards the target.
-    -- 0: no movement, 1: instantaneous, default: 0.6
-    stiffness = 0.8,
-
-    -- How fast the smear's tail moves towards the head.
-    -- 0: no movement, 1: instantaneous, default: 0.3
-    trailing_stiffness = 0.6,
-
-    -- How much the tail slows down when getting close to the head.
-    -- 0: no slowdown, more: more slowdown, default: 0.1
-    trailing_exponent = 0,
-
-    -- Stop animating when the smear's tail is within this distance (in characters) from the target.
-    -- Default: 0.1
-    distance_stop_animating = 0.5,
-
-    -- Attempt to hide the real cursor when smearing.
-    -- Default: true
-    hide_target_hack = false,
+  opts = {                         -- Default  Range
+    stiffness = 0.8,               -- 0.6      [0, 1]
+    trailing_stiffness = 0.6,      -- 0.3      [0, 1]
+    trailing_exponent = 0,         -- 0.1      >= 0
+    distance_stop_animating = 0.5, -- 0.1      > 0
+    hide_target_hack = false,      -- true     boolean
   },
 ```
 

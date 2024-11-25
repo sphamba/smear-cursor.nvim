@@ -1,28 +1,61 @@
 local M = {}
 
 
-M.logging_level = vim.log.levels.INFO
-M.dont_erase = false -- Set to true for debugging
+-- General configuration -------------------------------------------------------
 
-M.smear_between_buffers = true -- Smear cursor when switching buffers
-M.smear_between_neighbor_lines = true -- Smear cursor when moving within line or to neighbor lines
-M.use_floating_windows = true -- Fallback when extmarks cannot be drawn
-M.legacy_computing_symbols_support = false -- Allow for blending of background colors
-M.hide_target_hack = true -- Attempt to hide true cursor by drawing a character below it
+-- Smear cursor when switching buffers
+M.smear_between_buffers = true
+
+-- Smear cursor when moving within line or to neighbor lines
+M.smear_between_neighbor_lines = true
+
+-- Use floating windows to display smears over wrapped lines or outside buffers.
+-- May have performance issues with other plugins.
+M.use_floating_windows = true
+
+-- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
+-- Smears will blend better on all backgrounds.
+M.legacy_computing_symbols_support = false
+
+-- Attempt to hide the real cursor by drawing a character below it.
+M.hide_target_hack = true
 
 M.time_interval = 17 -- milliseconds
+
+
+-- Smear configuration ---------------------------------------------------------
+
+-- How fast the smear's head moves towards the target.
+-- 0: no movement, 1: instantaneous
+M.stiffness = 0.6
+
+-- How fast the smear's tail moves towards the head.
+-- 0: no movement, 1: instantaneous
+M.trailing_stiffness = 0.3
+
+-- How much the tail slows down when getting close to the head.
+-- 0: no slowdown, more: more slowdown
+M.trailing_exponent = 0.1
+
+-- Stop animating when the smear's tail is within this distance (in characters) from the target.
+M.distance_stop_animating = 0.1
+
+-- When to switch between rasterization methods
 M.max_slope_horizontal = 0.5
 M.min_slope_vertical = 2
+
 M.color_levels = 16 -- Minimum 1
-M.gamma = 2.2
-M.stiffness = 0.6 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.3
-M.trailing_exponent = 0.1 -- trailing stifness is multiplied by trailing_distance^TRAILING_EXPONENT
-M.distance_stop_animating = 0.1 -- characters
+M.gamma = 2.2 -- For color blending
 M.diagonal_pixel_value_threshold = 0.5 -- 0.1: more pixels, 0.9: less pixels
-M.diagonal_thickness_factor = 0.7 -- put less than 1 to reduce diagonal smear fatness
+M.diagonal_thickness_factor = 0.7 -- Put less than 1 to reduce diagonal smear fatness
 M.thickness_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
 M.minimum_thickness = 0.7 -- 0: no limit, 1: no reduction
+
+
+-- For debugging ---------------------------------------------------------------
+
+M.logging_level = vim.log.levels.INFO
+M.dont_erase = false -- Set to true for debugging, or use trailing_stiffness = 0
 
 
 return M
