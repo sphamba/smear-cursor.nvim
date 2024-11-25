@@ -12,7 +12,7 @@ local function get_window_containing_position(screen_row, screen_col)
 	local current_tab = vim.api.nvim_get_current_tabpage()
 	local window_ids = vim.api.nvim_tabpage_list_wins(current_tab)
 
-	for _, window_id in ipairs(window_ids) do
+	for _, window_id in pairs(window_ids) do
 		local window_origin = vim.api.nvim_win_get_position(window_id)
 		local window_row = window_origin[1] + 1
 		local window_col = window_origin[2] + 1
@@ -41,7 +41,7 @@ M.screen_to_buffer = function(screen_row, screen_col)
 	local buffer_window_ids = vim.fn.getbufinfo(buffer_id)[1].windows
 	local current_tab = vim.api.nvim_get_current_tabpage()
 	local tab_window_ids = vim.api.nvim_tabpage_list_wins(current_tab)
-	for _, other_window_id in ipairs(tab_window_ids) do
+	for _, other_window_id in pairs(tab_window_ids) do
 		if other_window_id ~= window_id and vim.tbl_contains(buffer_window_ids, other_window_id) then
 			return nil
 		end

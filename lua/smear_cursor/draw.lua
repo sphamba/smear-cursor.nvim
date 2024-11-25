@@ -21,7 +21,7 @@ local n_active_windows = {0}
 
 
 M.initialize_lists = function()
-	for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+	for _, tab in pairs(vim.api.nvim_list_tabpages()) do
 		if window_ids[tab] == nil then
 			window_ids[tab] = {}
 			n_active_windows[tab] = 0
@@ -82,7 +82,7 @@ local function clear_floating_windows(clear_extmarks)
 	clear_extmarks = clear_extmarks or true
 
 	-- Hide the windows without deleting them
-	for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+	for tab, _ in pairs(window_ids) do
 		for i = 1, n_active_windows[tab] do
 			local window_id = window_ids[tab][i]
 			vim.api.nvim_win_set_option(window_id, "winblend", 100)
@@ -135,7 +135,7 @@ end
 local function clear_extmarks()
 	local buffer_ids = vim.api.nvim_list_bufs()
 
-	for _, buffer_id in ipairs(buffer_ids) do
+	for _, buffer_id in pairs(buffer_ids) do
 		vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
 	end
 end
