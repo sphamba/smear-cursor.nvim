@@ -16,15 +16,16 @@ local MATRIX_CHARACTERS = {"▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
-local window_ids = {{}}
-local n_active_windows = {0}
-
-
 M.initialize_lists = function()
+	if _G.smear_cursor.window_ids == nil then
+		_G.smear_cursor.window_ids = {{}}
+		_G.smear_cursor.n_active_windows = {0}
+	end
+
 	for _, tab in pairs(vim.api.nvim_list_tabpages()) do
-		if window_ids[tab] == nil then
-			window_ids[tab] = {}
-			n_active_windows[tab] = 0
+		if _G.smear_cursor.window_ids[tab] == nil then
+			_G.smear_cursor.window_ids[tab] = {}
+			_G.smear_cursor.n_active_windows[tab] = 0
 		end
 	end
 end
@@ -34,13 +35,13 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 	local current_tab = vim.api.nvim_get_current_tabpage()
 
-	n_active_windows[current_tab] = n_active_windows[current_tab] + 1
+	_G.smear_cursor.n_active_windows[current_tab] = _G.smear_cursor.n_active_windows[current_tab] + 1
 	local window_id
 	local buffer_id
 
-	if #window_ids[current_tab] >= n_active_windows[current_tab] then
+	if #_G.smear_cursor.window_ids[current_tab] >= _G.smear_cursor.n_active_windows[current_tab] then
 		-- Get existing window
-		window_id = window_ids[current_tab][n_active_windows[current_tab]]
+		window_id = _G.smear_cursor.window_ids[current_tab][_G.smear_cursor.n_active_windows[current_tab]]
 		buffer_id = vim.api.nvim_win_get_buf(window_id)
 		vim.api.nvim_win_set_config(window_id, {
 			relative = "editor",
@@ -67,7 +68,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 		})
 		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
 
-		table.insert(window_ids[current_tab], window_id)
+		table.insert(_G.smear_cursor.window_ids[current_tab], window_id)
 	end
 
 	vim.api.nvim_win_set_option(window_id, "winblend", config.legacy_computing_symbols_support and 100 or 0)
@@ -82,9 +83,9 @@ local function clear_floating_windows(clear_extmarks)
 	clear_extmarks = clear_extmarks or true
 
 	-- Hide the windows without deleting them
-	for tab, _ in pairs(window_ids) do
-		for i = 1, n_active_windows[tab] do
-			local window_id = window_ids[tab][i]
+	for tab, _ in pairs(_G.smear_cursor.window_ids) do
+		for i = 1, _G.smear_cursor.n_active_windows[tab] do
+			local window_id = _G.smear_cursor.window_ids[tab][i]
 			vim.api.nvim_win_set_option(window_id, "winblend", 100)
 
 			if clear_extmarks then
@@ -99,7 +100,7 @@ local function clear_floating_windows(clear_extmarks)
 			})
 		end
 
-		n_active_windows[tab] = 0
+		_G.smear_cursor.n_active_windows[tab] = 0
 	end
 end
 
