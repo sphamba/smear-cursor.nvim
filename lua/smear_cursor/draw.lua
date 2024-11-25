@@ -223,10 +223,9 @@ end
 local function draw_vertically_shifted_block(row_float, col, L)
 	local top = row_float + 0.5 - L.thickness / 2
 	local bottom = top + L.thickness
-	local row = math.floor(row_float)
+	local row = math.floor(top)
 
-	draw_vertically_shifted_sub_block(top, row, col, L)
-	draw_vertically_shifted_sub_block(math.max(top, row), math.min(bottom, row + 1), col, L)
+	draw_vertically_shifted_sub_block(top, math.min(bottom, row + 1), col, L)
 	draw_vertically_shifted_sub_block(row + 1, bottom, col, L)
 end
 
@@ -278,10 +277,9 @@ end
 local function draw_horizontally_shifted_block(row, col_float, L)
 	local left = col_float + 0.5 - L.thickness / 2
 	local right = left + L.thickness
-	local col = math.floor(col_float)
+	local col = math.floor(left)
 
-	draw_horizontally_shifted_sub_block(row, left, col, L)
-	draw_horizontally_shifted_sub_block(row, math.max(left, col), math.min(right, col + 1), L)
+	draw_horizontally_shifted_sub_block(row, left, math.min(right, col + 1), L)
 	draw_horizontally_shifted_sub_block(row, col + 1, right, L)
 end
 
@@ -298,12 +296,11 @@ end
 local function fill_matrix_vertically(matrix, row_float, col, thickness)
 	local top = row_float + 1 - thickness * config.diagonal_thickness_factor
 	local bottom = top + 2 * thickness * config.diagonal_thickness_factor
-	local row = math.floor(row_float)
+	local row = math.floor(top)
 	-- logging.debug("top: " .. top .. ", bottom: " .. bottom)
 
-	fill_matrix_vertical_sub_block(matrix, top, row, col)
-	fill_matrix_vertical_sub_block(matrix, math.max(top, row), math.min(bottom, row + 1), col)
-	fill_matrix_vertical_sub_block(matrix, math.max(top, row + 1), math.min(bottom, row + 2), col)
+	fill_matrix_vertical_sub_block(matrix, top, math.min(bottom, row + 1), col)
+	fill_matrix_vertical_sub_block(matrix, row + 1, math.min(bottom, row + 2), col)
 	fill_matrix_vertical_sub_block(matrix, row + 2, bottom, col)
 end
 
@@ -356,12 +353,11 @@ end
 local function fill_matrix_horizontally(matrix, row, col_float, thickness)
 	local left = col_float + 1 - thickness * config.diagonal_thickness_factor
 	local right = left + 2 * thickness * config.diagonal_thickness_factor
-	local col = math.floor(col_float)
+	local col = math.floor(left)
 	-- logging.debug("left: " .. left .. ", right: " .. right)
 
-	fill_matrix_horizontal_sub_block(matrix, row, left, col)
-	fill_matrix_horizontal_sub_block(matrix, row, math.max(left, col), math.min(right, col + 1))
-	fill_matrix_horizontal_sub_block(matrix, row, math.max(left, col + 1), math.min(right, col + 2))
+	fill_matrix_horizontal_sub_block(matrix, row, left, math.min(right, col + 1))
+	fill_matrix_horizontal_sub_block(matrix, row, col + 1, math.min(right, col + 2))
 	fill_matrix_horizontal_sub_block(matrix, row, col + 2, right)
 end
 
@@ -459,7 +455,8 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	L.slope = L.row_shift / L.col_shift
 	L.slope_abs = math.abs(L.slope)
 	L.shift = math.sqrt(L.row_shift^2 + L.col_shift^2)
-	L.thickness = math.min(1 / L.shift, 1)^config.thickness_reduction
+	L.thickness = math.min(1 / L.shift, 1)^config.thickness_reduction_exponent
+	L.thickness = math.max(L.thickness, config.minimum_thickness)
 
 	if L.slope ~= L.slope then
 		M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.hl_group, L)
@@ -473,12 +470,20 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 
 	if L.slope_abs <= config.max_slope_horizontal then
 		-- logging.debug("Drawing horizontal-ish line")
+		-- if math.abs(L.row_shift) > 1 then
+		-- 	-- Avoid bulding on thin lines
+		-- 	L.thickness = math.max(L.thickness, 1)
+		-- end
 		draw_horizontal_ish_line(L, draw_vertically_shifted_block)
 		return
 	end
 
 	if L.slope_abs >= config.min_slope_vertical then
 		-- logging.debug("Drawing vertical-ish line")
+		-- if math.abs(L.col_shift) > 1 then
+		-- 	-- Avoid bulding on thin lines
+		-- 	L.thickness = math.max(L.thickness, 1)
+		-- end
 		draw_vertical_ish_line(L, draw_horizontally_shifted_block)
 		return
 	end
