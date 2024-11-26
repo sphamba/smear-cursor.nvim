@@ -11,7 +11,27 @@ M.get_screen_cursor_position = function(window_id)
 	local screen_row = window_row + vim.fn.winline()
 	local screen_col = window_col + vim.fn.wincol()
 
-	return screen_row, screen_col
+	-- Count concealed characters
+	local n_concealed = 0
+	local n_replacements = 0
+	local cursor_row = vim.fn.line(".")
+	local cursor_col = vim.fn.col(".")
+	local last_region = 0
+	for col = 1, cursor_col - 1 do
+		local concealed_info = vim.fn.synconcealed(cursor_row, col)
+		local concealed, replacement, region = concealed_info[1], concealed_info[2], concealed_info[3]
+		if concealed == 1 then
+			n_concealed = n_concealed + 1
+			if region ~= last_region then
+				n_replacements = n_replacements + #replacement
+				last_region = region
+			end
+		end
+	end
+
+	-- logging.debug("screen_col: " .. screen_col .. ", n_concealed: " .. n_concealed .. ", n_replacements: " .. n_replacements)
+
+	return screen_row, screen_col - n_concealed + n_replacements
 end
 
 

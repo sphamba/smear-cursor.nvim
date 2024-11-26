@@ -8,8 +8,8 @@ local foldable_lines = {
 }
 
 -- Line 1 with concealed characters
--- Line 2 without concealed characters
--- Line 3 with concealed characters
+-- Line 2 with concealed characters
+-- Line 3 😎 with 😀 concealed characters
 
 -- Line with	wide	characters
 
@@ -86,6 +86,8 @@ vim.api.nvim_buf_clear_namespace(buffer_id, ns, 0, -1)
 vim.cmd([[
 	syntax match SmearCursorConcealed1 /Line 1/ conceal
 	syntax match SmearCursorConcealed3 /Line 3/ conceal cchar=*
+	syntax match SmearCursorConcealedC /concealed/ conceal cchar=*
+	syntax match SmearCursorConcealedEmoji /😎/ conceal cchar=*
 	setlocal conceallevel=2
 	setlocal concealcursor=n
 ]])
