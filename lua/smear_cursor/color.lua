@@ -50,29 +50,6 @@ cursor_color = cursor_color or "#d0d0d0"
 local normal_bg = get_hl_color("Normal", "background")
 normal_bg = normal_bg or "#282828"
 
-
-local function hex_to_rgb(hex)
-    hex = hex:gsub("#", "")
-    local r, g, b = hex:match("(..)(..)(..)")
-    return tonumber(r, 16), tonumber(g, 16), tonumber(b, 16)
-end
-
-local function rgb_to_hex(r, g, b)
-    return string.format("#%02X%02X%02X", r, g, b)
-end
-
-local function interpolate_colors(hex1, hex2, t)
-    local r1, g1, b1 = hex_to_rgb(hex1)
-    local r2, g2, b2 = hex_to_rgb(hex2)
-
-    local r = round(r1 + t * (r2 - r1))
-    local g = round(g1 + t * (g2 - g1))
-    local b = round(b1 + t * (b2 - b1))
-
-    return rgb_to_hex(r, g, b)
-end
-
-
 local function set_hl_groups()
 	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_color, bg = normal_bg })
 	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = normal_bg, bg = cursor_color })
@@ -81,13 +58,13 @@ local function set_hl_groups()
 	M.hl_groups_inverted = {}
 
 	for i = 1, config.color_levels do
-		local blended_cursor_color = interpolate_colors(normal_bg, cursor_color, (i / config.color_levels)^(1 / config.gamma))
+		local blend = math.floor((i / config.color_levels) ^ (1 / config.gamma) * 100)
 		local blended_hl_group = M.hl_group .. i
 		local blended_hl_group_inverted = M.hl_group_inverted .. i
 		M.hl_groups[i] = blended_hl_group
 		M.hl_groups_inverted[i] = blended_hl_group_inverted
-		vim.api.nvim_set_hl(0, blended_hl_group, { fg = blended_cursor_color, bg = normal_bg })
-		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = normal_bg, bg = blended_cursor_color })
+		vim.api.nvim_set_hl(0, blended_hl_group, { fg = cursor_color, bg = normal_bg, blend = blend })
+		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = normal_bg, bg = cursor_color, blend = 100 - blend })
 	end
 end
 

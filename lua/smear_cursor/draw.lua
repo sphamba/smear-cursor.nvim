@@ -30,54 +30,32 @@ M.initialize_lists = function()
 	end
 end
 
+M.win = nil
+M.buf = nil
 
-local function draw_character_floating_window(row, col, character, hl_group, L)
-	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
-	local current_tab = vim.api.nvim_get_current_tabpage()
-
-	_G.smear_cursor.n_active_windows[current_tab] = _G.smear_cursor.n_active_windows[current_tab] + 1
-	local window_id
-	local buffer_id
-
-	if #_G.smear_cursor.window_ids[current_tab] >= _G.smear_cursor.n_active_windows[current_tab] then
-		-- Get existing window
-		window_id = _G.smear_cursor.window_ids[current_tab][_G.smear_cursor.n_active_windows[current_tab]]
-		buffer_id = vim.api.nvim_win_get_buf(window_id)
-		vim.api.nvim_win_set_config(window_id, {
+local function get_win()
+	if not (M.win and vim.api.nvim_win_is_valid(M.win)) then
+		vim.api.nvim_set_hl(0, "SmearCursorFloat", { bg = "NONE", nocombine = true})
+		M.buf = vim.api.nvim_create_buf(false, true)
+		local lines = vim.split(("\n"):rep(vim.o.lines), "\n")
+		vim.api.nvim_buf_set_lines(M.buf, 0, -1, false, lines)
+		vim.bo[M.buf].buftype = "nofile"
+		vim.bo[M.buf].bufhidden = "wipe"
+		M.win = vim.api.nvim_open_win(M.buf, false, {
 			relative = "editor",
-			row = row - 1,
-			col = col - 1,
-		})
-
-	else
-		-- Create new window
-		buffer_id = vim.api.nvim_create_buf(false, true)
-		vim.api.nvim_buf_set_option(buffer_id, "buftype", "nofile")
-		vim.api.nvim_buf_set_option(buffer_id, "bufhidden", "wipe")
-		vim.api.nvim_buf_set_option(buffer_id, "swapfile", false)
-
-		window_id = vim.api.nvim_open_win(buffer_id, false, {
-			relative = "editor",
-			row = row - 1,
-			col = col - 1,
-			width = 1,
-			height = 1,
+			width = vim.o.columns,
+			height = vim.o.lines,
+			row = 0,
+			col = 0,
 			style = "minimal",
 			focusable = false,
 			noautocmd = true,
+			zindex = 1,
 		})
-		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
-
-		table.insert(_G.smear_cursor.window_ids[current_tab], window_id)
+		vim.wo[M.win].winblend = 100
+		vim.wo[M.win].winhighlight = "NormalFloat:SmearCursorFloat"
 	end
-
-	vim.api.nvim_win_set_option(window_id, "winblend", config.legacy_computing_symbols_support and 100 or 0)
-	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
-		virt_text = {{character, hl_group}},
-		virt_text_win_col = 0,
-	})
 end
-
 
 local function clear_floating_windows(clear_extmarks)
 	clear_extmarks = clear_extmarks or true
@@ -111,25 +89,15 @@ local function draw_character_extmark(screen_row, screen_col, character, hl_grou
 	end
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 
-	local buffer_id, row, col = screen.screen_to_buffer(screen_row, screen_col)
-	if buffer_id == nil then
-		if config.use_floating_windows then
-			draw_character_floating_window(screen_row, screen_col, character, hl_group, L)
-		end
-		return
-	end
-
 	-- Place new extmark with the determined position
-	local success, extmark_id = pcall(function ()
-		vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, row - 1, 0, {
-			virt_text = {{character, hl_group}},
-			virt_text_win_col = col - 1,
+	local win = get_win()
+	local success, extmark_id = pcall(function()
+		vim.api.nvim_buf_set_extmark(M.buf, cursor_namespace, screen_row - 1, 0, {
+			strict = false,
+			virt_text = { { character, hl_group } },
+			virt_text_win_col = screen_col - 1,
 		})
 	end)
-
-	if not success and config.use_floating_windows then
-		draw_character_floating_window(screen_row, screen_col, character, hl_group, L)
-	end
 end
 
 
