@@ -21,6 +21,8 @@ local foldable_lines = {
 
 -- Line with 🎉 emoji
 
+
+
 -- Also test:
 -- - Popup menus
 -- - Sidebar
@@ -113,3 +115,20 @@ vim.api.nvim_buf_set_extmark(buffer_id, ns, 18, 10, {
 vim.api.nvim_buf_set_extmark(buffer_id, ns, 19, 0, {
 	virt_lines = {{{"Extmark below", "Question"}}},
 })
+
+local function create_float(content, row, col)
+	local buffer_id = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, { content })
+	vim.api.nvim_buf_set_option(buffer_id, "filetype", "smear_cursor")
+	vim.api.nvim_open_win(buffer_id, false, {
+		relative = "win",
+		row = row,
+		col = col,
+		width = #content,
+		height = 1,
+		style = "minimal",
+		focusable = true,
+	})
+end
+
+create_float("Floating window", 23, 10)

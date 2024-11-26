@@ -31,7 +31,10 @@ M.initialize_lists = function()
 end
 
 
-local function draw_character_floating_window(row, col, character, hl_group, L)
+M.draw_character = function(row, col, character, hl_group, L)
+	if L ~= nil and L.end_reached and row == L.row_end_rounded and col == L.col_end_rounded then
+		return
+	end
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 	local current_tab = vim.api.nvim_get_current_tabpage()
 
@@ -65,6 +68,7 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 			style = "minimal",
 			focusable = false,
 			noautocmd = true,
+			zindex = 300,
 		})
 		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
 
@@ -79,19 +83,14 @@ local function draw_character_floating_window(row, col, character, hl_group, L)
 end
 
 
-local function clear_floating_windows(clear_extmarks)
-	clear_extmarks = clear_extmarks or true
-
+M.clear = function()
 	-- Hide the windows without deleting them
 	for tab, _ in pairs(_G.smear_cursor.window_ids) do
 		for i = 1, _G.smear_cursor.n_active_windows[tab] do
 			local window_id = _G.smear_cursor.window_ids[tab][i]
+			local buffer_id = vim.api.nvim_win_get_buf(window_id)
 			vim.api.nvim_win_set_option(window_id, "winblend", 100)
-
-			if clear_extmarks then
-				local buffer_id = vim.api.nvim_win_get_buf(window_id)
-				vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
-			end
+			vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
 
 			vim.api.nvim_win_set_config(window_id, {
 				relative = "editor",
@@ -102,52 +101,6 @@ local function clear_floating_windows(clear_extmarks)
 
 		_G.smear_cursor.n_active_windows[tab] = 0
 	end
-end
-
-
-local function draw_character_extmark(screen_row, screen_col, character, hl_group, L)
-	if L ~= nil and L.end_reached and screen_row == L.row_end_rounded and screen_col == L.col_end_rounded then
-		return
-	end
-	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
-
-	local buffer_id, row, col = screen.screen_to_buffer(screen_row, screen_col)
-	if buffer_id == nil then
-		if config.use_floating_windows then
-			draw_character_floating_window(screen_row, screen_col, character, hl_group, L)
-		end
-		return
-	end
-
-	-- Place new extmark with the determined position
-	local success, extmark_id = pcall(function ()
-		vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, row - 1, 0, {
-			virt_text = {{character, hl_group}},
-			virt_text_win_col = col - 1,
-		})
-	end)
-
-	if not success and config.use_floating_windows then
-		draw_character_floating_window(screen_row, screen_col, character, hl_group, L)
-	end
-end
-
-
-local function clear_extmarks()
-	local buffer_ids = vim.api.nvim_list_bufs()
-
-	for _, buffer_id in pairs(buffer_ids) do
-		vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
-	end
-end
-
-
-M.draw_character = draw_character_extmark
-
-
-M.clear = function()
-	clear_extmarks()
-	clear_floating_windows(false)
 end
 
 
