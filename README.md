@@ -12,6 +12,11 @@ This plugin is intended for terminals/GUIs that can only display text and do not
 
 # Installation
 
+## Minimum requirements
+
+- Neovim 0.10.2
+
+
 ## Using [lazy.nvim](https://lazy.folke.io/)
 
 In `~/.config/nvim/lua/plugins/smear_cursor.lua`, add:
