@@ -53,7 +53,7 @@ function M.get_win(tab, row, col)
 	local ei = vim.o.ei
 	vim.o.ei = "all" -- ignore all events
 	M.bo(buffer_id, { buftype = "nofile", bufhidden = "wipe", swapfile = false })
-	M.wo(window_id, { winhighlight = "Normal:Normal" })
+	M.wo(window_id, { winhighlight = "Normal:Normal", winblend = 100 })
 	vim.o.ei = ei
 	M.wins[tab].wins[M.wins[tab].active] = { win = window_id, buf = buffer_id }
 	vim.api.nvim_create_autocmd("BufWipeout", { buffer = buffer_id, callback = vim.schedule_wrap(M.check_wins) })
@@ -82,9 +82,8 @@ M.draw_character = function(row, col, character, hl_group, L)
 	end
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 	local current_tab = vim.api.nvim_get_current_tabpage()
-	local window_id, buffer_id = M.get_win(current_tab, row, col)
+	local _, buffer_id = M.get_win(current_tab, row, col)
 
-	M.wo(window_id, { winblend = config.legacy_computing_symbols_support and 100 or 0 })
 	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
 		virt_text = { { character, hl_group } },
 		virt_text_win_col = 0,
@@ -97,7 +96,6 @@ M.clear = function()
 		for w = 1, M.wins[tab].active do
 			local win = M.wins[tab].wins[w]
 			if win and vim.api.nvim_win_is_valid(win.win) then
-				M.wo(win.win, { winblend = 100 })
 				vim.api.nvim_buf_clear_namespace(win.buf, cursor_namespace, 0, -1)
 				vim.api.nvim_win_set_config(win.win, { relative = "editor", row = 0, col = 0 })
 			end
