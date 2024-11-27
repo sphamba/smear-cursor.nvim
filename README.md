@@ -75,7 +75,12 @@ return {
 ```
 Some terminals override the cursor color set by Neovim. If that is the case, manually change the cursor color as shown above.
 
-Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) for the full list of configuration options that can be set with `opts`. For example, you can tune the smear dynamics to be snappier:
+Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) for the full list of configuration options that can be set with `opts`.
+
+
+### Faster smear
+
+As an example of further configuration, you can tune the smear dynamics to be snappier:
 ```lua
   opts = {                         -- Default  Range
     stiffness = 0.8,               -- 0.6      [0, 1]
@@ -86,12 +91,30 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
   },
 ```
 
+### Transparent background
+
+Drawing the smear over a transparent background works better when using a font that supports legacy computing symbols, therefore setting the following option:
+```lua
+  opts = {
+    legacy_computing_symbols_support = true,
+  },
+```
+
+If your font does not support legacy computing symbols, there will be a shadow under the smear. You may set a color for this shadow to be less noticeable:
+```lua
+  opts = {
+    transparent_bg_fallback_color = "#303030",
+  },
+```
+
 
 ### Using `init.vim`
 
 You can set the configuration variables in your `init.vim` file like this:
 ```vim
-lua require('smear_cursor').cursor_color = '#d3cdc3'
+lua require('smear_cursor').setup({
+    \cursor_color = '#d3cdc3',
+\})
 ```
 
 
