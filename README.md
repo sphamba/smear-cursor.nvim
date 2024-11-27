@@ -103,3 +103,22 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
   - No smear when buffer is duplicated
   - No smear outside buffer (further than the last line)
   - No smear through wrapped lines
+
+
+# Contributing
+
+Please feel free to open an issue or a pull request if you have any suggestions or improvements!
+This project uses [pre-commit](https://pre-commit.com/) hooks to ensure code quality (with [StyLua](https://github.com/JohnnyMorganz/StyLua)) and meaningful commit messages (following [Conventional Commits](https://www.conventionalcommits.org/))
+
+
+## Requirements
+
+- Neovim >= 0.10.2
+- Make
+- pre-commit (`pip install pre-commit`)
+
+
+## Setup
+
+1. Clone the repository
+2. Run `make install` to install the pre-commit hooks
