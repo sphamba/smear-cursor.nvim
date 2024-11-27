@@ -1,7 +1,6 @@
 local logging = require("smear_cursor.logging")
 local M = {}
 
-
 M.get_screen_cursor_position = function()
 	-- Must be called in a vim.defer_fn, otherwise it will return previous cursor position
 	local window_id = vim.api.nvim_get_current_win()
@@ -17,6 +16,5 @@ M.get_screen_cursor_position = function()
 
 	return row, col
 end
-
 
 return M

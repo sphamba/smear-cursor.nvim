@@ -4,10 +4,7 @@ local logging = require("smear_cursor.logging")
 local screen = require("smear_cursor.screen")
 local M = {}
 
-
 local switching_buffer = false
-
-
 
 local function move_cursor()
 	local row, col = screen.get_screen_cursor_position()
@@ -21,7 +18,6 @@ M.move_cursor = function()
 	vim.defer_fn(move_cursor, 0) -- for screen.get_screen_cursor_position()
 end
 
-
 local function jump_cursor()
 	local row, col = screen.get_screen_cursor_position()
 	animation.change_target_position(row, col, true)
@@ -31,14 +27,13 @@ M.jump_cursor = function()
 	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
 end
 
-
 M.flag_switching_buffer = function()
 	switching_buffer = true
 end
 
-
 M.listen = function()
-	vim.api.nvim_exec([[
+	vim.api.nvim_exec(
+		[[
 		augroup SmearCursor
 			autocmd!
 			autocmd CursorMoved * lua require("smear_cursor.events").move_cursor()
@@ -46,17 +41,20 @@ M.listen = function()
 			autocmd BufLeave * lua require("smear_cursor.events").flag_switching_buffer()
 			autocmd TabNew * lua require("smear_cursor.draw").initialize_lists()
 		augroup END
-	]], false)
+	]],
+		false
+	)
 end
 
-
 M.unlisten = function()
-	vim.api.nvim_exec([[
+	vim.api.nvim_exec(
+		[[
 		augroup SmearCursor
 			autocmd!
 		augroup END
-	]], false)
+	]],
+		false
+	)
 end
-
 
 return M
