@@ -7,10 +7,6 @@ local M = {}
 local enabled = false
 
 local function initialize()
-	if _G.smear_cursor == nil then
-		_G.smear_cursor = {}
-	end
-	draw.initialize_lists()
 	events.listen()
 end
 
