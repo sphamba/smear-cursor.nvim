@@ -34,12 +34,8 @@ local function get_hl_color(group, attr)
 end
 
 -- Get cursor color and normal background color
-local cursor_color = get_hl_color("Cursor", "background")
-cursor_color = cursor_color or get_hl_color("Normal", "foreground")
-cursor_color = cursor_color or "#d0d0d0"
-
-local normal_bg = get_hl_color("Normal", "background")
-normal_bg = normal_bg or "#282828"
+local cursor_color = get_hl_color("Cursor", "background") or get_hl_color("Normal", "foreground") or "#d0d0d0"
+local normal_bg = get_hl_color("Normal", "background") or "none"
 
 local function hex_to_rgb(hex)
 	hex = hex:gsub("#", "")
@@ -70,8 +66,11 @@ M.set_hl_groups = function()
 	M.hl_groups_inverted = {}
 
 	for i = 1, config.color_levels do
-		local blended_cursor_color =
-			interpolate_colors(normal_bg, cursor_color, (i / config.color_levels) ^ (1 / config.gamma))
+		local blended_cursor_color = interpolate_colors(
+			normal_bg == "none" and "#000000" or normal_bg,
+			cursor_color,
+			(i / config.color_levels) ^ (1 / config.gamma)
+		)
 		local blended_hl_group = M.hl_group .. i
 		local blended_hl_group_inverted = M.hl_group_inverted .. i
 		M.hl_groups[i] = blended_hl_group
