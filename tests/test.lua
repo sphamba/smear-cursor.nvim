@@ -1,6 +1,5 @@
 -- Instructions: open this file in Neovim and run `source %`
 
-
 local foldable_lines = {
 	{
 		"Hello",
@@ -20,8 +19,6 @@ local foldable_lines = {
 -- Line with extmark below
 
 -- Line with 🎉 emoji
-
-
 
 -- Also test:
 -- - Popup menus
@@ -46,7 +43,6 @@ local foldable_lines = {
 -- ──────────────┘││
 -- ───────────────┘│
 -- 4───1───2───3───4
-
 
 -- This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line. This is a very long line.
 
@@ -80,7 +76,6 @@ local foldable_lines = {
 -- ....
 --
 
-
 local buffer_id = vim.api.nvim_get_current_buf()
 local ns = vim.api.nvim_create_namespace("smear_cursor_test")
 vim.api.nvim_buf_clear_namespace(buffer_id, ns, 0, -1)
@@ -93,27 +88,27 @@ vim.cmd([[
 ]])
 
 vim.api.nvim_buf_set_extmark(buffer_id, ns, 15, 0, {
-	virt_lines = {{{"Extmark above", "Question"}}},
+	virt_lines = { { { "Extmark above", "Question" } } },
 	virt_lines_above = true,
 })
 
 vim.api.nvim_buf_set_extmark(buffer_id, ns, 16, 0, {
-	virt_text = {{"*", "Question"}},
+	virt_text = { { "*", "Question" } },
 	virt_text_pos = "eol",
 })
 
 vim.api.nvim_buf_set_extmark(buffer_id, ns, 17, 10, {
-	virt_text = {{"*", "Question"}},
+	virt_text = { { "*", "Question" } },
 	virt_text_pos = "overlay",
 })
 
 vim.api.nvim_buf_set_extmark(buffer_id, ns, 18, 10, {
-	virt_text = {{"*", "Question"}},
+	virt_text = { { "*", "Question" } },
 	virt_text_pos = "inline",
 })
 
 vim.api.nvim_buf_set_extmark(buffer_id, ns, 19, 0, {
-	virt_lines = {{{"Extmark below", "Question"}}},
+	virt_lines = { { { "Extmark below", "Question" } } },
 })
 
 local function create_float(content, row, col)

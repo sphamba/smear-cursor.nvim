@@ -437,7 +437,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	if L.slope_abs <= config.max_slope_horizontal then
 		-- logging.debug("Drawing horizontal-ish line")
 		-- if math.abs(L.row_shift) > 1 then
-		-- 	-- Avoid bulding on thin lines
+		-- 	-- Avoid bulging on thin lines
 		-- 	L.thickness = math.max(L.thickness, 1)
 		-- end
 		draw_horizontal_ish_line(L, draw_vertically_shifted_block)
@@ -447,7 +447,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	if L.slope_abs >= config.min_slope_vertical then
 		-- logging.debug("Drawing vertical-ish line")
 		-- if math.abs(L.col_shift) > 1 then
-		-- 	-- Avoid bulding on thin lines
+		-- 	-- Avoid bulging on thin lines
 		-- 	L.thickness = math.max(L.thickness, 1)
 		-- end
 		draw_vertical_ish_line(L, draw_horizontally_shifted_block)
