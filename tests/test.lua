@@ -19,7 +19,9 @@ local foldable_lines = {
 -- Line with extmark below
 
 -- Line with 🎉 emoji
-
+--
+--
+--
 -- Also test:
 -- - Popup menus
 -- - Sidebar
@@ -87,27 +89,29 @@ vim.cmd([[
 	setlocal concealcursor=n
 ]])
 
-vim.api.nvim_buf_set_extmark(buffer_id, ns, 15, 0, {
+local extmarks_first_line = 14
+
+vim.api.nvim_buf_set_extmark(buffer_id, ns, extmarks_first_line, 0, {
 	virt_lines = { { { "Extmark above", "Question" } } },
 	virt_lines_above = true,
 })
 
-vim.api.nvim_buf_set_extmark(buffer_id, ns, 16, 0, {
+vim.api.nvim_buf_set_extmark(buffer_id, ns, extmarks_first_line + 1, 0, {
 	virt_text = { { "*", "Question" } },
 	virt_text_pos = "eol",
 })
 
-vim.api.nvim_buf_set_extmark(buffer_id, ns, 17, 10, {
+vim.api.nvim_buf_set_extmark(buffer_id, ns, extmarks_first_line + 2, 10, {
 	virt_text = { { "*", "Question" } },
 	virt_text_pos = "overlay",
 })
 
-vim.api.nvim_buf_set_extmark(buffer_id, ns, 18, 10, {
+vim.api.nvim_buf_set_extmark(buffer_id, ns, extmarks_first_line + 3, 10, {
 	virt_text = { { "*", "Question" } },
 	virt_text_pos = "inline",
 })
 
-vim.api.nvim_buf_set_extmark(buffer_id, ns, 19, 0, {
+vim.api.nvim_buf_set_extmark(buffer_id, ns, extmarks_first_line + 4, 0, {
 	virt_lines = { { { "Extmark below", "Question" } } },
 })
 
@@ -126,4 +130,4 @@ local function create_float(content, row, col)
 	})
 end
 
-create_float("Floating window", 23, 10)
+create_float("Floating window", 22, 10)
