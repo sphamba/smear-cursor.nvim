@@ -14,27 +14,26 @@ local MATRIX_CHARACTERS = { "▘", "▝", "▀", "▖", "▌", "▞", "▛", "�
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
----@type table<number, {win:number, buf:number, used:boolean}[]>
+---@type table<number, {active:number, wins:{win:number, buf:number}[]}>
 M.wins = {}
 
 -- remove any invalid windows
 function M.check_wins()
 	for tab in pairs(M.wins) do
-		M.wins[tab] = vim.tbl_filter(function(w)
+		M.wins[tab].wins = vim.tbl_filter(function(w)
 			return w.win and vim.api.nvim_win_is_valid(w.win) and w.buf and vim.api.nvim_buf_is_valid(w.buf)
-		end, M.wins[tab])
+		end, M.wins[tab].wins)
 	end
 end
 
 function M.get_win(tab, row, col)
-	M.wins[tab] = M.wins[tab] or {}
+	M.wins[tab] = M.wins[tab] or { active = 0, wins = {} }
 
-	for _, w in ipairs(M.wins[tab]) do
-		if not w.used then
-			vim.api.nvim_win_set_config(w.win, { relative = "editor", row = row - 1, col = col - 1 })
-			w.used = true
-			return w.win, w.buf
-		end
+	M.wins[tab].active = M.wins[tab].active + 1
+	local ret = M.wins[tab].wins[M.wins[tab].active]
+	if ret then
+		vim.api.nvim_win_set_config(ret.win, { relative = "editor", row = row - 1, col = col - 1 })
+		return ret.win, ret.buf
 	end
 
 	local buffer_id = vim.api.nvim_create_buf(false, true)
@@ -56,7 +55,7 @@ function M.get_win(tab, row, col)
 	M.bo(buffer_id, { buftype = "nofile", bufhidden = "wipe", swapfile = false })
 	M.wo(window_id, { winhighlight = "Normal:Normal" })
 	vim.o.ei = ei
-	table.insert(M.wins[tab], { win = window_id, buf = buffer_id, used = true })
+	M.wins[tab].wins[M.wins[tab].active] = { win = window_id, buf = buffer_id }
 	vim.api.nvim_create_autocmd("BufWipeout", { buffer = buffer_id, callback = vim.schedule_wrap(M.check_wins) })
 	return window_id, buffer_id
 end
@@ -95,14 +94,15 @@ end
 M.clear = function()
 	-- Hide the windows without deleting them
 	for tab, _ in pairs(M.wins) do
-		for _, w in ipairs(M.wins[tab]) do
-			if w.win and vim.api.nvim_win_is_valid(w.win) and w.used then
-				w.used = false
-				M.wo(w.win, { winblend = 100 })
-				vim.api.nvim_buf_clear_namespace(w.buf, cursor_namespace, 0, -1)
-				vim.api.nvim_win_set_config(w.win, { relative = "editor", row = 0, col = 0 })
+		for w = 1, M.wins[tab].active do
+			local win = M.wins[tab].wins[w]
+			if win and vim.api.nvim_win_is_valid(win.win) then
+				M.wo(win.win, { winblend = 100 })
+				vim.api.nvim_buf_clear_namespace(win.buf, cursor_namespace, 0, -1)
+				vim.api.nvim_win_set_config(win.win, { relative = "editor", row = 0, col = 0 })
 			end
 		end
+		M.wins[tab].active = 0
 	end
 end
 
