@@ -13,6 +13,8 @@ local MATRIX_CHARACTERS = { "▘", "▝", "▀", "▖", "▌", "▞", "▛", "�
 
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
+local can_hide = vim.fn.has("nvim-0.10") == 1
+local extmark_id = 999
 
 ---@type table<number, {active:number, wins:{win:number, buf:number}[]}>
 M.wins = {}
@@ -32,7 +34,12 @@ function M.get_win(tab, row, col)
 	M.wins[tab].active = M.wins[tab].active + 1
 	local ret = M.wins[tab].wins[M.wins[tab].active]
 	if ret then
-		vim.api.nvim_win_set_config(ret.win, { relative = "editor", row = row - 1, col = col - 1 })
+		---@type vim.api.keyset.win_config
+		local win_config = { relative = "editor", row = row - 1, col = col - 1 }
+		if can_hide then
+			win_config.hide = false
+		end
+		vim.api.nvim_win_set_config(ret.win, win_config)
 		return ret.win, ret.buf
 	end
 
@@ -85,6 +92,7 @@ M.draw_character = function(row, col, character, hl_group, L)
 	local _, buffer_id = M.get_win(current_tab, row, col)
 
 	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
+		id = extmark_id, -- use a fixed extmark id
 		virt_text = { { character, hl_group } },
 		virt_text_win_col = 0,
 	})
@@ -96,8 +104,12 @@ M.clear = function()
 		for w = 1, M.wins[tab].active do
 			local win = M.wins[tab].wins[w]
 			if win and vim.api.nvim_win_is_valid(win.win) then
-				vim.api.nvim_buf_clear_namespace(win.buf, cursor_namespace, 0, -1)
-				vim.api.nvim_win_set_config(win.win, { relative = "editor", row = 0, col = 0 })
+				if can_hide then
+					vim.api.nvim_win_set_config(win.win, { hide = true })
+				else
+					vim.api.nvim_buf_del_extmark(win.buf, cursor_namespace, extmark_id)
+					vim.api.nvim_win_set_config(win.win, { relative = "editor", row = 0, col = 0 })
+				end
 			end
 		end
 		M.wins[tab].active = 0
