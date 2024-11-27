@@ -14,17 +14,66 @@ local MATRIX_CHARACTERS = { "▘", "▝", "▀", "▖", "▌", "▞", "▛", "�
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
-M.initialize_lists = function()
-	if _G.smear_cursor.window_ids == nil then
-		_G.smear_cursor.window_ids = { {} }
-		_G.smear_cursor.n_active_windows = { 0 }
+---@type table<number, {win:number, buf:number, used:boolean}[]>
+M.wins = {}
+
+-- remove any invalid windows
+function M.check_wins()
+	for tab in pairs(M.wins) do
+		M.wins[tab] = vim.tbl_filter(function(w)
+			return w.win and vim.api.nvim_win_is_valid(w.win) and w.buf and vim.api.nvim_buf_is_valid(w.buf)
+		end, M.wins[tab])
+	end
+end
+
+function M.get_win(tab, row, col)
+	M.wins[tab] = M.wins[tab] or {}
+
+	for _, w in ipairs(M.wins[tab]) do
+		if not w.used then
+			vim.api.nvim_win_set_config(w.win, { relative = "editor", row = row - 1, col = col - 1 })
+			w.used = true
+			return w.win, w.buf
+		end
 	end
 
-	for _, tab in pairs(vim.api.nvim_list_tabpages()) do
-		if _G.smear_cursor.window_ids[tab] == nil then
-			_G.smear_cursor.window_ids[tab] = {}
-			_G.smear_cursor.n_active_windows[tab] = 0
-		end
+	local buffer_id = vim.api.nvim_create_buf(false, true)
+
+	local window_id = vim.api.nvim_open_win(buffer_id, false, {
+		relative = "editor",
+		row = row - 1,
+		col = col - 1,
+		width = 1,
+		height = 1,
+		style = "minimal",
+		focusable = false,
+		noautocmd = true,
+		zindex = 300,
+	})
+
+	local ei = vim.o.ei
+	vim.o.ei = "all" -- ignore all events
+	M.bo(buffer_id, { buftype = "nofile", bufhidden = "wipe", swapfile = false })
+	M.wo(window_id, { winhighlight = "Normal:Normal" })
+	vim.o.ei = ei
+	table.insert(M.wins[tab], { win = window_id, buf = buffer_id, used = true })
+	vim.api.nvim_create_autocmd("BufWipeout", { buffer = buffer_id, callback = vim.schedule_wrap(M.check_wins) })
+	return window_id, buffer_id
+end
+
+---@param win number
+---@param wo vim.wo
+function M.wo(win, wo)
+	for k, v in pairs(wo or {}) do
+		vim.api.nvim_set_option_value(k, v, { scope = "local", win = win })
+	end
+end
+
+---@param buf number
+---@param bo vim.bo
+function M.bo(buf, bo)
+	for k, v in pairs(bo or {}) do
+		vim.api.nvim_set_option_value(k, v, { buf = buf })
 	end
 end
 
@@ -34,44 +83,9 @@ M.draw_character = function(row, col, character, hl_group, L)
 	end
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 	local current_tab = vim.api.nvim_get_current_tabpage()
+	local window_id, buffer_id = M.get_win(current_tab, row, col)
 
-	_G.smear_cursor.n_active_windows[current_tab] = _G.smear_cursor.n_active_windows[current_tab] + 1
-	local window_id
-	local buffer_id
-
-	if #_G.smear_cursor.window_ids[current_tab] >= _G.smear_cursor.n_active_windows[current_tab] then
-		-- Get existing window
-		window_id = _G.smear_cursor.window_ids[current_tab][_G.smear_cursor.n_active_windows[current_tab]]
-		buffer_id = vim.api.nvim_win_get_buf(window_id)
-		vim.api.nvim_win_set_config(window_id, {
-			relative = "editor",
-			row = row - 1,
-			col = col - 1,
-		})
-	else
-		-- Create new window
-		buffer_id = vim.api.nvim_create_buf(false, true)
-		vim.api.nvim_buf_set_option(buffer_id, "buftype", "nofile")
-		vim.api.nvim_buf_set_option(buffer_id, "bufhidden", "wipe")
-		vim.api.nvim_buf_set_option(buffer_id, "swapfile", false)
-
-		window_id = vim.api.nvim_open_win(buffer_id, false, {
-			relative = "editor",
-			row = row - 1,
-			col = col - 1,
-			width = 1,
-			height = 1,
-			style = "minimal",
-			focusable = false,
-			noautocmd = true,
-			zindex = 300,
-		})
-		vim.api.nvim_win_set_option(window_id, "winhl", "Normal:Normal")
-
-		table.insert(_G.smear_cursor.window_ids[current_tab], window_id)
-	end
-
-	vim.api.nvim_win_set_option(window_id, "winblend", config.legacy_computing_symbols_support and 100 or 0)
+	M.wo(window_id, { winblend = config.legacy_computing_symbols_support and 100 or 0 })
 	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
 		virt_text = { { character, hl_group } },
 		virt_text_win_col = 0,
@@ -80,21 +94,15 @@ end
 
 M.clear = function()
 	-- Hide the windows without deleting them
-	for tab, _ in pairs(_G.smear_cursor.window_ids) do
-		for i = 1, _G.smear_cursor.n_active_windows[tab] do
-			local window_id = _G.smear_cursor.window_ids[tab][i]
-			local buffer_id = vim.api.nvim_win_get_buf(window_id)
-			vim.api.nvim_win_set_option(window_id, "winblend", 100)
-			vim.api.nvim_buf_clear_namespace(buffer_id, cursor_namespace, 0, -1)
-
-			vim.api.nvim_win_set_config(window_id, {
-				relative = "editor",
-				row = 0,
-				col = 0,
-			})
+	for tab, _ in pairs(M.wins) do
+		for _, w in ipairs(M.wins[tab]) do
+			if w.win and vim.api.nvim_win_is_valid(w.win) and w.used then
+				w.used = false
+				M.wo(w.win, { winblend = 100 })
+				vim.api.nvim_buf_clear_namespace(w.buf, cursor_namespace, 0, -1)
+				vim.api.nvim_win_set_config(w.win, { relative = "editor", row = 0, col = 0 })
+			end
 		end
-
-		_G.smear_cursor.n_active_windows[tab] = 0
 	end
 end
 
