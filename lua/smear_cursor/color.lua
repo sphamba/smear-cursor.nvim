@@ -36,6 +36,7 @@ end
 -- Get cursor color and normal background color
 local cursor_color = get_hl_color("Cursor", "background") or get_hl_color("Normal", "foreground") or "#d0d0d0"
 local normal_bg = get_hl_color("Normal", "background") or "none"
+local transparent_bg_fallback_color = "#303030"
 
 local function hex_to_rgb(hex)
 	hex = hex:gsub("#", "")
@@ -59,28 +60,39 @@ local function interpolate_colors(hex1, hex2, t)
 end
 
 M.set_hl_groups = function()
-	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_color, bg = normal_bg })
-	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = normal_bg, bg = cursor_color })
+	vim.api.nvim_set_hl(0, M.hl_group, {
+		fg = cursor_color,
+		bg = "none",
+		blend = config.legacy_computing_symbols_support and normal_bg ~= "none" and 100 or 0,
+	})
+	vim.api.nvim_set_hl(
+		0,
+		M.hl_group_inverted,
+		{ fg = normal_bg == "none" and transparent_bg_fallback_color or normal_bg, bg = cursor_color, blend = 0 }
+	)
 
 	M.hl_groups = {}
 	M.hl_groups_inverted = {}
 
 	for i = 1, config.color_levels do
-		local blended_cursor_color = interpolate_colors(
-			normal_bg == "none" and "#000000" or normal_bg,
-			cursor_color,
-			(i / config.color_levels) ^ (1 / config.gamma)
-		)
+		local blend = (i / config.color_levels) ^ (1 / config.gamma)
+		local blended_cursor_color =
+			interpolate_colors(normal_bg == "none" and transparent_bg_fallback_color or normal_bg, cursor_color, blend)
 		local blended_hl_group = M.hl_group .. i
 		local blended_hl_group_inverted = M.hl_group_inverted .. i
 		M.hl_groups[i] = blended_hl_group
 		M.hl_groups_inverted[i] = blended_hl_group_inverted
-		vim.api.nvim_set_hl(
-			0,
-			blended_hl_group,
-			{ fg = blended_cursor_color, bg = normal_bg, blend = config.legacy_computing_symbols_support and 100 or 0 }
-		)
-		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = normal_bg, bg = blended_cursor_color, blend = 0 })
+
+		vim.api.nvim_set_hl(0, blended_hl_group, {
+			fg = blended_cursor_color,
+			bg = normal_bg,
+			blend = config.legacy_computing_symbols_support and normal_bg ~= "none" and 100 or 0,
+		})
+		vim.api.nvim_set_hl(0, blended_hl_group_inverted, {
+			fg = normal_bg == "none" and transparent_bg_fallback_color or normal_bg,
+			bg = blended_cursor_color,
+			blend = 0,
+		})
 	end
 end
 
@@ -95,13 +107,13 @@ local metatable = {
 	__index = function(table, key)
 		if key == "cursor_color" then
 			return cursor_color
-		end
-
-		if key == "normal_bg" then
+		elseif key == "normal_bg" then
 			return normal_bg
+		elseif key == "transparent_bg_fallback_color" then
+			return transparent_bg_fallback_color
+		else
+			return nil
 		end
-
-		return nil
 	end,
 
 	__newindex = function(table, key, value)
@@ -110,6 +122,9 @@ local metatable = {
 			M.set_hl_groups()
 		elseif key == "normal_bg" then
 			normal_bg = value
+			M.set_hl_groups()
+		elseif key == "transparent_bg_fallback_color" then
+			transparent_bg_fallback_color = value
 			M.set_hl_groups()
 		else
 			rawset(table, key, value)
