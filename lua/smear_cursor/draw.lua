@@ -53,7 +53,7 @@ function M.get_win(tab, row, col)
 	local ei = vim.o.ei
 	vim.o.ei = "all" -- ignore all events
 	M.bo(buffer_id, { buftype = "nofile", bufhidden = "wipe", swapfile = false })
-	M.wo(window_id, { winhighlight = "Normal:Normal", winblend = 100 })
+	M.wo(window_id, { winhighlight = "NormalFloat:Normal", winblend = 100 })
 	vim.o.ei = ei
 	M.wins[tab].wins[M.wins[tab].active] = { win = window_id, buf = buffer_id }
 	vim.api.nvim_create_autocmd("BufWipeout", { buffer = buffer_id, callback = vim.schedule_wrap(M.check_wins) })
