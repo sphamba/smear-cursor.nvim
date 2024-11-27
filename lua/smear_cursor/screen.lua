@@ -1,4 +1,3 @@
-local logging = require("smear_cursor.logging")
 local M = {}
 
 M.get_screen_cursor_position = function()

@@ -1,6 +1,5 @@
 local animation = require("smear_cursor.animation")
 local config = require("smear_cursor.config")
-local logging = require("smear_cursor.logging")
 local screen = require("smear_cursor.screen")
 local M = {}
 

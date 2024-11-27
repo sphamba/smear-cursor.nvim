@@ -62,7 +62,7 @@ local function interpolate_colors(hex1, hex2, t)
 	return rgb_to_hex(r, g, b)
 end
 
-local function set_hl_groups()
+M.set_hl_groups = function()
 	vim.api.nvim_set_hl(0, M.hl_group, { fg = cursor_color, bg = normal_bg })
 	vim.api.nvim_set_hl(0, M.hl_group_inverted, { fg = normal_bg, bg = cursor_color })
 
@@ -76,7 +76,11 @@ local function set_hl_groups()
 		local blended_hl_group_inverted = M.hl_group_inverted .. i
 		M.hl_groups[i] = blended_hl_group
 		M.hl_groups_inverted[i] = blended_hl_group_inverted
-		vim.api.nvim_set_hl(0, blended_hl_group, { fg = blended_cursor_color, bg = normal_bg, blend = 0 })
+		vim.api.nvim_set_hl(
+			0,
+			blended_hl_group,
+			{ fg = blended_cursor_color, bg = normal_bg, blend = config.legacy_computing_symbols_support and 100 or 0 }
+		)
 		vim.api.nvim_set_hl(0, blended_hl_group_inverted, { fg = normal_bg, bg = blended_cursor_color, blend = 0 })
 	end
 end
@@ -86,7 +90,7 @@ M.hl_group = "SmearCursorNormal"
 M.hl_group_inverted = "SmearCursorNormalInverted"
 M.hl_groups = {}
 M.hl_groups_inverted = {}
-set_hl_groups()
+M.set_hl_groups()
 
 local metatable = {
 	__index = function(table, key)
@@ -104,10 +108,10 @@ local metatable = {
 	__newindex = function(table, key, value)
 		if key == "cursor_color" then
 			cursor_color = value
-			set_hl_groups()
+			M.set_hl_groups()
 		elseif key == "normal_bg" then
 			normal_bg = value
-			set_hl_groups()
+			M.set_hl_groups()
 		else
 			rawset(table, key, value)
 		end

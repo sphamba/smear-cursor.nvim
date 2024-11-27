@@ -1,6 +1,5 @@
 local color = require("smear_cursor.color")
 local config = require("smear_cursor.config")
-local draw = require("smear_cursor.draw")
 local events = require("smear_cursor.events")
 local M = {}
 
@@ -37,6 +36,9 @@ local metatable = {
 			end
 		elseif key == "cursor_color" or key == "normal_bg" then
 			color[key] = value
+		elseif key == "legacy_computing_symbols_support" then
+			config.legacy_computing_symbols_support = value
+			color.set_hl_groups()
 		elseif config[key] ~= nil then
 			config[key] = value
 		else
