@@ -5,19 +5,19 @@ _Neovim plugin to animate the cursor with a smear effect. Inspired by [Neovide's
 This plugin is intended for terminals/GUIs that can only display text and do not have graphical capabilities (unlike [Neovide](https://neovide.dev/), or the [Kitty](https://sw.kovidgoyal.net/kitty/) terminal). Also, check out the [karb94/neoscroll.nvim](https://github.com/karb94/neoscroll.nvim) plugin for smooth scrolling!
 
 
-# Demo
+## 🚀 Demo
 
 [Demo](https://private-user-images.githubusercontent.com/17217484/389300116-fc95b4df-d791-4c53-9141-4f870eb03ab2.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzI0NzY0NDAsIm5iZiI6MTczMjQ3NjE0MCwicGF0aCI6Ii8xNzIxNzQ4NC8zODkzMDAxMTYtZmM5NWI0ZGYtZDc5MS00YzUzLTkxNDEtNGY4NzBlYjAzYWIyLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDExMjQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQxMTI0VDE5MjIyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTg1NjFhZjJlODQ4YmU2NjAzY2EzY2I3NWMzMzI5MWQ1Njk2MTExYmEwYmExNTMwMThmYTJjYjE2ZjIyOThjNjMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Skw2VVyVWVkMe4ht6mvl_AZ_6QasJm8O6qsIZmcQ2XE)
 
 
-# Installation
+## 📦 Installation
 
-## Minimum requirements
+### Minimum requirements
 
 - Neovim 0.10.2
 
 
-## Using [lazy.nvim](https://lazy.folke.io/)
+### Using [lazy.nvim](https://lazy.folke.io/)
 
 In `~/.config/nvim/lua/plugins/smear_cursor.lua`, add:
 ```lua
@@ -28,7 +28,7 @@ return {
 ```
 
 
-## Using [vim-plug](https://github.com/junegunn/vim-plug)
+### Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 In your `init.vim`, add:
 
@@ -41,9 +41,9 @@ lua require('smear_cursor').enabled = true
 ```
 
 
-# Configuration
+## ⚙  Configuration
 
-## Using [lazy.nvim](https://lazy.folke.io/)
+### Using [lazy.nvim](https://lazy.folke.io/)
 
 Here are the default configuration options:
 ```lua
@@ -87,7 +87,7 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 ```
 
 
-## Using `init.vim`
+### Using `init.vim`
 
 You can set the configuration variables in your `init.vim` file like this:
 ```vim
@@ -95,7 +95,7 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
 ```
 
 
-# Known issues
+## 🤕 Known issues
 
 - There is a shadow around the smear (text become invisible). This is inherent to the way the smear is rendered, as Neovim is not able to render superimposed characters. The shadow is less noticeable when the smear is moving faster (see configuration options).
 - Likely not compatible with other plugins that modify the cursor.
@@ -105,20 +105,20 @@ lua require('smear_cursor').cursor_color = '#d3cdc3'
   - No smear through wrapped lines
 
 
-# Contributing
+## 👨‍💻 Contributing
 
 Please feel free to open an issue or a pull request if you have any suggestions or improvements!
 This project uses [pre-commit](https://pre-commit.com/) hooks to ensure code quality (with [StyLua](https://github.com/JohnnyMorganz/StyLua)) and meaningful commit messages (following [Conventional Commits](https://www.conventionalcommits.org/))
 
 
-## Requirements
+### Requirements
 
 - Neovim >= 0.10.2
 - Make
 - pre-commit (`pip install pre-commit`)
 
 
-## Setup
+### Setup
 
 1. Clone the repository
 2. Run `make install` to install the pre-commit hooks
