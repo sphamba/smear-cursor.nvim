@@ -4,9 +4,7 @@ local draw = require("smear_cursor.draw")
 local events = require("smear_cursor.events")
 local M = {}
 
-
 local enabled = false
-
 
 local function initialize()
 	if _G.smear_cursor == nil then
@@ -15,7 +13,6 @@ local function initialize()
 	draw.initialize_lists()
 	events.listen()
 end
-
 
 local metatable = {
 	__index = function(table, key)
@@ -42,19 +39,15 @@ local metatable = {
 			else
 				events.unlisten()
 			end
-
 		elseif key == "cursor_color" or key == "normal_bg" then
 			color[key] = value
-
 		elseif config[key] ~= nil then
 			config[key] = value
-
 		else
 			rawset(table, key, value)
 		end
-	end
+	end,
 }
-
 
 M.setup = function(opts)
 	opts = opts or {}
@@ -66,7 +59,6 @@ M.setup = function(opts)
 		M[key] = value
 	end
 end
-
 
 setmetatable(M, metatable)
 return M

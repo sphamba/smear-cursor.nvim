@@ -1,6 +1,5 @@
 local M = {}
 
-
 -- General configuration -------------------------------------------------------
 
 -- Smear cursor when switching buffers
@@ -21,7 +20,6 @@ M.legacy_computing_symbols_support = false
 M.hide_target_hack = true
 
 M.time_interval = 17 -- milliseconds
-
 
 -- Smear configuration ---------------------------------------------------------
 
@@ -51,11 +49,9 @@ M.diagonal_thickness_factor = 0.7 -- Put less than 1 to reduce diagonal smear fa
 M.thickness_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
 M.minimum_thickness = 0.7 -- 0: no limit, 1: no reduction
 
-
 -- For debugging ---------------------------------------------------------------
 
 M.logging_level = vim.log.levels.INFO
 M.dont_erase = false -- Set to true for debugging, or use trailing_stiffness = 0
-
 
 return M
