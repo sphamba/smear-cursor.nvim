@@ -47,7 +47,7 @@ function M.get_hl_group(opts)
 	opts = opts or {}
 	local _cursor_color = cursor_color
 
-	local hl_group = ("SmearCursorNormal%s"):format(opts.inverted and "Inverted" or "", opts.level or 0)
+	local hl_group = ("SmearCursorNormal%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level) or "")
 
 	-- Get the cursor color from the treesitter highlight group
 	-- at the cursor.
