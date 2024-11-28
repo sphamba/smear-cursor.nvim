@@ -7,6 +7,6 @@ changelog:
     - title: Fixes
       labels:
         - bug
-  exclude:
-    labels:
-      - "*"
+    - title: Others
+      labels:
+        - "*"
