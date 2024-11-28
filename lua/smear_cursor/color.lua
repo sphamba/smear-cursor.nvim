@@ -13,6 +13,7 @@ local function get_hl_color(group, attr)
 end
 
 local cursor_color = nil
+local color_at_cursor = nil
 local normal_bg = nil
 local transparent_bg_fallback_color = "#303030"
 local cache = {} ---@type table<string, boolean>
@@ -65,6 +66,13 @@ function M.get_color_at_cursor()
 	end
 end
 
+function M.update_color_at_cursor()
+	if cursor_color ~= "none" then
+		return
+	end
+	color_at_cursor = M.get_color_at_cursor()
+end
+
 ---@param opts? {level?: number, inverted?: boolean}
 function M.get_hl_group(opts)
 	opts = opts or {}
@@ -75,7 +83,7 @@ function M.get_hl_group(opts)
 	-- Get the cursor color from the treesitter highlight group
 	-- at the cursor.
 	if cursor_color == "none" then
-		_cursor_color = M.get_color_at_cursor()
+		_cursor_color = color_at_cursor
 		if _cursor_color then
 			hl_group = hl_group .. "_" .. _cursor_color:sub(2)
 		end
