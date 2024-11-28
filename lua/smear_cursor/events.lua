@@ -35,6 +35,7 @@ M.listen = function()
 		[[
 		augroup SmearCursor
 			autocmd!
+			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
 			autocmd CursorMoved * lua require("smear_cursor.events").move_cursor()
 			autocmd CursorMovedI,WinScrolled * lua require("smear_cursor.events").jump_cursor()
 			autocmd BufLeave * lua require("smear_cursor.events").flag_switching_buffer()
