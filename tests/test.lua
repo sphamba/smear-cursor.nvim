@@ -27,6 +27,7 @@ local foldable_lines = {
 -- - Sidebar
 -- - Split windows
 -- - Tabs
+-- - fclose!
 
 -- 0│││1│││2│││3│││4
 -- ─┘│││││││││││││││
