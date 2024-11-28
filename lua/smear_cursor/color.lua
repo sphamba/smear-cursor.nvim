@@ -42,6 +42,29 @@ function M.clear()
 	cache = {}
 end
 
+function M.get_color_at_cursor()
+	local cursor = vim.api.nvim_win_get_cursor(0)
+	if vim.b.ts_highlight then
+		-- get the treesitter highlight group at the cursor
+		local ts_hl_group ---@type string?
+		for _, capture in pairs(vim.treesitter.get_captures_at_pos(0, cursor[1] - 1, cursor[2])) do
+			ts_hl_group = "@" .. capture.capture .. "." .. capture.lang
+		end
+		if ts_hl_group then
+			return get_hl_color(ts_hl_group, "fg")
+		end
+	end
+	-- get any extmark with hl_group at the cursor
+	cursor[1] = cursor[1] - 1
+	local extmarks = vim.api.nvim_buf_get_extmarks(0, -1, cursor, cursor, { details = true, overlap = true })
+	for _, extmark in ipairs(extmarks) do
+		local ret = extmark[4].hl_group and get_hl_color(extmark[4].hl_group, "fg")
+		if ret then
+			return ret
+		end
+	end
+end
+
 ---@param opts? {level?: number, inverted?: boolean}
 function M.get_hl_group(opts)
 	opts = opts or {}
@@ -51,19 +74,10 @@ function M.get_hl_group(opts)
 
 	-- Get the cursor color from the treesitter highlight group
 	-- at the cursor.
-	if cursor_color == "treesitter" then
-		_cursor_color = nil
-		if vim.b.ts_highlight then
-			local cursor = vim.api.nvim_win_get_cursor(0)
-			local ts_hl_group ---@type string?
-			for _, capture in pairs(vim.treesitter.get_captures_at_pos(0, cursor[1] - 1, cursor[2])) do
-				ts_hl_group = "@" .. capture.capture .. "." .. capture.lang
-			end
-			local ts_color = ts_hl_group and get_hl_color(ts_hl_group, "fg")
-			if ts_color then
-				_cursor_color = ts_color
-				hl_group = hl_group .. "_" .. ts_color:sub(2)
-			end
+	if cursor_color == "none" then
+		_cursor_color = M.get_color_at_cursor()
+		if _cursor_color then
+			hl_group = hl_group .. "_" .. _cursor_color:sub(2)
 		end
 	end
 
