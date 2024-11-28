@@ -63,10 +63,6 @@ return {
     -- Smear cursor when moving within line or to neighbor lines
     smear_between_neighbor_lines = true,
 
-    -- Use floating windows to display smears over wrapped lines or outside buffers.
-    -- May have performance issues with other plugins.
-    use_floating_windows = true,
-
     -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
     -- Smears will blend better on all backgrounds.
     legacy_computing_symbols_support = false,
@@ -122,10 +118,6 @@ lua require('smear_cursor').setup({
 
 - There is a shadow around the smear (text become invisible). This is inherent to the way the smear is rendered, as Neovim is not able to render superimposed characters. The shadow is less noticeable when the smear is moving faster (see configuration options).
 - Likely not compatible with other plugins that modify the cursor.
-- When not using floating windows fallback:
-  - No smear when buffer is duplicated
-  - No smear outside buffer (further than the last line)
-  - No smear through wrapped lines
 
 
 ## 👨‍💻 Contributing
