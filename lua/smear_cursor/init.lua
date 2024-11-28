@@ -38,7 +38,7 @@ local metatable = {
 			color[key] = value
 		elseif key == "legacy_computing_symbols_support" then
 			config.legacy_computing_symbols_support = value
-			color.set_hl_groups()
+			color.clear()
 		elseif config[key] ~= nil then
 			config[key] = value
 		else
