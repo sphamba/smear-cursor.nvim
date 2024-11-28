@@ -51,10 +51,10 @@ return {
   "sphamba/smear-cursor.nvim",
 
   opts = {
-    -- Cursor color. Defaults to Cursor gui color
+    -- Smear cursor color. Defaults to Cursor GUI color
     cursor_color = "#d3cdc3",
 
-    -- Background color. Defaults to Normal gui background color
+    -- Background color. Defaults to Normal GUI background color
     normal_bg = "#282828",
 
     -- Smear cursor when switching buffers
@@ -69,9 +69,11 @@ return {
   },
 }
 ```
-Some terminals override the cursor color set by Neovim. If that is the case, manually change the cursor color as shown above.
 
 Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) for the full list of configuration options that can be set with `opts`.
+
+> [!TIP]
+> Some terminals override the cursor color set by Neovim. If that is the case, manually put the actual cursor color in your config, as shown above, to get a matching smear color.
 
 
 ### Faster smear
