@@ -1,6 +1,6 @@
 ---
 name: 🐞 Bug report
-description: Report a bug
+about: Report a bug
 labels: ["bug"]
 ---
 

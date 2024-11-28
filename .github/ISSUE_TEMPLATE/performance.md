@@ -1,6 +1,6 @@
 ---
 name: 🐌 Performance issue
-description: Report a performance issue
+about: Report a performance issue
 labels: ["performance"]
 ---
 
