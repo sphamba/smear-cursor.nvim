@@ -10,6 +10,12 @@ local current_position = { 0, 0 }
 local trailing_position = { 0, 0 }
 local animating = false
 
+-- M.current_position = setmetatable({}, {
+-- 	__index = function(_, key)
+-- 		return current_position[key]
+-- 	end,
+-- })
+
 vim.defer_fn(function()
 	local cursor_row, cursor_col = screen.get_screen_cursor_position()
 	target_position = { cursor_row, cursor_col }
@@ -61,7 +67,6 @@ local function animate()
 end
 
 M.change_target_position = function(row, col, jump)
-	jump = jump or (not config.smear_between_neighbor_lines and math.abs(row - current_position[1]) <= 1)
 	if target_position[1] == row and target_position[2] == col then
 		return
 	end
@@ -85,5 +90,15 @@ M.change_target_position = function(row, col, jump)
 		animate()
 	end
 end
+
+setmetatable(M, {
+	__index = function(_, key)
+		if key == "current_position" then
+			return current_position
+		else
+			return nil
+		end
+	end,
+})
 
 return M

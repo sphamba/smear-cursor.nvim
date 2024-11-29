@@ -7,7 +7,12 @@ local switching_buffer = false
 
 local function move_cursor()
 	local row, col = screen.get_screen_cursor_position()
-	local jump = not config.smear_between_buffers and switching_buffer
+	local jump = (not config.smear_between_buffers and switching_buffer)
+		or (
+			not config.smear_between_neighbor_lines
+			and not switching_buffer
+			and math.abs(row - animation.current_position[1]) <= 1
+		)
 	animation.change_target_position(row, col, jump)
 
 	switching_buffer = false
