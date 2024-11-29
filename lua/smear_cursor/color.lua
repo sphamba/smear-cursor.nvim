@@ -1,5 +1,4 @@
 local config = require("smear_cursor.config")
-local logging = require("smear_cursor.logging")
 local round = require("smear_cursor.math").round
 local M = {}
 
@@ -39,16 +38,17 @@ local function interpolate_colors(hex1, hex2, t)
 	return rgb_to_hex(r, g, b)
 end
 
-function M.clear()
+function M.clear_cache()
 	cache = {}
 end
 
 function M.get_color_at_cursor()
 	local cursor = vim.api.nvim_win_get_cursor(0)
+	cursor[1] = cursor[1] - 1
 	if vim.b.ts_highlight then
 		-- get the treesitter highlight group at the cursor
 		local ts_hl_group ---@type string?
-		for _, capture in pairs(vim.treesitter.get_captures_at_pos(0, cursor[1] - 1, cursor[2])) do
+		for _, capture in pairs(vim.treesitter.get_captures_at_pos(0, cursor[1], cursor[2])) do
 			ts_hl_group = "@" .. capture.capture .. "." .. capture.lang
 		end
 		if ts_hl_group then
@@ -56,7 +56,6 @@ function M.get_color_at_cursor()
 		end
 	end
 	-- get any extmark with hl_group at the cursor
-	cursor[1] = cursor[1] - 1
 	local extmarks = vim.api.nvim_buf_get_extmarks(0, -1, cursor, cursor, { details = true, overlap = true })
 	for _, extmark in ipairs(extmarks) do
 		local ret = extmark[4].hl_group and get_hl_color(extmark[4].hl_group, "fg")
@@ -119,7 +118,7 @@ function M.get_hl_group(opts)
 			}
 		or {
 			fg = _cursor_color,
-			bg = "none", -- _normal_bg,
+			bg = "none",
 			blend = blending and 100 or 0,
 		}
 
@@ -127,18 +126,6 @@ function M.get_hl_group(opts)
 	cache[hl_group] = true
 	return hl_group
 end
-
--- Define new highlight groups using the retrieved colors
-M.hl_groups = setmetatable({}, {
-	__index = function(_, key)
-		return M.get_hl_group({ level = key })
-	end,
-})
-M.hl_groups_inverted = setmetatable({}, {
-	__index = function(_, key)
-		return M.get_hl_group({ level = key, inverted = true })
-	end,
-})
 
 local metatable = {
 	__index = function(_, key)
@@ -148,10 +135,6 @@ local metatable = {
 			return normal_bg
 		elseif key == "transparent_bg_fallback_color" then
 			return transparent_bg_fallback_color
-		elseif key == "hl_group" then
-			return M.get_hl_group()
-		elseif key == "hl_group_inverted" then
-			return M.get_hl_group({ inverted = true })
 		else
 			return nil
 		end
@@ -160,13 +143,13 @@ local metatable = {
 	__newindex = function(table, key, value)
 		if key == "cursor_color" then
 			cursor_color = value
-			M.clear()
+			M.clear_cache()
 		elseif key == "normal_bg" then
 			normal_bg = value
-			M.clear()
+			M.clear_cache()
 		elseif key == "transparent_bg_fallback_color" then
 			transparent_bg_fallback_color = value
-			M.clear()
+			M.clear_cache()
 		else
 			rawset(table, key, value)
 		end

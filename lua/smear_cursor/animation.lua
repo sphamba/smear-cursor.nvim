@@ -42,7 +42,7 @@ local function animate()
 		and round(current_position[2]) == target_position[2]
 	draw.draw_line(trailing_position[1], trailing_position[2], current_position[1], current_position[2], end_reached)
 	if not end_reached and config.hide_target_hack then
-		draw.draw_character(target_position[1], target_position[2], " ", color.hl_group_inverted)
+		draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
 	end
 
 	local trailing_distance =

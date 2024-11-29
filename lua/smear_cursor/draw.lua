@@ -158,7 +158,7 @@ local function draw_matrix_character(row, col, matrix, L)
 		return
 	end
 
-	M.draw_character(row, col, character, color.hl_groups[hl_group_index], L)
+	M.draw_character(row, col, character, color.get_hl_group({ level = hl_group_index }), L)
 end
 
 local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
@@ -188,10 +188,10 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 
 		if config.legacy_computing_symbols_support then
 			character_list = TOP_BLOCKS
-			hl_group = color.hl_groups[hl_group_index]
+			hl_group = color.get_hl_group({ level = hl_group_index })
 		else
 			character_list = BOTTOM_BLOCKS
-			hl_group = color.hl_groups_inverted[hl_group_index]
+			hl_group = color.get_hl_group({ level = hl_group_index, inverted = true })
 		end
 	else
 		local micro_shift = center * 16 - 8
@@ -208,7 +208,7 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 		end
 
 		character_list = BOTTOM_BLOCKS
-		hl_group = color.hl_groups[hl_group_index]
+		hl_group = color.get_hl_group({ level = hl_group_index })
 	end
 
 	draw_partial_block(row, col, character_list, character_index, hl_group, L)
@@ -249,7 +249,7 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 		end
 
 		character_list = LEFT_BLOCKS
-		hl_group = color.hl_groups[hl_group_index]
+		hl_group = color.get_hl_group({ level = hl_group_index })
 	else
 		local micro_shift = center * 16 - 8
 		character_index = math.floor(micro_shift)
@@ -266,10 +266,10 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 
 		if config.legacy_computing_symbols_support then
 			character_list = RIGHT_BLOCKS
-			hl_group = color.hl_groups[hl_group_index]
+			hl_group = color.get_hl_group({ level = hl_group_index })
 		else
 			character_list = LEFT_BLOCKS
-			hl_group = color.hl_groups_inverted[hl_group_index]
+			hl_group = color.get_hl_group({ level = hl_group_index, inverted = true })
 		end
 	end
 
@@ -459,7 +459,7 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	L.thickness = math.max(L.thickness, config.minimum_thickness)
 
 	if L.slope ~= L.slope then
-		M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.hl_group, L)
+		M.draw_character(L.row_end_rounded, L.col_end_rounded, "█", color.get_hl_group(), L)
 		return
 	end
 
