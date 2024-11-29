@@ -2,7 +2,7 @@ local M = {}
 
 -- General configuration -------------------------------------------------------
 
--- Smear cursor when switching buffers
+-- Smear cursor when switching buffers or windows
 M.smear_between_buffers = true
 
 -- Smear cursor when moving within line or to neighbor lines

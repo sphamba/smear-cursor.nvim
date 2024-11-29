@@ -58,7 +58,7 @@ return {
     -- Background color. Defaults to Normal GUI background color if not set.
     normal_bg = "#282828",
 
-    -- Smear cursor when switching buffers.
+    -- Smear cursor when switching buffers or windows.
     smear_between_buffers = true,
 
     -- Smear cursor when moving within line or to neighbor lines.
