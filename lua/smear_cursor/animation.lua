@@ -10,12 +10,6 @@ local current_position = { 0, 0 }
 local trailing_position = { 0, 0 }
 local animating = false
 
--- M.current_position = setmetatable({}, {
--- 	__index = function(_, key)
--- 		return current_position[key]
--- 	end,
--- })
-
 vim.defer_fn(function()
 	local cursor_row, cursor_col = screen.get_screen_cursor_position()
 	target_position = { cursor_row, cursor_col }

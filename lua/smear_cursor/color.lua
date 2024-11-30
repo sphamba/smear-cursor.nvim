@@ -127,7 +127,7 @@ function M.get_hl_group(opts)
 	return hl_group
 end
 
-local metatable = {
+setmetatable(M, {
 	__index = function(_, key)
 		if key == "cursor_color" then
 			return cursor_color
@@ -154,8 +154,6 @@ local metatable = {
 			rawset(table, key, value)
 		end
 	end,
-}
-
-setmetatable(M, metatable)
+})
 
 return M

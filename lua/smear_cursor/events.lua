@@ -36,7 +36,7 @@ M.flag_switching_buffer = function()
 end
 
 M.listen = function()
-	vim.api.nvim_exec(
+	vim.api.nvim_exec2(
 		[[
 		augroup SmearCursor
 			autocmd!
@@ -47,18 +47,18 @@ M.listen = function()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
-		false
+		{}
 	)
 end
 
 M.unlisten = function()
-	vim.api.nvim_exec(
+	vim.api.nvim_exec2(
 		[[
 		augroup SmearCursor
 			autocmd!
 		augroup END
 	]],
-		false
+		{}
 	)
 end
 
