@@ -21,15 +21,15 @@ M.time_interval = 17 -- milliseconds
 
 -- How fast the smear's head moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.stiffness = 0.6
+M.stiffness = 0.3
 
 -- How fast the smear's tail moves towards the head.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.3
+M.trailing_stiffness = 0.1
 
 -- How much the tail slows down when getting close to the head.
 -- 0: no slowdown, more: more slowdown
-M.trailing_exponent = 0.1
+M.slowdown_exponent = 0.2
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
@@ -48,6 +48,6 @@ M.minimum_thickness = 0.7 -- 0: no limit, 1: no reduction
 -- For debugging ---------------------------------------------------------------
 
 M.logging_level = vim.log.levels.INFO
-M.dont_erase = false -- Set to true for debugging, or use trailing_stiffness = 0
+-- Set trailing_stiffness to 0 for debugging
 
 return M

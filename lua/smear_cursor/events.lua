@@ -11,7 +11,7 @@ local function move_cursor()
 		or (
 			not config.smear_between_neighbor_lines
 			and not switching_buffer
-			and math.abs(row - animation.current_position[1]) <= 1
+			and math.abs(row - animation.target_position[1]) <= 1
 		)
 	animation.change_target_position(row, col, jump)
 
