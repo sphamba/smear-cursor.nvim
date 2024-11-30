@@ -498,4 +498,12 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 	draw_vertical_ish_line(L, draw_diagonal_vertical_block)
 end
 
+M.draw_quad = function(corners, target_position)
+	-- logging.debug("Drawing quad")
+	M.draw_line(corners[1][1], corners[1][2], corners[2][1], corners[2][2] - 1, false)
+	M.draw_line(corners[2][1], corners[2][2] - 1, corners[3][1] - 1, corners[3][2] - 1, false)
+	M.draw_line(corners[3][1] - 1, corners[3][2] - 1, corners[4][1] - 1, corners[4][2], false)
+	M.draw_line(corners[4][1] - 1, corners[4][2], corners[1][1], corners[1][2], false)
+end
+
 return M
