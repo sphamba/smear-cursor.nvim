@@ -56,6 +56,18 @@ M.setup = function(opts)
 	for key, value in pairs(opts) do
 		M[key] = value
 	end
+
+	vim.api.nvim_create_user_command("SmearToggle", M.toggle, {})
+end
+
+M.toggle = function(opts)
+	opts = opts or {}
+
+	if opts.enabled then
+		opts.enabled = false
+	else
+		opts.enabled = true
+	end
 end
 
 setmetatable(M, metatable)
