@@ -21,15 +21,15 @@ M.time_interval = 17 -- milliseconds
 
 -- How fast the smear's head moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.stiffness = 0.3
+M.stiffness = 0.6
 
 -- How fast the smear's tail moves towards the head.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.1
+M.trailing_stiffness = 0.3
 
 -- How much the tail slows down when getting close to the head.
 -- 0: no slowdown, more: more slowdown
-M.slowdown_exponent = 0.2
+M.slowdown_exponent = 0.0
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
