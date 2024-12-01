@@ -109,12 +109,48 @@ col = 2
 
 for i = 0, 8 do
 	draw.draw_quad({
-		{ row, col + 10 * i },
-		{ row + i, col + 10 * i + 9 },
-		{ row + i + 1, col + 10 * i + 9 },
-		{ row + 1, col + 10 * i },
+		{ row, col },
+		{ row + i, col + 9 },
+		{ row + i + 1, col + 9 },
+		{ row + 1, col },
 	})
+
+	col = col + 10
 end
+
+-- Rhombuses
+
+row = 26
+col = 2
+
+for i = 0, 4 do
+	draw.draw_quad({
+		{ row, col },
+		{ row + i / 2, col + 5 },
+		{ row + i + 1, col + 9 },
+		{ row + i / 2 + 1, col + 4 },
+	})
+
+	col = col + 10
+end
+
+-- Thin horizontal lines
+
+row = 29
+col = 2
+
+for i = 0, 2 do
+	draw.draw_quad({
+		{ row, col },
+		{ row + i, col + 9 },
+		{ row + i + 1 / 8, col + 9 },
+		{ row + 1 / 8, col },
+	})
+
+	col = col + 10
+end
+
+-- Vertical lines
 
 row = 32
 col = 2
