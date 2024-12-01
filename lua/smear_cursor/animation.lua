@@ -11,19 +11,6 @@ local current_corners = {}
 local target_corners = {}
 local stiffnesses = { 0, 0, 0, 0 }
 
--- local loop_metatable = {
--- 	__index = function(table, key)
--- 		if key == 5 then
--- 			return table[1]
--- 		else
--- 			return nil
--- 		end
--- 	end,
--- }
-
--- setmetatable(current_corners, loop_metatable)
--- setmetatable(target_corners, loop_metatable)
-
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
 	corners[2] = { row, col + 1 }
@@ -75,7 +62,7 @@ local function animate()
 	end
 end
 
-local function set_stiffnesses()
+local function set_stiffnesses(head_stiffness, trailing_stiffness)
 	local target_center = { target_position[1] + 0.5, target_position[2] + 0.5 }
 	local distances = {}
 	local min_distance = math.huge
@@ -90,10 +77,8 @@ local function set_stiffnesses()
 	end
 
 	for i = 1, 4 do
-		local stiffness = config.stiffness
-			+ (config.trailing_stiffness - config.stiffness)
-				* (distances[i] - min_distance)
-				/ (max_distance - min_distance)
+		local stiffness = head_stiffness
+			+ (trailing_stiffness - head_stiffness) * (distances[i] - min_distance) / (max_distance - min_distance)
 		stiffnesses[i] = math.min(1, stiffness)
 	end
 end
@@ -104,20 +89,24 @@ M.change_target_position = function(row, col, jump)
 	end
 	draw.clear()
 
+	-- Draw end of previous smear
 	if animating then
+		set_stiffnesses(1, 0)
+		update()
 		draw.draw_quad(current_corners, target_position)
 		set_corners(current_corners, target_position[1], target_position[2])
 	end
 
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
+	set_stiffnesses(config.stiffness, config.trailing_stiffness)
+
 	if jump then
 		set_corners(current_corners, row, col)
 		return
 	end
 
 	if not animating then
-		set_stiffnesses()
 		animate()
 	end
 end
