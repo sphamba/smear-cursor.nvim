@@ -61,13 +61,7 @@ M.setup = function(opts)
 end
 
 M.toggle = function(opts)
-	opts = opts or {}
-
-	if opts.enabled then
-		opts.enabled = false
-	else
-		opts.enabled = true
-	end
+	M.enabled = not M.enabled
 end
 
 setmetatable(M, metatable)
