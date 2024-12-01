@@ -82,7 +82,18 @@ local function animate()
 		max_distance = math.max(max_distance, distance)
 	end
 	if max_distance > config.distance_stop_animating then
-		local target_reached = draw.draw_quad(shrink_volume(current_corners), target_position)
+		local shrunk_corners = shrink_volume(current_corners)
+		draw.draw_quad(shrunk_corners, target_position)
+		local target_reached = (
+			math.floor(current_corners[1][1]) == target_position[1]
+			and math.floor(current_corners[1][2]) == target_position[2]
+		)
+			or (math.floor(current_corners[2][1]) == target_position[1] and math.ceil(current_corners[2][2]) - 1 == target_position[2])
+			or (math.ceil(current_corners[3][1]) - 1 == target_position[1] and math.ceil(current_corners[3][2]) - 1 == target_position[2])
+			or (
+				math.ceil(current_corners[4][1]) - 1 == target_position[1]
+				and math.floor(current_corners[4][2]) == target_position[2]
+			)
 		if not target_reached and config.hide_target_hack then
 			draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
 		end
