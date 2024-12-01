@@ -161,7 +161,7 @@ local function draw_matrix_character(row, col, matrix, L)
 	M.draw_character(row, col, character, color.get_hl_group({ level = hl_group_index }), L)
 end
 
-local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
+local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade)
 	if row_top >= row_bottom then
 		return
 	end
@@ -180,7 +180,7 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 		end
 
 		local character_thickness = character_index / 8
-		local shade = thickness / character_thickness
+		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then
 			return
@@ -201,7 +201,7 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, L)
 		end
 
 		local character_thickness = 1 - character_index / 8
-		local shade = thickness / character_thickness
+		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then
 			return
@@ -223,7 +223,7 @@ local function draw_vertically_shifted_block(row_float, col, L)
 	draw_vertically_shifted_sub_block(row + 1, bottom, col, L)
 end
 
-local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
+local function draw_horizontally_shifted_sub_block(row, col_left, col_right, shade)
 	if col_left >= col_right then
 		return
 	end
@@ -242,7 +242,7 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 		end
 
 		local character_thickness = character_index / 8
-		local shade = thickness / character_thickness
+		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then
 			return
@@ -258,7 +258,7 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, L)
 		end
 
 		local character_thickness = 1 - character_index / 8
-		local shade = thickness / character_thickness
+		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
 		if hl_group_index == 0 then
 			return
@@ -553,30 +553,18 @@ M.draw_quad = function(corners, target_position)
 				goto continue
 			end
 
-			-- Check target
+			-- Check if on target
 			if row == target_position[1] and col == target_position[2] then
 				target_reached = true
 				goto continue
 			end
 
-			-- Draw horizontally shifted block
-			local left_in = left_intersection > col
-			local left_vertical = math.abs(slopes[4]) >= config.min_slope_vertical
-			local right_in = right_intersection < col + 1
-			local right_vertical = math.abs(slopes[2]) >= config.min_slope_vertical
-			if
-				(left_in and left_vertical and (not right_in or right_vertical))
-				or (right_in and right_vertical and (not left_in or left_vertical))
-			then
-				draw_horizontally_shifted_sub_block(
-					row,
-					math.max(col, left_intersection),
-					math.min(col + 1, right_intersection)
-				)
-				goto continue
-			end
+			local is_vertically_shifted = false
+			local vertical_shade = 1
+			local is_horizontally_shifted = false
+			local horizontal_shade = 1
 
-			-- Draw vertically shifted block
+			-- Check if vertically shifted block
 			local top_in = top_intersection > row
 			local top_horizontal = math.abs(slopes[1]) <= config.max_slope_horizontal
 			local bottom_in = bottom_intersection < row + 1
@@ -585,15 +573,57 @@ M.draw_quad = function(corners, target_position)
 				(top_in and top_horizontal and (not bottom_in or bottom_horizontal))
 				or (bottom_in and bottom_horizontal and (not top_in or top_horizontal))
 			then
+				is_vertically_shifted = true
+				vertical_shade = math.min(row + 1, bottom_intersection) - math.max(row, top_intersection)
+			end
+
+			-- Check if horizontally shifted block
+			local left_in = left_intersection > col
+			local left_vertical = math.abs(slopes[4]) >= config.min_slope_vertical
+			local right_in = right_intersection < col + 1
+			local right_vertical = math.abs(slopes[2]) >= config.min_slope_vertical
+			if
+				(left_in and left_vertical and (not right_in or right_vertical))
+				or (right_in and right_vertical and (not left_in or left_vertical))
+			then
+				is_horizontally_shifted = true
+				horizontal_shade = math.min(col + 1, right_intersection) - math.max(col, left_intersection)
+			end
+
+			-- Draw shifted block
+			if is_vertically_shifted and is_horizontally_shifted then
+				-- if vertical_shade < 0.5 and horizontal_shade < 0.5 then
+				-- 	is_vertically_shifted = false
+				-- 	is_horizontally_shifted = false
+				if vertical_shade < horizontal_shade then
+					is_horizontally_shifted = false
+				else
+					is_vertically_shifted = false
+				end
+			end
+
+			if is_vertically_shifted then
 				draw_vertically_shifted_sub_block(
 					math.max(row, top_intersection),
 					math.min(row + 1, bottom_intersection),
-					col
+					col,
+					horizontal_shade
+				)
+				goto continue
+			end
+
+			if is_horizontally_shifted then
+				draw_horizontally_shifted_sub_block(
+					row,
+					math.max(col, left_intersection),
+					math.min(col + 1, right_intersection),
+					vertical_shade
 				)
 				goto continue
 			end
 
 			M.draw_character(row, col, "█", color.get_hl_group())
+
 			::continue::
 		end
 	end
