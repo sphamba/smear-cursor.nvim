@@ -499,11 +499,96 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 end
 
 M.draw_quad = function(corners, target_position)
-	-- logging.debug("Drawing quad")
-	M.draw_line(corners[1][1], corners[1][2], corners[2][1], corners[2][2] - 1, false)
-	M.draw_line(corners[2][1], corners[2][2] - 1, corners[3][1] - 1, corners[3][2] - 1, false)
-	M.draw_line(corners[3][1] - 1, corners[3][2] - 1, corners[4][1] - 1, corners[4][2], false)
-	M.draw_line(corners[4][1] - 1, corners[4][2], corners[1][1], corners[1][2], false)
+	local top = math.floor(math.min(corners[1][1], corners[2][1], corners[3][1], corners[4][1]))
+	local bottom = math.ceil(math.max(corners[1][1], corners[2][1], corners[3][1], corners[4][1])) - 1
+	local left = math.floor(math.min(corners[1][2], corners[2][2], corners[3][2], corners[4][2]))
+	local right = math.ceil(math.max(corners[1][2], corners[2][2], corners[3][2], corners[4][2])) - 1
+	local edges = {}
+	local slopes = {}
+
+	for i = 1, 4 do
+		local edge = {
+			corners[i % 4 + 1][1] - corners[i][1],
+			corners[i % 4 + 1][2] - corners[i][2],
+		}
+		edges[i] = edge
+		slopes[i] = edge[1] / edge[2]
+	end
+
+	for row = top, bottom do
+		for col = left, right do
+			-- Filter cells outside the quad
+
+			-- Intersection of top quad edge with vertical centerline of cell
+			local top_intersection = corners[1][1] + (col + 0.5 - corners[1][2]) * slopes[1]
+			-- Intersection of top quad edge with left edge of cell
+			local top_n_left_intersection = top_intersection - 0.5 * slopes[1]
+			-- Intersection of top quad edge with right edge of cell
+			local top_n_right_intersection = top_intersection + 0.5 * slopes[1]
+			-- Cell is above the quad
+			if top_n_left_intersection >= row + 1 and top_n_right_intersection >= row + 1 then
+				goto continue
+			end
+
+			local right_intersection = corners[2][2] + (row + 0.5 - corners[2][1]) / slopes[2]
+			local right_n_top_intersection = right_intersection - 0.5 / slopes[2]
+			local right_n_bottom_intersection = right_intersection + 0.5 / slopes[2]
+			if right_n_top_intersection <= col and right_n_bottom_intersection <= col then
+				goto continue
+			end
+
+			local bottom_intersection = corners[3][1] + (col + 0.5 - corners[3][2]) * slopes[3]
+			local bottom_n_left_intersection = bottom_intersection - 0.5 * slopes[3]
+			local bottom_n_right_intersection = bottom_intersection + 0.5 * slopes[3]
+			if bottom_n_left_intersection <= row and bottom_n_right_intersection <= row then
+				goto continue
+			end
+
+			local left_intersection = corners[4][2] + (row + 0.5 - corners[4][1]) / slopes[4]
+			local left_n_top_intersection = left_intersection - 0.5 / math.abs(slopes[4])
+			local left_n_bottom_intersection = left_intersection + 0.5 / math.abs(slopes[4])
+			if left_n_top_intersection >= col + 1 and left_n_bottom_intersection >= col + 1 then
+				goto continue
+			end
+
+			-- Draw horizontally shifted block
+			local left_in = left_intersection > col
+			local left_vertical = math.abs(slopes[4]) >= config.min_slope_vertical
+			local right_in = right_intersection < col + 1
+			local right_vertical = math.abs(slopes[2]) >= config.min_slope_vertical
+			if
+				(left_in and left_vertical and (not right_in or right_vertical))
+				or (right_in and right_vertical and (not left_in or left_vertical))
+			then
+				draw_horizontally_shifted_sub_block(
+					row,
+					math.max(col, left_intersection),
+					math.min(col + 1, right_intersection)
+				)
+				goto continue
+			end
+
+			-- Draw vertically shifted block
+			local top_in = top_intersection > row
+			local top_horizontal = math.abs(slopes[1]) <= config.max_slope_horizontal
+			local bottom_in = bottom_intersection < row + 1
+			local bottom_horizontal = math.abs(slopes[3]) <= config.max_slope_horizontal
+			if
+				(top_in and top_horizontal and (not bottom_in or bottom_horizontal))
+				or (bottom_in and bottom_horizontal and (not top_in or top_horizontal))
+			then
+				draw_vertically_shifted_sub_block(
+					math.max(row, top_intersection),
+					math.min(row + 1, bottom_intersection),
+					col
+				)
+				goto continue
+			end
+
+			M.draw_character(row, col, "█", color.get_hl_group())
+			::continue::
+		end
+	end
 end
 
 return M
