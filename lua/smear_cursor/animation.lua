@@ -36,6 +36,39 @@ local function update()
 	end
 end
 
+local function shrink_volume(corners)
+	local edges = {}
+	for i = 1, 3 do
+		edges[i] = {
+			corners[i + 1][1] - corners[1][1],
+			corners[i + 1][2] - corners[1][2],
+		}
+	end
+
+	local double_volumes = {}
+	for i = 1, 2 do
+		double_volumes[i] = edges[1][2] * edges[2][1] - edges[1][1] * edges[2][2]
+	end
+	local volume = (double_volumes[1] + double_volumes[2]) / 2
+
+	local center = {
+		(corners[1][1] + corners[2][1] + corners[3][1] + corners[4][1]) / 4,
+		(corners[1][2] + corners[2][2] + corners[3][2] + corners[4][2]) / 4,
+	}
+
+	local factor = (1 / volume) ^ (config.volume_reduction_exponent / 2)
+	factor = math.max(config.minimum_volume_factor, factor)
+	local shrunk_corners = {}
+	for i = 1, 4 do
+		shrunk_corners[i] = {
+			center[1] + (corners[i][1] - center[1]) * factor,
+			center[2] + (corners[i][2] - center[2]) * factor,
+		}
+	end
+
+	return shrunk_corners
+end
+
 local function animate()
 	animating = true
 	update()
@@ -49,7 +82,7 @@ local function animate()
 		max_distance = math.max(max_distance, distance)
 	end
 	if max_distance > config.distance_stop_animating then
-		local target_reached = draw.draw_quad(current_corners, target_position)
+		local target_reached = draw.draw_quad(shrink_volume(current_corners), target_position)
 		if not target_reached and config.hide_target_hack then
 			draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
 		end
@@ -91,7 +124,7 @@ M.change_target_position = function(row, col, jump)
 	if animating then
 		set_stiffnesses(1, 0)
 		update()
-		draw.draw_quad(current_corners, target_position)
+		draw.draw_quad(shrink_volume(current_corners), target_position)
 		set_corners(current_corners, target_position[1], target_position[2])
 	end
 

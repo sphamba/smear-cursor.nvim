@@ -42,8 +42,8 @@ M.color_levels = 16 -- Minimum 1
 M.gamma = 2.2 -- For color blending
 M.diagonal_pixel_value_threshold = 0.25 -- 0.1: more pixels, 0.9: less pixels
 M.diagonal_thickness_factor = 0.7 -- Put less than 1 to reduce diagonal smear fatness
-M.thickness_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
-M.minimum_thickness = 0.7 -- 0: no limit, 1: no reduction
+M.volume_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
+M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
 
 -- For debugging ---------------------------------------------------------------
 
