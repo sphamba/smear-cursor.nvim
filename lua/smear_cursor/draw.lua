@@ -592,10 +592,11 @@ M.draw_quad = function(corners, target_position)
 
 			-- Draw shifted block
 			if is_vertically_shifted and is_horizontally_shifted then
-				-- if vertical_shade < 0.5 and horizontal_shade < 0.5 then
-				-- 	is_vertically_shifted = false
-				-- 	is_horizontally_shifted = false
-				if vertical_shade < horizontal_shade then
+				if vertical_shade < 0.75 and horizontal_shade < 0.5 then
+					goto continue
+					-- is_vertically_shifted = false
+					-- is_horizontally_shifted = false
+				elseif vertical_shade < horizontal_shade then
 					is_horizontally_shifted = false
 				else
 					is_vertically_shifted = false
