@@ -49,12 +49,10 @@ local function animate()
 		max_distance = math.max(max_distance, distance)
 	end
 	if max_distance > config.distance_stop_animating then
-		draw.draw_quad(current_corners, target_position)
-		-- TODO: draw character at cursor if hack is enabled
-		-- local end_reached = ...
-		-- if not end_reached and config.hide_target_hack then
-		-- 	draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
-		-- end
+		local target_reached = draw.draw_quad(current_corners, target_position)
+		if not target_reached and config.hide_target_hack then
+			draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
+		end
 		vim.defer_fn(animate, config.time_interval)
 	else
 		animating = false

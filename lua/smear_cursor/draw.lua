@@ -515,6 +515,8 @@ M.draw_quad = function(corners, target_position)
 		slopes[i] = edge[1] / edge[2]
 	end
 
+	local target_reached = false
+
 	for row = top, bottom do
 		for col = left, right do
 			-- Filter cells outside the quad
@@ -548,6 +550,12 @@ M.draw_quad = function(corners, target_position)
 			local left_n_top_intersection = left_intersection - 0.5 / math.abs(slopes[4])
 			local left_n_bottom_intersection = left_intersection + 0.5 / math.abs(slopes[4])
 			if left_n_top_intersection >= col + 1 and left_n_bottom_intersection >= col + 1 then
+				goto continue
+			end
+
+			-- Check target
+			if row == target_position[1] and col == target_position[2] then
+				target_reached = true
 				goto continue
 			end
 
@@ -589,6 +597,8 @@ M.draw_quad = function(corners, target_position)
 			::continue::
 		end
 	end
+
+	return target_reached
 end
 
 return M
