@@ -499,6 +499,10 @@ M.draw_line = function(row_start, col_start, row_end, col_end, end_reached)
 end
 
 M.draw_quad = function(corners, target_position)
+	if target_position == nil then
+		target_position = { 0, 0 }
+	end
+
 	local top = math.floor(math.min(corners[1][1], corners[2][1], corners[3][1], corners[4][1]))
 	local bottom = math.ceil(math.max(corners[1][1], corners[2][1], corners[3][1], corners[4][1])) - 1
 	local left = math.floor(math.min(corners[1][2], corners[2][2], corners[3][2], corners[4][2]))
@@ -593,9 +597,8 @@ M.draw_quad = function(corners, target_position)
 			-- Draw shifted block
 			if is_vertically_shifted and is_horizontally_shifted then
 				if vertical_shade < 0.75 and horizontal_shade < 0.5 then
-					goto continue
-					-- is_vertically_shifted = false
-					-- is_horizontally_shifted = false
+					is_vertically_shifted = false
+					is_horizontally_shifted = false
 				elseif vertical_shade < horizontal_shade then
 					is_horizontally_shifted = false
 				else
@@ -623,7 +626,66 @@ M.draw_quad = function(corners, target_position)
 				goto continue
 			end
 
-			M.draw_character(row, col, "█", color.get_hl_group())
+			-- Draw matrix
+			local row_float, col_float, matrix_index, shade
+			local matrix = {
+				{ 1, 1 },
+				{ 1, 1 },
+			}
+
+			for i = 1, 2 do
+				local shift = (i == 1) and -0.25 or 0.25
+
+				-- Intersection with top quad edge
+				row_float = top_intersection + shift * slopes[1]
+				row_float = 2 * (row_float - row)
+				matrix_index = math.floor(row_float) + 1
+				for index = 1, math.min(2, matrix_index - 1) do
+					matrix[index][i] = 0
+				end
+				if matrix_index == 1 or matrix_index == 2 then
+					shade = 1 - (row_float % 1)
+					matrix[matrix_index][i] = matrix[matrix_index][i] * shade
+				end
+
+				-- Intersection with right quad edge
+				col_float = right_intersection + shift / slopes[2]
+				col_float = 2 * (col_float - col)
+				matrix_index = math.floor(col_float) + 1
+				for index = math.max(1, matrix_index + 1), 2 do
+					matrix[i][index] = 0
+				end
+				if matrix_index == 1 or matrix_index == 2 then
+					shade = col_float % 1
+					matrix[i][matrix_index] = matrix[i][matrix_index] * shade
+				end
+
+				-- Intersection with bottom quad edge
+				row_float = bottom_intersection + shift * slopes[3]
+				row_float = 2 * (row_float - row)
+				matrix_index = math.floor(row_float) + 1
+				for index = math.max(1, matrix_index + 1), 2 do
+					matrix[index][i] = 0
+				end
+				if matrix_index == 1 or matrix_index == 2 then
+					shade = row_float % 1
+					matrix[matrix_index][i] = matrix[matrix_index][i] * shade
+				end
+
+				-- Intersection with left quad edge
+				col_float = left_intersection + shift / slopes[4]
+				col_float = 2 * (col_float - col)
+				matrix_index = math.floor(col_float) + 1
+				for index = 1, math.min(2, matrix_index - 1) do
+					matrix[i][index] = 0
+				end
+				if matrix_index == 1 or matrix_index == 2 then
+					shade = 1 - (col_float % 1)
+					matrix[i][matrix_index] = matrix[i][matrix_index] * shade
+				end
+			end
+
+			draw_matrix_character(row, col, matrix)
 
 			::continue::
 		end
