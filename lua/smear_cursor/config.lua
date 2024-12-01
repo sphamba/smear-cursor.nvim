@@ -23,13 +23,13 @@ M.time_interval = 17 -- milliseconds
 -- 0: no movement, 1: instantaneous
 M.stiffness = 0.6
 
--- How fast the smear's tail moves towards the head.
+-- How fast the smear's tail moves towards the target.
 -- 0: no movement, 1: instantaneous
 M.trailing_stiffness = 0.3
 
 -- How much the tail slows down when getting close to the head.
 -- 0: no slowdown, more: more slowdown
-M.slowdown_exponent = 0.0
+M.slowdown_exponent = 0
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
@@ -41,7 +41,6 @@ M.min_slope_vertical = 2
 M.color_levels = 16 -- Minimum 1
 M.gamma = 2.2 -- For color blending
 M.diagonal_pixel_value_threshold = 0.25 -- 0.1: more pixels, 0.9: less pixels
-M.diagonal_thickness_factor = 0.7 -- Put less than 1 to reduce diagonal smear fatness
 M.volume_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
 M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
 
