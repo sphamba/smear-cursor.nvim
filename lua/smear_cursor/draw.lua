@@ -264,46 +264,78 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	draw_partial_block(row, col, character_list, character_index, hl_group)
 end
 
-M.draw_quad = function(corners, target_position)
-	if target_position == nil then
-		target_position = { 0, 0 }
-	end
+local function precompute_quad_geometry(corners)
+	local G = {}
 
-	local slopes = {}
+	-- Bounding box
+	G.top = math.floor(math.min(corners[1][1], corners[2][1], corners[3][1], corners[4][1]))
+	G.bottom = math.ceil(math.max(corners[1][1], corners[2][1], corners[3][1], corners[4][1])) - 1
+	G.left = math.floor(math.min(corners[1][2], corners[2][2], corners[3][2], corners[4][2]))
+	G.right = math.ceil(math.max(corners[1][2], corners[2][2], corners[3][2], corners[4][2])) - 1
+
+	-- Slopes
+	G.slopes = {}
 
 	for i = 1, 4 do
 		local edge = {
 			corners[i % 4 + 1][1] - corners[i][1],
 			corners[i % 4 + 1][2] - corners[i][2],
 		}
-		slopes[i] = edge[1] / edge[2]
+		G.slopes[i] = edge[1] / edge[2]
 	end
 
-	local top = math.floor(math.min(corners[1][1], corners[2][1], corners[3][1], corners[4][1]))
-	local bottom = math.ceil(math.max(corners[1][1], corners[2][1], corners[3][1], corners[4][1])) - 1
+	G.top_horizontal = math.abs(G.slopes[1]) <= config.max_slope_horizontal
+	G.bottom_horizontal = math.abs(G.slopes[3]) <= config.max_slope_horizontal
+	G.left_vertical = math.abs(G.slopes[4]) >= config.min_slope_vertical
+	G.right_vertical = math.abs(G.slopes[2]) >= config.min_slope_vertical
 
-	for row = top, bottom do
-		local left = corners[4][2] + (row + 0.5 - corners[4][1]) / slopes[4]
-		left = left - 0.5 / math.abs(slopes[4])
-		local right = corners[2][2] + (row + 0.5 - corners[2][1]) / slopes[2]
-		right = right + 0.5 / math.abs(slopes[2])
+	-- Intersections
+	-- Intersection of quad edge with centerline of cells
+	G.top_centerlines = {}
+	-- Lowest intersection of quad edge with lateral edges of cells
+	G.top_intersections = {}
+	G.bottom_centerlines = {}
+	G.bottom_intersections = {}
+	G.left_centerlines = {}
+	G.left_intersections = {}
+	G.right_centerlines = {}
+	G.right_intersections = {}
 
-		for col = math.floor(left), math.ceil(right) do
+	for col = G.left, G.right do
+		G.top_centerlines[col] = corners[1][1] + (col + 0.5 - corners[1][2]) * G.slopes[1]
+		G.top_intersections[col] = G.top_centerlines[col] + 0.5 * math.abs(G.slopes[1])
+		G.bottom_centerlines[col] = corners[3][1] + (col + 0.5 - corners[3][2]) * G.slopes[3]
+		G.bottom_intersections[col] = G.bottom_centerlines[col] - 0.5 * math.abs(G.slopes[3])
+	end
+
+	for row = G.top, G.bottom do
+		G.right_centerlines[row] = corners[2][2] + (row + 0.5 - corners[2][1]) / G.slopes[2]
+		G.right_intersections[row] = G.right_centerlines[row] - 0.5 / math.abs(G.slopes[2])
+		G.left_centerlines[row] = corners[4][2] + (row + 0.5 - corners[4][1]) / G.slopes[4]
+		G.left_intersections[row] = G.left_centerlines[row] + 0.5 / math.abs(G.slopes[4])
+	end
+
+	return G
+end
+
+M.draw_quad = function(corners, target_position)
+	if target_position == nil then
+		target_position = { 0, 0 }
+	end
+
+	local G = precompute_quad_geometry(corners)
+
+	for row = G.top, G.bottom do
+		local left = corners[4][2] + (row + 0.5 - corners[4][1]) / G.slopes[4]
+		left = left - 0.5 / math.abs(G.slopes[4])
+		local right = corners[2][2] + (row + 0.5 - corners[2][1]) / G.slopes[2]
+		right = right + 0.5 / math.abs(G.slopes[2])
+
+		for col = math.max(G.left, math.floor(left)), math.min(G.right, math.ceil(right)) do
 			-- Check if on target
 			if row == target_position[1] and col == target_position[2] then
 				goto continue
 			end
-
-			-- Intersection of quad edge with centerline of cell
-			local top_centerline = corners[1][1] + (col + 0.5 - corners[1][2]) * slopes[1]
-			-- Lowest intersection of quad edge with lateral edges of cell
-			local top_intersection = top_centerline + 0.5 * math.abs(slopes[1])
-			local right_centerline = corners[2][2] + (row + 0.5 - corners[2][1]) / slopes[2]
-			local right_intersection = right_centerline - 0.5 / math.abs(slopes[2])
-			local bottom_centerline = corners[3][1] + (col + 0.5 - corners[3][2]) * slopes[3]
-			local bottom_intersection = bottom_centerline - 0.5 * math.abs(slopes[3])
-			local left_centerline = corners[4][2] + (row + 0.5 - corners[4][1]) / slopes[4]
-			local left_intersection = left_centerline + 0.5 / math.abs(slopes[4])
 
 			local is_vertically_shifted = false
 			local vertical_shade = 1
@@ -311,36 +343,34 @@ M.draw_quad = function(corners, target_position)
 			local horizontal_shade = 1
 
 			-- Check if vertically shifted block
-			local top_horizontal = math.abs(slopes[1]) <= config.max_slope_horizontal
-			local bottom_horizontal = math.abs(slopes[3]) <= config.max_slope_horizontal
-			local left_in = left_intersection > col
-			local left_vertical = math.abs(slopes[4]) >= config.min_slope_vertical
-			local right_in = right_intersection < col + 1
-			local right_vertical = math.abs(slopes[2]) >= config.min_slope_vertical
-			if not (left_in and not left_vertical) and not (right_in and not right_vertical) then
-				local top_near = top_centerline > row
-				local bottom_near = bottom_centerline < row + 1
+			local left_in = G.left_intersections[row] > col
+			local right_in = G.right_intersections[row] < col + 1
+			if not (left_in and not G.left_vertical) and not (right_in and not G.right_vertical) then
+				local top_near = G.top_centerlines[col] > row
+				local bottom_near = G.bottom_centerlines[col] < row + 1
 				if
-					(top_near and top_horizontal and (not bottom_near or bottom_horizontal))
-					or (bottom_near and bottom_horizontal and (not top_near or top_horizontal))
+					(top_near and G.top_horizontal and (not bottom_near or G.bottom_horizontal))
+					or (bottom_near and G.bottom_horizontal and (not top_near or G.top_horizontal))
 				then
 					is_vertically_shifted = true
-					vertical_shade = math.min(row + 1, bottom_centerline) - math.max(row, top_centerline)
+					vertical_shade = math.min(row + 1, G.bottom_centerlines[col])
+						- math.max(row, G.top_centerlines[col])
 				end
 			end
 
 			-- Check if horizontally shifted block
-			local top_in = top_intersection > row
-			local bottom_in = bottom_intersection < row + 1
-			if not (top_in and not top_horizontal) and not (bottom_in and not bottom_horizontal) then
-				local left_near = left_centerline > col
-				local right_near = right_centerline < col + 1
+			local top_in = G.top_intersections[col] > row
+			local bottom_in = G.bottom_intersections[col] < row + 1
+			if not (top_in and not G.top_horizontal) and not (bottom_in and not G.bottom_horizontal) then
+				local left_near = G.left_centerlines[row] > col
+				local right_near = G.right_centerlines[row] < col + 1
 				if
-					(left_near and left_vertical and (not right_near or right_vertical))
-					or (right_near and right_vertical and (not left_near or left_vertical))
+					(left_near and G.left_vertical and (not right_near or G.right_vertical))
+					or (right_near and G.right_vertical and (not left_near or G.left_vertical))
 				then
 					is_horizontally_shifted = true
-					horizontal_shade = math.min(col + 1, right_centerline) - math.max(col, left_centerline)
+					horizontal_shade = math.min(col + 1, G.right_centerlines[row])
+						- math.max(col, G.left_centerlines[row])
 				end
 			end
 
@@ -357,8 +387,8 @@ M.draw_quad = function(corners, target_position)
 
 			if is_vertically_shifted and horizontal_shade > 0 then
 				draw_vertically_shifted_sub_block(
-					math.max(row, top_centerline),
-					math.min(row + 1, bottom_centerline),
+					math.max(row, G.top_centerlines[col]),
+					math.min(row + 1, G.bottom_centerlines[col]),
 					col,
 					horizontal_shade
 				)
@@ -368,8 +398,8 @@ M.draw_quad = function(corners, target_position)
 			if is_horizontally_shifted and vertical_shade > 0 then
 				draw_horizontally_shifted_sub_block(
 					row,
-					math.max(col, left_centerline),
-					math.min(col + 1, right_centerline),
+					math.max(col, G.left_centerlines[row]),
+					math.min(col + 1, G.right_centerlines[row]),
 					vertical_shade
 				)
 				goto continue
@@ -386,7 +416,7 @@ M.draw_quad = function(corners, target_position)
 				local shift = (i == 1) and -0.25 or 0.25
 
 				-- Intersection with top quad edge
-				row_float = top_centerline + shift * slopes[1]
+				row_float = G.top_centerlines[col] + shift * G.slopes[1]
 				row_float = 2 * (row_float - row)
 				matrix_index = math.floor(row_float) + 1
 				for index = 1, math.min(2, matrix_index - 1) do
@@ -398,7 +428,7 @@ M.draw_quad = function(corners, target_position)
 				end
 
 				-- Intersection with right quad edge
-				col_float = right_centerline + shift / slopes[2]
+				col_float = G.right_centerlines[row] + shift / G.slopes[2]
 				col_float = 2 * (col_float - col)
 				matrix_index = math.floor(col_float) + 1
 				for index = math.max(1, matrix_index + 1), 2 do
@@ -410,7 +440,7 @@ M.draw_quad = function(corners, target_position)
 				end
 
 				-- Intersection with bottom quad edge
-				row_float = bottom_centerline + shift * slopes[3]
+				row_float = G.bottom_centerlines[col] + shift * G.slopes[3]
 				row_float = 2 * (row_float - row)
 				matrix_index = math.floor(row_float) + 1
 				for index = math.max(1, matrix_index + 1), 2 do
@@ -422,7 +452,7 @@ M.draw_quad = function(corners, target_position)
 				end
 
 				-- Intersection with left quad edge
-				col_float = left_centerline + shift / slopes[4]
+				col_float = G.left_centerlines[row] + shift / G.slopes[4]
 				col_float = 2 * (col_float - col)
 				matrix_index = math.floor(col_float) + 1
 				for index = 1, math.min(2, matrix_index - 1) do
