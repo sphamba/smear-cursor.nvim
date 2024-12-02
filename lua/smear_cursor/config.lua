@@ -25,7 +25,7 @@ M.stiffness = 0.6
 
 -- How fast the smear's tail moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.3
+M.trailing_stiffness = 0.25
 
 -- How much the tail slows down when getting close to the head.
 -- 0: no slowdown, more: more slowdown
@@ -41,10 +41,10 @@ M.min_slope_vertical = 2
 M.color_levels = 16 -- Minimum 1
 M.gamma = 2.2 -- For color blending
 M.max_shade_no_matrix = 0.9 -- 0: more overhangs, 1: more matrices
-M.matrix_pixel_threshold = 0.2 -- 0: all pixels, 1: no pixel
+M.matrix_pixel_threshold = 0.5 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
-M.volume_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
-M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
+M.volume_reduction_exponent = 0.3 -- 0: no reduction, 1: full reduction
+M.minimum_volume_factor = 0.5 -- 0: no limit, 1: no reduction
 
 -- For debugging ---------------------------------------------------------------
 
