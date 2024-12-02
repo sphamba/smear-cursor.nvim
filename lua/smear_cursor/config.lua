@@ -40,7 +40,9 @@ M.min_slope_vertical = 2
 
 M.color_levels = 16 -- Minimum 1
 M.gamma = 2.2 -- For color blending
-M.diagonal_pixel_value_threshold = 0.25 -- 0.1: more pixels, 0.9: less pixels
+M.max_shade_no_matrix = 0.9 -- 0: more overhangs, 1: more matrices
+M.matrix_pixel_threshold = 0.2 -- 0: all pixels, 1: no pixel
+M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
 M.volume_reduction_exponent = 0.2 -- 0: no reduction, 1: full reduction
 M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
 

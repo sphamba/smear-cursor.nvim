@@ -135,8 +135,11 @@ local function draw_partial_block(row, col, character_list, character_index, hl_
 end
 
 local function draw_matrix_character(row, col, matrix)
-	local threshold = config.diagonal_pixel_value_threshold
-		* math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
+	local max = math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
+	if max < config.matrix_pixel_threshold then
+		return
+	end
+	local threshold = max * config.matrix_pixel_min_factor
 	local bit_1 = (matrix[1][1] > threshold) and 1 or 0
 	local bit_2 = (matrix[1][2] > threshold) and 1 or 0
 	local bit_3 = (matrix[2][1] > threshold) and 1 or 0
@@ -397,7 +400,7 @@ M.draw_quad = function(corners, target_position)
 
 			-- Draw shifted block
 			if is_vertically_shifted and is_horizontally_shifted then
-				if vertical_shade < 0.75 and horizontal_shade < 0.75 then
+				if vertical_shade < config.max_shade_no_matrix and horizontal_shade < config.max_shade_no_matrix then
 					goto continue
 				elseif vertical_shade < horizontal_shade then
 					is_horizontally_shifted = false
