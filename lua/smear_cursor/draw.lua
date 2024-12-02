@@ -293,26 +293,47 @@ local function precompute_quad_geometry(corners)
 	-- Intersection of quad edge with centerline of cells
 	G.top_centerlines = {}
 	-- Lowest intersection of quad edge with lateral edges of cells
-	G.top_intersections = {}
+	G.top_edges = {}
+	-- Intersection of quad edge with lines at 0.25 and 0.75
+	G.top_fractions = {}
 	G.bottom_centerlines = {}
-	G.bottom_intersections = {}
+	G.bottom_edges = {}
+	G.bottom_fractions = {}
 	G.left_centerlines = {}
-	G.left_intersections = {}
+	G.left_edges = {}
+	G.left_fractions = {}
 	G.right_centerlines = {}
-	G.right_intersections = {}
+	G.right_edges = {}
+	G.right_fractions = {}
 
 	for col = G.left, G.right do
 		G.top_centerlines[col] = corners[1][1] + (col + 0.5 - corners[1][2]) * G.slopes[1]
-		G.top_intersections[col] = G.top_centerlines[col] + 0.5 * math.abs(G.slopes[1])
+		G.top_edges[col] = G.top_centerlines[col] + 0.5 * math.abs(G.slopes[1])
+		G.top_fractions[col] = {}
 		G.bottom_centerlines[col] = corners[3][1] + (col + 0.5 - corners[3][2]) * G.slopes[3]
-		G.bottom_intersections[col] = G.bottom_centerlines[col] - 0.5 * math.abs(G.slopes[3])
+		G.bottom_edges[col] = G.bottom_centerlines[col] - 0.5 * math.abs(G.slopes[3])
+		G.bottom_fractions[col] = {}
+
+		for i = 1, 2 do
+			local shift = (i == 1) and -0.25 or 0.25
+			G.top_fractions[col][i] = G.top_centerlines[col] + shift * G.slopes[1]
+			G.bottom_fractions[col][i] = G.bottom_centerlines[col] + shift * G.slopes[3]
+		end
 	end
 
 	for row = G.top, G.bottom do
 		G.right_centerlines[row] = corners[2][2] + (row + 0.5 - corners[2][1]) / G.slopes[2]
-		G.right_intersections[row] = G.right_centerlines[row] - 0.5 / math.abs(G.slopes[2])
+		G.right_edges[row] = G.right_centerlines[row] - 0.5 / math.abs(G.slopes[2])
+		G.right_fractions[row] = {}
 		G.left_centerlines[row] = corners[4][2] + (row + 0.5 - corners[4][1]) / G.slopes[4]
-		G.left_intersections[row] = G.left_centerlines[row] + 0.5 / math.abs(G.slopes[4])
+		G.left_edges[row] = G.left_centerlines[row] + 0.5 / math.abs(G.slopes[4])
+		G.left_fractions[row] = {}
+
+		for i = 1, 2 do
+			local shift = (i == 1) and -0.25 or 0.25
+			G.right_fractions[row][i] = G.right_centerlines[row] + shift / G.slopes[2]
+			G.left_fractions[row][i] = G.left_centerlines[row] + shift / G.slopes[4]
+		end
 	end
 
 	return G
@@ -343,8 +364,8 @@ M.draw_quad = function(corners, target_position)
 			local horizontal_shade = 1
 
 			-- Check if vertically shifted block
-			local left_in = G.left_intersections[row] > col
-			local right_in = G.right_intersections[row] < col + 1
+			local left_in = G.left_edges[row] > col
+			local right_in = G.right_edges[row] < col + 1
 			if not (left_in and not G.left_vertical) and not (right_in and not G.right_vertical) then
 				local top_near = G.top_centerlines[col] > row
 				local bottom_near = G.bottom_centerlines[col] < row + 1
@@ -359,8 +380,8 @@ M.draw_quad = function(corners, target_position)
 			end
 
 			-- Check if horizontally shifted block
-			local top_in = G.top_intersections[col] > row
-			local bottom_in = G.bottom_intersections[col] < row + 1
+			local top_in = G.top_edges[col] > row
+			local bottom_in = G.bottom_edges[col] < row + 1
 			if not (top_in and not G.top_horizontal) and not (bottom_in and not G.bottom_horizontal) then
 				local left_near = G.left_centerlines[row] > col
 				local right_near = G.right_centerlines[row] < col + 1
@@ -413,11 +434,8 @@ M.draw_quad = function(corners, target_position)
 			}
 
 			for i = 1, 2 do
-				local shift = (i == 1) and -0.25 or 0.25
-
 				-- Intersection with top quad edge
-				row_float = G.top_centerlines[col] + shift * G.slopes[1]
-				row_float = 2 * (row_float - row)
+				row_float = 2 * (G.top_fractions[col][i] - row)
 				matrix_index = math.floor(row_float) + 1
 				for index = 1, math.min(2, matrix_index - 1) do
 					matrix[index][i] = 0
@@ -428,8 +446,7 @@ M.draw_quad = function(corners, target_position)
 				end
 
 				-- Intersection with right quad edge
-				col_float = G.right_centerlines[row] + shift / G.slopes[2]
-				col_float = 2 * (col_float - col)
+				col_float = 2 * (G.right_fractions[row][i] - col)
 				matrix_index = math.floor(col_float) + 1
 				for index = math.max(1, matrix_index + 1), 2 do
 					matrix[i][index] = 0
@@ -440,8 +457,7 @@ M.draw_quad = function(corners, target_position)
 				end
 
 				-- Intersection with bottom quad edge
-				row_float = G.bottom_centerlines[col] + shift * G.slopes[3]
-				row_float = 2 * (row_float - row)
+				row_float = 2 * (G.bottom_fractions[col][i] - row)
 				matrix_index = math.floor(row_float) + 1
 				for index = math.max(1, matrix_index + 1), 2 do
 					matrix[index][i] = 0
@@ -452,8 +468,7 @@ M.draw_quad = function(corners, target_position)
 				end
 
 				-- Intersection with left quad edge
-				col_float = G.left_centerlines[row] + shift / G.slopes[4]
-				col_float = 2 * (col_float - col)
+				col_float = 2 * (G.left_fractions[row][i] - col)
 				matrix_index = math.floor(col_float) + 1
 				for index = 1, math.min(2, matrix_index - 1) do
 					matrix[i][index] = 0
