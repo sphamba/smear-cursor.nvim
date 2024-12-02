@@ -7,6 +7,7 @@ local enabled = false
 
 local function initialize()
 	events.listen()
+	events.jump_cursor()
 end
 
 local metatable = {
@@ -57,7 +58,7 @@ M.setup = function(opts)
 		M[key] = value
 	end
 
-	vim.api.nvim_create_user_command("SmearToggle", M.toggle, {})
+	vim.api.nvim_create_user_command("SmearCursorToggle", M.toggle, {})
 end
 
 M.toggle = function(opts)
