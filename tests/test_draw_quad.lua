@@ -102,6 +102,18 @@ draw.draw_quad({
 	{ row + 5, col + 4 },
 })
 
+-- Degenerate quads (aligned points)
+
+row = 14
+col = 23
+
+draw.draw_quad({
+	{ row, col },
+	{ row - 1, col + 2 },
+	{ row + 3, col + 2 },
+	{ row + 3, col - 1 },
+})
+
 -- Lines
 
 row = 23
