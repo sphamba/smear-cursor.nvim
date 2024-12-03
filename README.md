@@ -93,8 +93,8 @@ As an example of further configuration, you can tune the smear dynamics to be sn
 ```
 
 
-> [!WARNING] Fire Hazard
-> Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
+> [!WARNING]
+> **🔥 FIRE HAZARD 🔥** Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
 > ```lua
 >   opts = {
 >     cursor_color = "#ff8800",
