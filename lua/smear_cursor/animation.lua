@@ -72,7 +72,6 @@ end
 local function animate()
 	animating = true
 	update()
-	draw.clear()
 
 	local max_distance = 0
 	for i = 1, 4 do
@@ -81,27 +80,38 @@ local function animate()
 		)
 		max_distance = math.max(max_distance, distance)
 	end
-	if max_distance > config.distance_stop_animating then
-		local shrunk_corners = shrink_volume(current_corners)
-		draw.draw_quad(shrunk_corners, target_position)
-		local target_reached = (
-			math.floor(shrunk_corners[1][1]) == target_position[1]
-			and math.floor(shrunk_corners[1][2]) == target_position[2]
-		)
-			or (math.floor(shrunk_corners[2][1]) == target_position[1] and math.ceil(shrunk_corners[2][2]) - 1 == target_position[2])
-			or (math.ceil(shrunk_corners[3][1]) - 1 == target_position[1] and math.ceil(shrunk_corners[3][2]) - 1 == target_position[2])
-			or (
-				math.ceil(shrunk_corners[4][1]) - 1 == target_position[1]
-				and math.floor(shrunk_corners[4][2]) == target_position[2]
-			)
-		if not target_reached and config.hide_target_hack then
-			draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
-		end
-		vim.defer_fn(animate, config.time_interval)
-	else
+
+	draw.clear()
+
+	if max_distance <= config.distance_stop_animating then
 		animating = false
 		set_corners(current_corners, target_position[1], target_position[2])
+		return
 	end
+
+	local shrunk_corners = shrink_volume(current_corners)
+	-- stylua: ignore start
+	local target_reached = (
+		math.floor(shrunk_corners[1][1]) == target_position[1] and
+		math.floor(shrunk_corners[1][2]) == target_position[2]
+	) or (
+		math.floor(shrunk_corners[2][1]) == target_position[1] and
+		math.ceil(shrunk_corners[2][2]) - 1 == target_position[2]
+	) or (
+		math.ceil(shrunk_corners[3][1]) - 1 == target_position[1] and
+		math.ceil(shrunk_corners[3][2]) - 1 == target_position[2]
+	) or (
+		math.ceil(shrunk_corners[4][1]) - 1 == target_position[1] and
+		math.floor(shrunk_corners[4][2]) == target_position[2]
+	)
+	-- stylua: ignore end
+
+	if not target_reached and config.hide_target_hack then
+		draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
+	end
+
+	draw.draw_quad(shrunk_corners, target_position)
+	vim.defer_fn(animate, config.time_interval)
 end
 
 local function set_stiffnesses(head_stiffness, trailing_stiffness)
