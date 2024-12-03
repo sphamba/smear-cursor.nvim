@@ -116,10 +116,10 @@ M.clear = function()
 			local wb = tab_windows.windows[i]
 
 			if wb and vim.api.nvim_win_is_valid(wb.window_id) then
+				vim.api.nvim_buf_del_extmark(wb.buffer_id, cursor_namespace, extmark_id)
 				if can_hide then
 					vim.api.nvim_win_set_config(wb.window_id, { hide = true })
 				else
-					vim.api.nvim_buf_del_extmark(wb.buffer_id, cursor_namespace, extmark_id)
 					vim.api.nvim_win_set_config(wb.window_id, { relative = "editor", row = 0, col = 0 })
 				end
 			end
@@ -401,7 +401,8 @@ M.draw_quad = function(corners, target_position)
 			-- Draw shifted block
 			if is_vertically_shifted and is_horizontally_shifted then
 				if vertical_shade < config.max_shade_no_matrix and horizontal_shade < config.max_shade_no_matrix then
-					goto continue
+					is_horizontally_shifted = false
+					is_vertically_shifted = false
 				elseif vertical_shade < horizontal_shade then
 					is_horizontally_shifted = false
 				else
