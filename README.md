@@ -89,6 +89,19 @@ As an example of further configuration, you can tune the smear dynamics to be sn
   },
 ```
 
+
+> [!WARNING] Fire Hazard
+> Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
+> ```lua
+>   opts = {
+>     cursor_color = "#ff8800",
+>     stiffness = 0.6,
+>     trailing_stiffness = 0.1,
+>     trailing_exponent = 5,
+>     gamma = 1,
+>   }
+> ```
+
 ### Transparent background
 
 Drawing the smear over a transparent background works better when using a font that supports legacy computing symbols, therefore setting the following option:

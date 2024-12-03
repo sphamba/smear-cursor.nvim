@@ -129,8 +129,8 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 	end
 
 	for i = 1, 4 do
-		local stiffness = head_stiffness
-			+ (trailing_stiffness - head_stiffness) * (distances[i] - min_distance) / (max_distance - min_distance)
+		local x = (distances[i] - min_distance) / (max_distance - min_distance)
+		local stiffness = head_stiffness + (trailing_stiffness - head_stiffness) * x ^ config.trailing_exponent
 		stiffnesses[i] = math.min(1, stiffness)
 	end
 end

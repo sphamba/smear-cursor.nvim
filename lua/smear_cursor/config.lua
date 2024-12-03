@@ -27,7 +27,11 @@ M.stiffness = 0.6
 -- 0: no movement, 1: instantaneous
 M.trailing_stiffness = 0.25
 
--- How much the tail slows down when getting close to the head.
+-- Controls if middle points are closer to the head or the tail.
+-- < 1: closer to the tail, > 1: closer to the head
+M.trailing_exponent = 2
+
+-- How much the smear slows down when getting close to the target.
 -- 0: no slowdown, more: more slowdown
 M.slowdown_exponent = 0
 
