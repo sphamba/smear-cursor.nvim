@@ -99,10 +99,11 @@ As an example of further configuration, you can tune the smear dynamics to be sn
 > ```lua
 >   opts = {
 >     cursor_color = "#ff8800",
->     stiffness = 0.6,
+>     stiffness = 0.3,
 >     trailing_stiffness = 0.1,
->     trailing_exponent = 5,
+>     trailing_exponent = 3,
 >     gamma = 1,
+>     volume_reduction_exponent = -0.1,
 >   }
 > ```
 
