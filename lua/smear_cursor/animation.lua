@@ -40,6 +40,13 @@ local function update()
 	end
 end
 
+local function get_center(corners)
+	return {
+		(corners[1][1] + corners[2][1] + corners[3][1] + corners[4][1]) / 4,
+		(corners[1][2] + corners[2][2] + corners[3][2] + corners[4][2]) / 4,
+	}
+end
+
 local function shrink_volume(corners)
 	local edges = {}
 	for i = 1, 3 do
@@ -55,11 +62,7 @@ local function shrink_volume(corners)
 	end
 	local volume = (double_volumes[1] + double_volumes[2]) / 2
 
-	local center = {
-		(corners[1][1] + corners[2][1] + corners[3][1] + corners[4][1]) / 4,
-		(corners[1][2] + corners[2][2] + corners[3][2] + corners[4][2]) / 4,
-	}
-
+	local center = get_center(corners)
 	local factor = (1 / volume) ^ (config.volume_reduction_exponent / 2)
 	factor = math.max(config.minimum_volume_factor, factor)
 	local shrunk_corners = {}
@@ -122,7 +125,7 @@ local function animate()
 end
 
 local function set_stiffnesses(head_stiffness, trailing_stiffness)
-	local target_center = { target_position[1] + 0.5, target_position[2] + 0.5 }
+	local target_center = get_center(target_corners)
 	local distances = {}
 	local min_distance = math.huge
 	local max_distance = 0
