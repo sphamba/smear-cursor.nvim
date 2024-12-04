@@ -47,6 +47,14 @@ local function get_center(corners)
 	}
 end
 
+local function normalize(v)
+	local length = math.sqrt(v[1] ^ 2 + v[2] ^ 2)
+	if length == 0 then
+		return { 0, 0 }
+	end
+	return { v[1] / length, v[2] / length }
+end
+
 local function shrink_volume(corners)
 	local edges = {}
 	for i = 1, 3 do
@@ -65,11 +73,19 @@ local function shrink_volume(corners)
 	local center = get_center(corners)
 	local factor = (1 / volume) ^ (config.volume_reduction_exponent / 2)
 	factor = math.max(config.minimum_volume_factor, factor)
+
 	local shrunk_corners = {}
 	for i = 1, 4 do
+		-- Only shrink perpendicular to the motion
+		local corner_to_target = { target_corners[i][1] - corners[i][1], target_corners[i][2] - corners[i][2] }
+		local center_to_corner = { corners[i][1] - center[1], corners[i][2] - center[2] }
+		local normal = normalize({ -corner_to_target[2], corner_to_target[1] })
+		local projection = center_to_corner[1] * normal[1] + center_to_corner[2] * normal[2]
+		local shift = projection * (1 - factor)
+
 		shrunk_corners[i] = {
-			center[1] + (corners[i][1] - center[1]) * factor,
-			center[2] + (corners[i][2] - center[2]) * factor,
+			corners[i][1] - normal[1] * shift,
+			corners[i][2] - normal[2] * shift,
 		}
 	end
 

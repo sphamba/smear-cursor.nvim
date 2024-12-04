@@ -32,7 +32,7 @@ M.stiffness = 0.6
 
 -- How fast the smear's tail moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.25
+M.trailing_stiffness = 0.3
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
