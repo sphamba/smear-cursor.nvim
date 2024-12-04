@@ -1,3 +1,6 @@
+-- All the following options can be set using the `setup` function.
+-- Refer to the README for more information.
+
 local M = {}
 
 -- General configuration -------------------------------------------------------
@@ -29,10 +32,10 @@ M.trailing_stiffness = 0.25
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
-M.trailing_exponent = 2
+M.trailing_exponent = 1
 
 -- How much the smear slows down when getting close to the target.
--- 0: no slowdown, more: more slowdown
+-- < 0: less slowdown, > 0: more slowdown. Keep small, e.g. [-0.2, 0.2]
 M.slowdown_exponent = 0
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
