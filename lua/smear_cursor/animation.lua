@@ -1,7 +1,6 @@
 local color = require("smear_cursor.color")
 local config = require("smear_cursor.config")
 local draw = require("smear_cursor.draw")
-local round = require("smear_cursor.math").round
 local screen = require("smear_cursor.screen")
 local M = {}
 
@@ -13,8 +12,13 @@ local stiffnesses = { 0, 0, 0, 0 }
 
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
-	corners[2] = { row, col + 1 }
-	corners[3] = { row + 1, col + 1 }
+	if config.vertical_bar_cursor then
+		corners[2] = { row, col + 1 / 8 }
+		corners[3] = { row + 1, col + 1 / 8 }
+	else
+		corners[2] = { row, col + 1 }
+		corners[3] = { row + 1, col + 1 }
+	end
 	corners[4] = { row + 1, col }
 end
 
@@ -90,24 +94,27 @@ local function animate()
 	end
 
 	local shrunk_corners = shrink_volume(current_corners)
-	-- stylua: ignore start
-	local target_reached = (
-		math.floor(shrunk_corners[1][1]) == target_position[1] and
-		math.floor(shrunk_corners[1][2]) == target_position[2]
-	) or (
-		math.floor(shrunk_corners[2][1]) == target_position[1] and
-		math.ceil(shrunk_corners[2][2]) - 1 == target_position[2]
-	) or (
-		math.ceil(shrunk_corners[3][1]) - 1 == target_position[1] and
-		math.ceil(shrunk_corners[3][2]) - 1 == target_position[2]
-	) or (
-		math.ceil(shrunk_corners[4][1]) - 1 == target_position[1] and
-		math.floor(shrunk_corners[4][2]) == target_position[2]
-	)
-	-- stylua: ignore end
+	if config.hide_target_hack then
+		-- stylua: ignore start
+		local target_reached = (
+			math.floor(shrunk_corners[1][1]) == target_position[1] and
+			math.floor(shrunk_corners[1][2]) == target_position[2]
+		) or (
+			math.floor(shrunk_corners[2][1]) == target_position[1] and
+			math.ceil(shrunk_corners[2][2]) - 1 == target_position[2]
+		) or (
+			math.ceil(shrunk_corners[3][1]) - 1 == target_position[1] and
+			math.ceil(shrunk_corners[3][2]) - 1 == target_position[2]
+		) or (
+			math.ceil(shrunk_corners[4][1]) - 1 == target_position[1] and
+			math.floor(shrunk_corners[4][2]) == target_position[2]
+		)
+		-- stylua: ignore end
 
-	if not target_reached and config.hide_target_hack then
-		draw.draw_character(target_position[1], target_position[2], " ", color.get_hl_group({ inverted = true }))
+		if not target_reached then
+			local character = config.vertical_bar_cursor and "▏" or "█"
+			draw.draw_character(target_position[1], target_position[2], character, color.get_hl_group())
+		end
 	end
 
 	draw.draw_quad(shrunk_corners, target_position)

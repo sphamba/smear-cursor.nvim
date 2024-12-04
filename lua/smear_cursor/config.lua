@@ -15,6 +15,10 @@ M.smear_between_neighbor_lines = true
 -- Smears will blend better on all backgrounds.
 M.legacy_computing_symbols_support = false
 
+-- Set to `true` if your cursor is a vertical bar in normal mode.
+-- Use with `matrix_pixel_threshold = 0.3`
+M.vertical_bar_cursor = false
+
 -- Attempt to hide the real cursor by drawing a character below it.
 M.hide_target_hack = true
 
