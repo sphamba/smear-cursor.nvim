@@ -12,6 +12,10 @@ This plugin is intended for terminals/GUIs that can only display text and do not
 
 ## 📦 Installation
 
+> [!NOTE]
+> After enabling the plugin in your configuration, you can toggle the smear cursor on and off with the `:SmearCursorToggle` command or with `:lua require("smear_cursor").toggle()`.
+
+
 ### Minimum requirements
 
 - Neovim 0.10.2
@@ -39,9 +43,6 @@ call plug#end()
 
 lua require('smear_cursor').enabled = true
 ```
-
-> [!NOTE]
-> After enabling the plugin in your configuration, you can toggle the smear cursor on and off with the `:SmearCursorToggle` command or with `:lua require("smear_cursor").toggle()`.
 
 
 ## ⚙  Configuration
