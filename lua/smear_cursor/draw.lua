@@ -89,7 +89,10 @@ local function get_window(tab, row, col)
 
 	local ei = vim.o.ei -- eventignore
 	vim.o.ei = "all" -- ignore all events
-	set_buffer_options(buffer_id, { buftype = "nofile", bufhidden = "wipe", swapfile = false })
+	set_buffer_options(
+		buffer_id,
+		{ buftype = "nofile", filetype = "smear-cursor", bufhidden = "wipe", swapfile = false }
+	)
 	set_window_options(window_id, { winhighlight = "NormalFloat:Normal", winblend = 100 })
 	vim.o.ei = ei
 	tab_windows.windows[tab_windows.active] = { window_id = window_id, buffer_id = buffer_id }
