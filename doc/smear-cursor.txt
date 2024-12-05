@@ -1,43 +1,33 @@
-*smear-cursor.nvim.txt*   For Neovim >= 0.10.2   Last change: 2024 December 04
+*smear-cursor.txt*     Neovim plugin to animate the cursor with a smear effect
 
 ==============================================================================
-Table of Contents                        *smear-cursor.nvim-table-of-contents*
+Table of Contents                             *smear-cursor-table-of-contents*
 
-1. Smear cursor for Neovim         |smear-cursor.nvim-smear-cursor-for-neovim|
-  - Demo                      |smear-cursor.nvim-smear-cursor-for-neovim-demo|
-  - Installation      |smear-cursor.nvim-smear-cursor-for-neovim-installation|
-  - Configuration    |smear-cursor.nvim-smear-cursor-for-neovim-configuration|
-  - Known issues      |smear-cursor.nvim-smear-cursor-for-neovim-known-issues|
-  - ‍ Contributing|smear-cursor.nvim-smear-cursor-for-neovim-‍-contributing|
+1. Installation                                    |smear-cursor-installation|
+  - Minimum requirements      |smear-cursor-installation-minimum-requirements|
+  - Using lazy.nvim                |smear-cursor-installation-using-lazy.nvim|
+  - Using vim-plug                  |smear-cursor-installation-using-vim-plug|
+2. Configuration                                  |smear-cursor-configuration|
+  - Using lazy.nvim               |smear-cursor-configuration-using-lazy.nvim|
+  - Faster smear                     |smear-cursor-configuration-faster-smear|
+  - Transparent background |smear-cursor-configuration-transparent-background|
+  - Using init.vim                 |smear-cursor-configuration-using-init.vim|
+3. Known issues                                    |smear-cursor-known-issues|
 
 ==============================================================================
-1. Smear cursor for Neovim         *smear-cursor.nvim-smear-cursor-for-neovim*
-
-_Neovim plugin to animate the cursor with a smear effect. Inspired by
-Neovide’s animated cursor._
-
-This plugin is intended for terminals/GUIs that can only display text and do
-not have graphical capabilities (unlike Neovide <https://neovide.dev/>, or the
-Kitty <https://sw.kovidgoyal.net/kitty/> terminal). Also, check out the
-karb94/neoscroll.nvim <https://github.com/karb94/neoscroll.nvim> plugin for
-smooth scrolling!
+1. Installation                                    *smear-cursor-installation*
 
 
-DEMO                          *smear-cursor.nvim-smear-cursor-for-neovim-demo*
+  [!NOTE] After enabling the plugin in your configuration, you can toggle the
+  smear cursor on and off with the `:SmearCursorToggle` command or with `:lua
+  require("smear_cursor").toggle()`.
 
-Demo
-<https://private-user-images.githubusercontent.com/17217484/389300116-fc95b4df-d791-4c53-9141-4f870eb03ab2.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzI0NzY0NDAsIm5iZiI6MTczMjQ3NjE0MCwicGF0aCI6Ii8xNzIxNzQ4NC8zODkzMDAxMTYtZmM5NWI0ZGYtZDc5MS00YzUzLTkxNDEtNGY4NzBlYjAzYWIyLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDExMjQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQxMTI0VDE5MjIyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTg1NjFhZjJlODQ4YmU2NjAzY2EzY2I3NWMzMzI5MWQ1Njk2MTExYmEwYmExNTMwMThmYTJjYjE2ZjIyOThjNjMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Skw2VVyVWVkMe4ht6mvl_AZ_6QasJm8O6qsIZmcQ2XE>
-
-
-INSTALLATION          *smear-cursor.nvim-smear-cursor-for-neovim-installation*
-
-
-MINIMUM REQUIREMENTS ~
+MINIMUM REQUIREMENTS          *smear-cursor-installation-minimum-requirements*
 
 - Neovim 0.10.2
 
 
-USING LAZY.NVIM ~
+USING LAZY.NVIM                    *smear-cursor-installation-using-lazy.nvim*
 
 In `~/.config/nvim/lua/plugins/smear_cursor.lua`, add:
 
@@ -49,7 +39,7 @@ In `~/.config/nvim/lua/plugins/smear_cursor.lua`, add:
 <
 
 
-USING VIM-PLUG ~
+USING VIM-PLUG                      *smear-cursor-installation-using-vim-plug*
 
 In your `init.vim`, add:
 
@@ -57,40 +47,37 @@ In your `init.vim`, add:
     call plug#begin()
     Plug 'sphamba/smear-cursor.nvim'
     call plug#end()
-    
+
     lua require('smear_cursor').enabled = true
 <
 
 
-  [!NOTE] After enabling the plugin in your configuration, you can toggle the
-  smear cursor on and off with the `:SmearCursorToggle` command or with `:lua
-  require("smear_cursor").toggle()`.
-
-CONFIGURATION        *smear-cursor.nvim-smear-cursor-for-neovim-configuration*
+==============================================================================
+2. Configuration                                  *smear-cursor-configuration*
 
 
-USING LAZY.NVIM ~
+USING LAZY.NVIM                   *smear-cursor-configuration-using-lazy.nvim*
 
 Here are the default configuration options:
 
 >lua
     return {
       "sphamba/smear-cursor.nvim",
-    
+
       opts = {
         -- Smear cursor color. Defaults to Cursor GUI color if not set.
         -- Set to "none" to match the text color at the target cursor position.
         cursor_color = "#d3cdc3",
-    
+
         -- Background color. Defaults to Normal GUI background color if not set.
         normal_bg = "#282828",
-    
+
         -- Smear cursor when switching buffers or windows.
         smear_between_buffers = true,
-    
+
         -- Smear cursor when moving within line or to neighbor lines.
         smear_between_neighbor_lines = true,
-    
+
         -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
         -- Smears will blend better on all backgrounds.
         legacy_computing_symbols_support = false,
@@ -107,7 +94,7 @@ for the full list of configuration options that can be set with `opts`.
   case, manually put the actual cursor color in your config, as shown above, to
   get a matching smear color.
 
-FASTER SMEAR ~
+FASTER SMEAR                         *smear-cursor-configuration-faster-smear*
 
 As an example of further configuration, you can tune the smear dynamics to be
 snappier:
@@ -115,7 +102,7 @@ snappier:
 >lua
       opts = {                         -- Default  Range
         stiffness = 0.8,               -- 0.6      [0, 1]
-        trailing_stiffness = 0.5,      -- 0.25     [0, 1]
+        trailing_stiffness = 0.5,      -- 0.3      [0, 1]
         distance_stop_animating = 0.5, -- 0.1      > 0
         hide_target_hack = false,      -- true     boolean
       },
@@ -128,14 +115,15 @@ snappier:
   >lua
         opts = {
           cursor_color = "#ff8800",
-          stiffness = 0.6,
+          stiffness = 0.3,
           trailing_stiffness = 0.1,
-          trailing_exponent = 5,
+          trailing_exponent = 3,
           gamma = 1,
+          volume_reduction_exponent = -0.1,
         }
   <
 
-TRANSPARENT BACKGROUND ~
+TRANSPARENT BACKGROUND     *smear-cursor-configuration-transparent-background*
 
 Drawing the smear over a transparent background works better when using a font
 that supports legacy computing symbols, therefore setting the following option:
@@ -156,7 +144,7 @@ under the smear. You may set a color for this shadow to be less noticeable:
 <
 
 
-USING INIT.VIM ~
+USING INIT.VIM                     *smear-cursor-configuration-using-init.vim*
 
 You can set the configuration variables in your `init.vim` file like this:
 
@@ -167,32 +155,11 @@ You can set the configuration variables in your `init.vim` file like this:
 <
 
 
-KNOWN ISSUES          *smear-cursor.nvim-smear-cursor-for-neovim-known-issues*
+==============================================================================
+3. Known issues                                    *smear-cursor-known-issues*
 
 - There is a shadow around the smear (text become invisible). This is inherent to the way the smear is rendered, as Neovim is not able to render superimposed characters. The shadow is less noticeable when the smear is moving faster (see configuration options).
 - Likely not compatible with other plugins that modify the cursor.
-
-
-‍ CONTRIBUTING  *smear-cursor.nvim-smear-cursor-for-neovim-‍-contributing*
-
-Please feel free to open an issue or a pull request if you have any suggestions
-or improvements! This project uses pre-commit <https://pre-commit.com/> hooks
-to ensure code quality (with StyLua <https://github.com/JohnnyMorganz/StyLua>)
-and meaningful commit messages (following Conventional Commits
-<https://www.conventionalcommits.org/>)
-
-
-REQUIREMENTS ~
-
-- Neovim >= 0.10.2
-- Make
-- pre-commit (`pip install pre-commit`)
-
-
-SETUP ~
-
-1. Clone the repository
-2. Run `make install` to install the pre-commit hooks
 
 Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
 

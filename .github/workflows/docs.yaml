@@ -19,9 +19,11 @@ jobs:
         uses: kdheepak/panvimdoc@main
         with:
           vimdoc: smear-cursor
-          version: "Neovim >= 0.10.2"
+          version: "NVIM v0.10.2"
+          description: "Neovim plugin to animate the cursor with a smear effect"
           demojify: true
           treesitter: true
+          shiftheadinglevelby: -1
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
