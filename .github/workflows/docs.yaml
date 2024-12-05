@@ -13,7 +13,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: panvimdoc
         uses: kdheepak/panvimdoc@main
         with:
@@ -21,10 +21,12 @@ jobs:
           version: "Neovim >= 0.10.2"
           demojify: true
           treesitter: true
-      - name: Push changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
         with:
-          commit_message: "chore(build): auto-generate vimdoc"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          commit-message: "chore(build): auto-generate vimdoc"
+          branch: "docs-auto-generate"
+          title: "docs: auto-generate vimdoc"
+          body: "This pull request contains auto-generated Vim documentation."
+          labels: "documentation"
+          author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
