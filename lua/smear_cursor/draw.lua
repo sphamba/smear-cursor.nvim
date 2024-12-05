@@ -19,18 +19,6 @@ local extmark_id = 999
 ---@type table<number, {active:number, windows:{window_id:number, buffer_id:number}[]}>
 local all_tab_windows = {}
 
--- Remove any invalid windows
-function M.check_windows()
-	for _, tab_windows in pairs(all_tab_windows) do
-		tab_windows.windows = vim.tbl_filter(function(wb)
-			return wb.window_id
-				and vim.api.nvim_win_is_valid(wb.window_id)
-				and wb.buffer_id
-				and vim.api.nvim_buf_is_valid(wb.buffer_id)
-		end, tab_windows.windows)
-	end
-end
-
 ---@param window_id number
 ---@param options vim.wo
 local function set_window_options(window_id, options)
@@ -55,15 +43,21 @@ local function get_window(tab, row, col)
 	all_tab_windows[tab] = all_tab_windows[tab] or { active = 0, windows = {} }
 	local tab_windows = all_tab_windows[tab]
 
+	-- Find existing window
 	tab_windows.active = tab_windows.active + 1
-	local wb = tab_windows.windows[tab_windows.active]
+	while tab_windows.active <= #tab_windows.windows do
+		local wb = tab_windows.windows[tab_windows.active]
 
-	if wb then -- Window already exists
-		---@type vim.api.keyset.win_config
-		local window_config = { relative = "editor", row = row - 1, col = col - 1 }
-		if can_hide then window_config.hide = false end
-		vim.api.nvim_win_set_config(wb.window_id, window_config)
-		return wb.window_id, wb.buffer_id
+		if vim.api.nvim_win_is_valid(wb.window_id) and vim.api.nvim_buf_is_valid(wb.buffer_id) then
+			---@type vim.api.keyset.win_config
+			local window_config = { relative = "editor", row = row - 1, col = col - 1 }
+			if can_hide then window_config.hide = false end
+			vim.api.nvim_win_set_config(wb.window_id, window_config)
+			return wb.window_id, wb.buffer_id
+		end
+
+		-- Remove invalid window
+		table.remove(tab_windows.windows, tab_windows.active)
 	end
 
 	-- Create a new window
@@ -90,7 +84,6 @@ local function get_window(tab, row, col)
 	set_window_options(window_id, { winhighlight = "NormalFloat:Normal", winblend = 100 })
 	vim.o.ei = ei
 	tab_windows.windows[tab_windows.active] = { window_id = window_id, buffer_id = buffer_id }
-	vim.api.nvim_create_autocmd("BufWipeout", { buffer = buffer_id, callback = vim.schedule_wrap(M.check_windows) })
 	return window_id, buffer_id
 end
 
