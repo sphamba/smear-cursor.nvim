@@ -61,8 +61,10 @@ local function get_window(tab, row, col)
 	end
 
 	-- Create a new window
-	local buffer_id = vim.api.nvim_create_buf(false, true)
+	local ei = vim.o.ei -- eventignore
+	vim.o.ei = "all" -- ignore all events
 
+	local buffer_id = vim.api.nvim_create_buf(false, true)
 	local window_id = vim.api.nvim_open_win(buffer_id, false, {
 		relative = "editor",
 		row = row - 1,
@@ -75,8 +77,6 @@ local function get_window(tab, row, col)
 		zindex = 300,
 	})
 
-	local ei = vim.o.ei -- eventignore
-	vim.o.ei = "all" -- ignore all events
 	set_buffer_options(
 		buffer_id,
 		{ buftype = "nofile", filetype = "smear-cursor", bufhidden = "wipe", swapfile = false }
@@ -84,6 +84,7 @@ local function get_window(tab, row, col)
 	set_window_options(window_id, { winhighlight = "NormalFloat:Normal", winblend = 100 })
 	vim.o.ei = ei
 	tab_windows.windows[tab_windows.active] = { window_id = window_id, buffer_id = buffer_id }
+
 	return window_id, buffer_id
 end
 
@@ -100,9 +101,9 @@ M.draw_character = function(row, col, character, hl_group)
 end
 
 M.clear = function()
-	-- Hide the windows without deleting them
 	for tab, tab_windows in pairs(all_tab_windows) do
-		for i = 1, tab_windows.active do
+		-- Hide windows without deleting them
+		for i = 1, math.min(tab_windows.active, config.max_kept_windows) do
 			local wb = tab_windows.windows[i]
 
 			if wb and vim.api.nvim_win_is_valid(wb.window_id) then
@@ -116,6 +117,18 @@ M.clear = function()
 		end
 
 		all_tab_windows[tab].active = 0
+
+		-- Delete supplementary windows
+		local ei = vim.o.ei -- eventignore
+		vim.o.ei = "all" -- ignore all events
+		for i = config.max_kept_windows + 1, #tab_windows.windows do
+			local wb = tab_windows.windows[i]
+
+			if wb and vim.api.nvim_win_is_valid(wb.window_id) then vim.api.nvim_win_close(wb.window_id, true) end
+
+			tab_windows.windows[i] = nil
+		end
+		vim.o.ei = ei
 	end
 end
 
