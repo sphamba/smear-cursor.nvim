@@ -5,9 +5,7 @@ local M = {}
 -- Get a color from a highlight group
 local function get_hl_color(group, attr)
 	local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
-	if hl[attr] then
-		return string.format("#%06x", hl[attr])
-	end
+	if hl[attr] then return string.format("#%06x", hl[attr]) end
 	return nil
 end
 
@@ -51,24 +49,18 @@ function M.get_color_at_cursor()
 		for _, capture in pairs(vim.treesitter.get_captures_at_pos(0, cursor[1], cursor[2])) do
 			ts_hl_group = "@" .. capture.capture .. "." .. capture.lang
 		end
-		if ts_hl_group then
-			return get_hl_color(ts_hl_group, "fg")
-		end
+		if ts_hl_group then return get_hl_color(ts_hl_group, "fg") end
 	end
 	-- get any extmark with hl_group at the cursor
 	local extmarks = vim.api.nvim_buf_get_extmarks(0, -1, cursor, cursor, { details = true, overlap = true })
 	for _, extmark in ipairs(extmarks) do
 		local ret = extmark[4].hl_group and get_hl_color(extmark[4].hl_group, "fg")
-		if ret then
-			return ret
-		end
+		if ret then return ret end
 	end
 end
 
 function M.update_color_at_cursor()
-	if cursor_color ~= "none" then
-		return
-	end
+	if cursor_color ~= "none" then return end
 	color_at_cursor = M.get_color_at_cursor()
 end
 
@@ -83,14 +75,10 @@ function M.get_hl_group(opts)
 	-- at the cursor.
 	if cursor_color == "none" then
 		_cursor_color = color_at_cursor
-		if _cursor_color then
-			hl_group = hl_group .. "_" .. _cursor_color:sub(2)
-		end
+		if _cursor_color then hl_group = hl_group .. "_" .. _cursor_color:sub(2) end
 	end
 
-	if cache[hl_group] then
-		return hl_group
-	end
+	if cache[hl_group] then return hl_group end
 
 	local _normal_bg = normal_bg or get_hl_color("Normal", "bg") or "none"
 
@@ -110,17 +98,16 @@ function M.get_hl_group(opts)
 	end
 
 	---@type vim.api.keyset.highlight
-	local hl = opts.inverted
-			and {
-				fg = _normal_bg == "none" and transparent_bg_fallback_color or _normal_bg,
-				bg = _cursor_color,
-				blend = 0,
-			}
-		or {
-			fg = _cursor_color,
-			bg = "none",
-			blend = blending and 100 or 0,
-		}
+	-- stylua: ignore
+	local hl = opts.inverted and {
+		fg = _normal_bg == "none" and transparent_bg_fallback_color or _normal_bg,
+		bg = _cursor_color,
+		blend = 0,
+	} or {
+		fg = _cursor_color,
+		bg = "none",
+		blend = blending and 100 or 0,
+	}
 
 	vim.api.nvim_set_hl(0, hl_group, hl)
 	cache[hl_group] = true

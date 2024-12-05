@@ -34,9 +34,7 @@ end
 ---@param window_id number
 ---@param options vim.wo
 local function set_window_options(window_id, options)
-	if options == nil then
-		return
-	end
+	if options == nil then return end
 
 	for k, v in pairs(options) do
 		vim.api.nvim_set_option_value(k, v, { scope = "local", win = window_id })
@@ -46,9 +44,7 @@ end
 ---@param buffer_id number
 ---@param options vim.bo
 local function set_buffer_options(buffer_id, options)
-	if options == nil then
-		return
-	end
+	if options == nil then return end
 
 	for k, v in pairs(options) do
 		vim.api.nvim_set_option_value(k, v, { buf = buffer_id })
@@ -65,9 +61,7 @@ local function get_window(tab, row, col)
 	if wb then -- Window already exists
 		---@type vim.api.keyset.win_config
 		local window_config = { relative = "editor", row = row - 1, col = col - 1 }
-		if can_hide then
-			window_config.hide = false
-		end
+		if can_hide then window_config.hide = false end
 		vim.api.nvim_win_set_config(wb.window_id, window_config)
 		return wb.window_id, wb.buffer_id
 	end
@@ -139,35 +133,27 @@ end
 
 local function draw_matrix_character(row, col, matrix)
 	local max = math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
-	if max < config.matrix_pixel_threshold then
-		return
-	end
+	if max < config.matrix_pixel_threshold then return end
 	local threshold = max * config.matrix_pixel_min_factor
 	local bit_1 = (matrix[1][1] > threshold) and 1 or 0
 	local bit_2 = (matrix[1][2] > threshold) and 1 or 0
 	local bit_3 = (matrix[2][1] > threshold) and 1 or 0
 	local bit_4 = (matrix[2][2] > threshold) and 1 or 0
 	local index = bit_1 * 1 + bit_2 * 2 + bit_3 * 4 + bit_4 * 8
-	if index == 0 then
-		return
-	end
+	if index == 0 then return end
 
 	local character = MATRIX_CHARACTERS[index]
 	local shade = matrix[1][1] + matrix[1][2] + matrix[2][1] + matrix[2][2]
 	local max_shade = bit_1 + bit_2 + bit_3 + bit_4
 	local hl_group_index = round(shade / max_shade * config.color_levels)
 	hl_group_index = math.min(hl_group_index, config.color_levels)
-	if hl_group_index == 0 then
-		return
-	end
+	if hl_group_index == 0 then return end
 
 	M.draw_character(row, col, character, color.get_hl_group({ level = hl_group_index }))
 end
 
 local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade)
-	if row_top >= row_bottom then
-		return
-	end
+	if row_top >= row_bottom then return end
 	-- logging.debug("top: " .. row_top .. ", bottom: " .. row_bottom .. ", col: " .. col)
 
 	local row = math.floor(row_top)
@@ -178,16 +164,12 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade
 	if center < 0.5 then
 		local micro_shift = center * 16
 		character_index = math.ceil(micro_shift)
-		if character_index == 0 then
-			return
-		end
+		if character_index == 0 then return end
 
 		local character_thickness = character_index / 8
 		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then
-			return
-		end
+		if hl_group_index == 0 then return end
 
 		if config.legacy_computing_symbols_support then
 			character_list = TOP_BLOCKS
@@ -199,16 +181,12 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade
 	else
 		local micro_shift = center * 16 - 8
 		character_index = math.floor(micro_shift)
-		if character_index == 8 then
-			return
-		end
+		if character_index == 8 then return end
 
 		local character_thickness = 1 - character_index / 8
 		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then
-			return
-		end
+		if hl_group_index == 0 then return end
 
 		character_list = BOTTOM_BLOCKS
 		hl_group = color.get_hl_group({ level = hl_group_index })
@@ -218,9 +196,7 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade
 end
 
 local function draw_horizontally_shifted_sub_block(row, col_left, col_right, shade)
-	if col_left >= col_right then
-		return
-	end
+	if col_left >= col_right then return end
 	-- logging.debug("row: " .. row .. ", left: " .. col_left .. ", right: " .. col_right)
 
 	local col = math.floor(col_left)
@@ -231,32 +207,24 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	if center < 0.5 then
 		local micro_shift = center * 16
 		character_index = math.ceil(micro_shift)
-		if character_index == 0 then
-			return
-		end
+		if character_index == 0 then return end
 
 		local character_thickness = character_index / 8
 		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then
-			return
-		end
+		if hl_group_index == 0 then return end
 
 		character_list = LEFT_BLOCKS
 		hl_group = color.get_hl_group({ level = hl_group_index })
 	else
 		local micro_shift = center * 16 - 8
 		character_index = math.floor(micro_shift)
-		if character_index == 8 then
-			return
-		end
+		if character_index == 8 then return end
 
 		local character_thickness = 1 - character_index / 8
 		shade = shade * thickness / character_thickness
 		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then
-			return
-		end
+		if hl_group_index == 0 then return end
 
 		if config.legacy_computing_symbols_support then
 			character_list = RIGHT_BLOCKS
@@ -346,9 +314,7 @@ local function precompute_quad_geometry(corners)
 end
 
 M.draw_quad = function(corners, target_position)
-	if target_position == nil then
-		target_position = { 0, 0 }
-	end
+	if target_position == nil then target_position = { 0, 0 } end
 
 	local G = precompute_quad_geometry(corners)
 
@@ -360,9 +326,7 @@ M.draw_quad = function(corners, target_position)
 
 		for col = math.max(G.left, math.floor(left)), math.min(G.right, math.ceil(right)) do
 			-- Check if on target
-			if row == target_position[1] and col == target_position[2] then
-				goto continue
-			end
+			if row == target_position[1] and col == target_position[2] then goto continue end
 
 			local is_vertically_shifted = false
 			local vertical_shade = 1

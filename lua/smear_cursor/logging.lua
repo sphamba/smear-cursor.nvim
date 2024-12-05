@@ -13,9 +13,7 @@ local function log(message, level)
 	local logging_level = require("smear_cursor.config").logging_level
 	local level_name = vim.log.levels[level + 1]
 
-	if logging_level <= level then
-		vim.notify("[smear_cursor][" .. level_names[level] .. "] " .. message, level)
-	end
+	if logging_level <= level then vim.notify("[smear_cursor][" .. level_names[level] .. "] " .. message, level) end
 end
 
 M.trace = function(message)

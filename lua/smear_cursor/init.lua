@@ -12,17 +12,11 @@ end
 
 local metatable = {
 	__index = function(table, key)
-		if key == "enabled" then
-			return enabled
-		end
+		if key == "enabled" then return enabled end
 
-		if key == "cursor_color" or key == "normal_bg" then
-			return color[key]
-		end
+		if key == "cursor_color" or key == "normal_bg" then return color[key] end
 
-		if config[key] ~= nil then
-			return config[key]
-		end
+		if config[key] ~= nil then return config[key] end
 
 		return nil
 	end,
@@ -50,9 +44,7 @@ local metatable = {
 
 M.setup = function(opts)
 	opts = opts or {}
-	if opts.enabled == nil then
-		opts.enabled = true
-	end
+	if opts.enabled == nil then opts.enabled = true end
 
 	for key, value in pairs(opts) do
 		M[key] = value

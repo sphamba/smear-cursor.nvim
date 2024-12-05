@@ -5,6 +5,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^doc/
       - id: end-of-file-fixer
       - id: check-yaml
   - repo: https://github.com/JohnnyMorganz/StyLua

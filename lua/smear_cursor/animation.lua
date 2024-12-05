@@ -49,9 +49,7 @@ end
 
 local function normalize(v)
 	local length = math.sqrt(v[1] ^ 2 + v[2] ^ 2)
-	if length == 0 then
-		return { 0, 0 }
-	end
+	if length == 0 then return { 0, 0 } end
 	return { v[1] / length, v[2] / length }
 end
 
@@ -114,7 +112,7 @@ local function animate()
 
 	local shrunk_corners = shrink_volume(current_corners)
 	if config.hide_target_hack then
-		-- stylua: ignore start
+		-- stylua: ignore
 		local target_reached = (
 			math.floor(shrunk_corners[1][1]) == target_position[1] and
 			math.floor(shrunk_corners[1][2]) == target_position[2]
@@ -128,7 +126,6 @@ local function animate()
 			math.ceil(shrunk_corners[4][1]) - 1 == target_position[1] and
 			math.floor(shrunk_corners[4][2]) == target_position[2]
 		)
-		-- stylua: ignore end
 
 		if not target_reached then
 			local character = config.vertical_bar_cursor and "▏" or "█"
@@ -162,9 +159,7 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 end
 
 M.change_target_position = function(row, col, jump)
-	if target_position[1] == row and target_position[2] == col then
-		return
-	end
+	if target_position[1] == row and target_position[2] == col then return end
 	draw.clear()
 
 	-- Draw end of previous smear
@@ -184,9 +179,7 @@ M.change_target_position = function(row, col, jump)
 		return
 	end
 
-	if not animating then
-		animate()
-	end
+	if not animating then animate() end
 end
 
 setmetatable(M, {
