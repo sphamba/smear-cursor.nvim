@@ -22,6 +22,9 @@ M.vertical_bar_cursor = false
 -- Attempt to hide the real cursor by drawing a character below it.
 M.hide_target_hack = true
 
+-- Number of windows that stay open for rendering.
+M.max_kept_windows = 30
+
 M.time_interval = 17 -- milliseconds
 
 -- Smear configuration ---------------------------------------------------------
