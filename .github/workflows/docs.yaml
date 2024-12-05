@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   pull_request:
     branches:
       - main
@@ -17,7 +18,7 @@ jobs:
       - name: panvimdoc
         uses: kdheepak/panvimdoc@main
         with:
-          vimdoc: smear-cursor.nvim
+          vimdoc: smear-cursor
           version: "Neovim >= 0.10.2"
           demojify: true
           treesitter: true
