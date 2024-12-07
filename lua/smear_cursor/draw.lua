@@ -255,22 +255,38 @@ end
 
 local function precompute_intersections_horizontal(corners, G, index)
 	local centerlines = {}
+	local fractions = {}
 
 	for col = G.left, G.right do
 		centerlines[col] = corners[index][1] + (col + 0.5 - corners[index][2]) * G.slopes[index]
+		fractions[col] = {}
+
+		for j = 1, 2 do
+			local shift = (j == 1) and -0.25 or 0.25
+			fractions[col][j] = centerlines[col] + shift * G.slopes[index]
+		end
 	end
 
 	G.I.centerlines[index] = centerlines
+	G.I.fractions[index] = fractions
 end
 
 local function precompute_intersections_vertical(corners, G, index)
 	local centerlines = {}
+	local fractions = {}
 
 	for row = G.top, G.bottom do
 		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
+		fractions[row] = {}
+
+		for j = 1, 2 do
+			local shift = (j == 1) and -0.25 or 0.25
+			fractions[row][j] = centerlines[row] + shift / G.slopes[index]
+		end
 	end
 
 	G.I.centerlines[index] = centerlines
+	G.I.fractions[index] = fractions
 end
 
 local function precompute_intersections_diagonal(corners, G, index)
@@ -283,6 +299,7 @@ local function precompute_intersections_diagonal(corners, G, index)
 		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
 		edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
 		fractions[row] = {}
+
 		for j = 1, 2 do
 			local shift = (j == 1) and -0.25 or 0.25
 			fractions[row][j] = centerlines[row] + shift / G.slopes[index]
@@ -382,6 +399,68 @@ local function get_edge_cell_intersection(edge_index, row, col, G)
 	return get_edge_cell_intersection_functions[edge_type](edge_index, row, col, G)
 end
 
+local function update_matrix_with_top_edge(edge_index, fraction_index, row, col, G, matrix)
+	local row_float = 2 * (G.I.fractions[edge_index][col][fraction_index] - row)
+	local matrix_index = math.floor(row_float) + 1
+	for index = 1, math.min(2, matrix_index - 1) do
+		matrix[index][fraction_index] = 0
+	end
+	if matrix_index == 1 or matrix_index == 2 then
+		local shade = 1 - (row_float % 1)
+		matrix[matrix_index][fraction_index] = matrix[matrix_index][fraction_index] * shade
+	end
+end
+
+local function update_matrix_with_bottom_edge(edge_index, fraction_index, row, col, G, matrix)
+	local row_float = 2 * (G.I.fractions[edge_index][col][fraction_index] - row)
+	local matrix_index = math.floor(row_float) + 1
+	for index = math.max(1, matrix_index + 1), 2 do
+		matrix[index][fraction_index] = 0
+	end
+	if matrix_index == 1 or matrix_index == 2 then
+		local shade = row_float % 1
+		matrix[matrix_index][fraction_index] = matrix[matrix_index][fraction_index] * shade
+	end
+end
+
+local function update_matrix_with_left_edge(edge_index, fraction_index, row, col, G, matrix)
+	local col_float = 2 * (G.I.fractions[edge_index][row][fraction_index] - col)
+	local matrix_index = math.floor(col_float) + 1
+	for index = 1, math.min(2, matrix_index - 1) do
+		matrix[fraction_index][index] = 0
+	end
+	if matrix_index == 1 or matrix_index == 2 then
+		local shade = 1 - (col_float % 1)
+		matrix[fraction_index][matrix_index] = matrix[fraction_index][matrix_index] * shade
+	end
+end
+
+local function update_matrix_with_right_edge(edge_index, fraction_index, row, col, G, matrix)
+	local col_float = 2 * (G.I.fractions[edge_index][row][fraction_index] - col)
+	local matrix_index = math.floor(col_float) + 1
+	for index = math.max(1, matrix_index + 1), 2 do
+		matrix[fraction_index][index] = 0
+	end
+	if matrix_index == 1 or matrix_index == 2 then
+		local shade = col_float % 1
+		matrix[fraction_index][matrix_index] = matrix[fraction_index][matrix_index] * shade
+	end
+end
+
+local update_matrix_with_edge_functions = {
+	[TOP] = update_matrix_with_top_edge,
+	[BOTTOM] = update_matrix_with_bottom_edge,
+	[LEFT] = update_matrix_with_left_edge,
+	[RIGHT] = update_matrix_with_right_edge,
+	[LEFT_DIAGONAL] = update_matrix_with_left_edge,
+	[RIGHT_DIAGONAL] = update_matrix_with_right_edge,
+}
+
+local function update_matrix_with_edge(edge_index, matrix_index, row, col, G, matrix)
+	local edge_type = G.edge_types[edge_index]
+	update_matrix_with_edge_functions[edge_type](edge_index, matrix_index, row, col, G, matrix)
+end
+
 M.draw_quad = function(corners, target_position)
 	if target_position == nil then target_position = { 0, 0 } end
 
@@ -468,56 +547,14 @@ M.draw_quad = function(corners, target_position)
 			end
 
 			-- Draw matrix
-			local row_float, col_float, matrix_index, shade
 			local matrix = {
 				{ 1, 1 },
 				{ 1, 1 },
 			}
 
-			for i = 1, 0 do
-				-- for i = 1, 2 do
-				-- Intersection with top quad edge
-				row_float = 2 * (G.top_fractions[col][i] - row)
-				matrix_index = math.floor(row_float) + 1
-				for index = 1, math.min(2, matrix_index - 1) do
-					matrix[index][i] = 0
-				end
-				if matrix_index == 1 or matrix_index == 2 then
-					shade = 1 - (row_float % 1)
-					matrix[matrix_index][i] = matrix[matrix_index][i] * shade
-				end
-
-				-- Intersection with right quad edge
-				col_float = 2 * (G.right_fractions[row][i] - col)
-				matrix_index = math.floor(col_float) + 1
-				for index = math.max(1, matrix_index + 1), 2 do
-					matrix[i][index] = 0
-				end
-				if matrix_index == 1 or matrix_index == 2 then
-					shade = col_float % 1
-					matrix[i][matrix_index] = matrix[i][matrix_index] * shade
-				end
-
-				-- Intersection with bottom quad edge
-				row_float = 2 * (G.bottom_fractions[col][i] - row)
-				matrix_index = math.floor(row_float) + 1
-				for index = math.max(1, matrix_index + 1), 2 do
-					matrix[index][i] = 0
-				end
-				if matrix_index == 1 or matrix_index == 2 then
-					shade = row_float % 1
-					matrix[matrix_index][i] = matrix[matrix_index][i] * shade
-				end
-
-				-- Intersection with left quad edge
-				col_float = 2 * (G.left_fractions[row][i] - col)
-				matrix_index = math.floor(col_float) + 1
-				for index = 1, math.min(2, matrix_index - 1) do
-					matrix[i][index] = 0
-				end
-				if matrix_index == 1 or matrix_index == 2 then
-					shade = 1 - (col_float % 1)
-					matrix[i][matrix_index] = matrix[i][matrix_index] * shade
+			for edge_index = 1, 4 do
+				for fraction_index = 1, 2 do
+					update_matrix_with_edge(edge_index, fraction_index, row, col, G, matrix)
 				end
 			end
 
