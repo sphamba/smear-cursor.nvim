@@ -39,7 +39,7 @@ M.trailing_stiffness = 0.3
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
-M.trailing_exponent = 1
+M.trailing_exponent = 2
 
 -- How much the smear slows down when getting close to the target.
 -- < 0: less slowdown, > 0: more slowdown. Keep small, e.g. [-0.2, 0.2]

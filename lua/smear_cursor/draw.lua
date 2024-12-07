@@ -479,10 +479,9 @@ M.draw_quad = function(corners, target_position)
 			local intersections = {}
 			for i = 1, 4 do
 				local intersection = get_edge_cell_intersection(i, row, col, G)
-				if intersection >= 1 then goto continue end
-
 				local edge_type = G.edge_types[i]
 				if edge_type == LEFT_DIAGONAL or edge_type == RIGHT_DIAGONAL then edge_type = DIAGONAL end
+				if edge_type ~= DIAGONAL and intersection >= 1 then goto continue end
 
 				if intersections[edge_type] == nil or intersections[edge_type] < intersection then
 					intersections[edge_type] = intersection
