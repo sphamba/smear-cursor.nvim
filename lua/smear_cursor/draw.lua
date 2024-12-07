@@ -11,6 +11,15 @@ local RIGHT_BLOCKS      = { "█", "🮋", "🮊", "🮉", "▐", "🮈", "🮇"
 local MATRIX_CHARACTERS = { "▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "▚", "▐", "▜", "▄", "▙", "▟", "█" }
 -- stylua: ignore end
 
+-- Enums for drawing quad
+local TOP = 1
+local BOTTOM = 2
+local LEFT = 3
+local RIGHT = 4
+local LEFT_DIAGONAL = 5
+local RIGHT_DIAGONAL = 6
+local DIAGONAL = 7
+
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 local can_hide = vim.fn.has("nvim-0.10") == 1
@@ -244,6 +253,56 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	draw_partial_block(row, col, character_list, character_index, hl_group)
 end
 
+local function precompute_intersections_horizontal(corners, G, index)
+	local centerlines = {}
+
+	for col = G.left, G.right do
+		centerlines[col] = corners[index][1] + (col + 0.5 - corners[index][2]) * G.slopes[index]
+	end
+
+	G.I.centerlines[index] = centerlines
+end
+
+local function precompute_intersections_vertical(corners, G, index)
+	local centerlines = {}
+
+	for row = G.top, G.bottom do
+		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
+	end
+
+	G.I.centerlines[index] = centerlines
+end
+
+local function precompute_intersections_diagonal(corners, G, index)
+	local edge_type = G.edge_types[index]
+	local centerlines = {}
+	local edges = {}
+	local fractions = {}
+
+	for row = G.top, G.bottom do
+		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
+		edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
+		fractions[row] = {}
+		for j = 1, 2 do
+			local shift = (j == 1) and -0.25 or 0.25
+			fractions[row][j] = centerlines[row] + shift / G.slopes[index]
+		end
+	end
+
+	G.I.centerlines[index] = centerlines
+	G.I.edges[index] = edges
+	G.I.fractions[index] = fractions
+end
+
+local precompute_intersections_functions = {
+	[TOP] = precompute_intersections_horizontal,
+	[BOTTOM] = precompute_intersections_horizontal,
+	[LEFT] = precompute_intersections_vertical,
+	[RIGHT] = precompute_intersections_vertical,
+	[LEFT_DIAGONAL] = precompute_intersections_diagonal,
+	[RIGHT_DIAGONAL] = precompute_intersections_diagonal,
+}
+
 local function precompute_quad_geometry(corners)
 	local G = {}
 
@@ -254,69 +313,73 @@ local function precompute_quad_geometry(corners)
 	G.right = math.ceil(math.max(corners[1][2], corners[2][2], corners[3][2], corners[4][2])) - 1
 
 	-- Slopes
+	local edges = {}
 	G.slopes = {}
 
 	for i = 1, 4 do
-		local edge = {
+		edges[i] = {
 			corners[i % 4 + 1][1] - corners[i][1],
 			corners[i % 4 + 1][2] - corners[i][2],
 		}
-		G.slopes[i] = edge[1] / edge[2]
+		G.slopes[i] = edges[i][1] / edges[i][2]
 	end
 
-	G.top_horizontal = math.abs(G.slopes[1]) <= config.max_slope_horizontal
-	G.bottom_horizontal = math.abs(G.slopes[3]) <= config.max_slope_horizontal
-	G.left_vertical = math.abs(G.slopes[4]) >= config.min_slope_vertical
-	G.right_vertical = math.abs(G.slopes[2]) >= config.min_slope_vertical
+	-- Edge types
+	G.edge_types = {}
+
+	for i = 1, 4 do
+		local abs_slope = math.abs(G.slopes[i])
+
+		if abs_slope <= config.max_slope_horizontal then
+			G.edge_types[i] = (edges[i][2] > 0) and TOP or BOTTOM
+		elseif abs_slope >= config.min_slope_vertical then
+			G.edge_types[i] = (edges[i][1] > 0) and RIGHT or LEFT
+		else
+			G.edge_types[i] = (edges[i][1] > 0) and RIGHT_DIAGONAL or LEFT_DIAGONAL
+		end
+	end
 
 	-- Intersections
+	G.I = {}
 	-- Intersection of quad edge with centerline of cells
-	G.top_centerlines = {}
-	-- Lowest intersection of quad edge with lateral edges of cells
-	G.top_edges = {}
+	G.I.centerlines = {}
+	-- Closest intersection of quad edge with lateral edges of cells
+	G.I.edges = {}
 	-- Intersection of quad edge with lines at 0.25 and 0.75
-	G.top_fractions = {}
-	G.bottom_centerlines = {}
-	G.bottom_edges = {}
-	G.bottom_fractions = {}
-	G.left_centerlines = {}
-	G.left_edges = {}
-	G.left_fractions = {}
-	G.right_centerlines = {}
-	G.right_edges = {}
-	G.right_fractions = {}
+	G.I.fractions = {}
 
-	for col = G.left, G.right do
-		G.top_centerlines[col] = corners[1][1] + (col + 0.5 - corners[1][2]) * G.slopes[1]
-		G.top_edges[col] = G.top_centerlines[col] + 0.5 * math.abs(G.slopes[1])
-		G.top_fractions[col] = {}
-		G.bottom_centerlines[col] = corners[3][1] + (col + 0.5 - corners[3][2]) * G.slopes[3]
-		G.bottom_edges[col] = G.bottom_centerlines[col] - 0.5 * math.abs(G.slopes[3])
-		G.bottom_fractions[col] = {}
-
-		for i = 1, 2 do
-			local shift = (i == 1) and -0.25 or 0.25
-			G.top_fractions[col][i] = G.top_centerlines[col] + shift * G.slopes[1]
-			G.bottom_fractions[col][i] = G.bottom_centerlines[col] + shift * G.slopes[3]
-		end
-	end
-
-	for row = G.top, G.bottom do
-		G.right_centerlines[row] = corners[2][2] + (row + 0.5 - corners[2][1]) / G.slopes[2]
-		G.right_edges[row] = G.right_centerlines[row] - 0.5 / math.abs(G.slopes[2])
-		G.right_fractions[row] = {}
-		G.left_centerlines[row] = corners[4][2] + (row + 0.5 - corners[4][1]) / G.slopes[4]
-		G.left_edges[row] = G.left_centerlines[row] + 0.5 / math.abs(G.slopes[4])
-		G.left_fractions[row] = {}
-
-		for i = 1, 2 do
-			local shift = (i == 1) and -0.25 or 0.25
-			G.right_fractions[row][i] = G.right_centerlines[row] + shift / G.slopes[2]
-			G.left_fractions[row][i] = G.left_centerlines[row] + shift / G.slopes[4]
-		end
+	for i = 1, 4 do
+		local edge_type = G.edge_types[i]
+		precompute_intersections_functions[edge_type](corners, G, i)
 	end
 
 	return G
+end
+
+local get_edge_cell_intersection_functions = {
+	[TOP] = function(edge_index, row, col, G)
+		return G.I.centerlines[edge_index][col] - row
+	end,
+	[BOTTOM] = function(edge_index, row, col, G)
+		return row + 1 - G.I.centerlines[edge_index][col]
+	end,
+	[LEFT] = function(edge_index, row, col, G)
+		return G.I.centerlines[edge_index][row] - col
+	end,
+	[RIGHT] = function(edge_index, row, col, G)
+		return col + 1 - G.I.centerlines[edge_index][row]
+	end,
+	[LEFT_DIAGONAL] = function(edge_index, row, col, G)
+		return G.I.edges[edge_index][row] - col
+	end,
+	[RIGHT_DIAGONAL] = function(edge_index, row, col, G)
+		return col + 1 - G.I.edges[edge_index][row]
+	end,
+}
+
+local function get_edge_cell_intersection(edge_index, row, col, G)
+	local edge_type = G.edge_types[edge_index]
+	return get_edge_cell_intersection_functions[edge_type](edge_index, row, col, G)
 end
 
 M.draw_quad = function(corners, target_position)
@@ -334,73 +397,74 @@ M.draw_quad = function(corners, target_position)
 			-- Check if on target
 			if row == target_position[1] and col == target_position[2] then goto continue end
 
-			local is_vertically_shifted = false
-			local vertical_shade = 1
-			local is_horizontally_shifted = false
-			local horizontal_shade = 1
+			local intersections = {}
+			for i = 1, 4 do
+				local intersection = get_edge_cell_intersection(i, row, col, G)
+				if intersection >= 1 then goto continue end
 
-			-- Check if vertically shifted block
-			local left_in = G.left_edges[row] > col
-			local right_in = G.right_edges[row] < col + 1
-			if not (left_in and not G.left_vertical) and not (right_in and not G.right_vertical) then
-				local top_near = G.top_centerlines[col] > row
-				local bottom_near = G.bottom_centerlines[col] < row + 1
-				if
-					(top_near and G.top_horizontal and (not bottom_near or G.bottom_horizontal))
-					or (bottom_near and G.bottom_horizontal and (not top_near or G.top_horizontal))
-				then
+				local edge_type = G.edge_types[i]
+				if edge_type == LEFT_DIAGONAL or edge_type == RIGHT_DIAGONAL then edge_type = DIAGONAL end
+
+				if intersections[edge_type] == nil or intersections[edge_type] < intersection then
+					intersections[edge_type] = intersection
+				end
+			end
+
+			-- Try to render as shifted block
+			if intersections[DIAGONAL] == nil or intersections[DIAGONAL] < 1 - config.max_shade_no_matrix then
+				local is_vertically_shifted = false
+				local vertical_shade = 1
+				local is_horizontally_shifted = false
+				local horizontal_shade = 1
+
+				if intersections[TOP] ~= nil or intersections[BOTTOM] ~= nil then
 					is_vertically_shifted = true
-					vertical_shade = math.min(row + 1, G.bottom_centerlines[col])
-						- math.max(row, G.top_centerlines[col])
+					intersections[TOP] = math.max(0, intersections[TOP] or 0)
+					intersections[BOTTOM] = math.max(0, intersections[BOTTOM] or 0)
+					vertical_shade = 1 - intersections[TOP] - intersections[BOTTOM]
 				end
-			end
 
-			-- Check if horizontally shifted block
-			local top_in = G.top_edges[col] > row
-			local bottom_in = G.bottom_edges[col] < row + 1
-			if not (top_in and not G.top_horizontal) and not (bottom_in and not G.bottom_horizontal) then
-				local left_near = G.left_centerlines[row] > col
-				local right_near = G.right_centerlines[row] < col + 1
-				if
-					(left_near and G.left_vertical and (not right_near or G.right_vertical))
-					or (right_near and G.right_vertical and (not left_near or G.left_vertical))
-				then
+				if intersections[LEFT] ~= nil or intersections[RIGHT] ~= nil then
 					is_horizontally_shifted = true
-					horizontal_shade = math.min(col + 1, G.right_centerlines[row])
-						- math.max(col, G.left_centerlines[row])
+					intersections[LEFT] = math.max(0, intersections[LEFT] or 0)
+					intersections[RIGHT] = math.max(0, intersections[RIGHT] or 0)
+					horizontal_shade = 1 - intersections[LEFT] - intersections[RIGHT]
 				end
-			end
 
-			-- Draw shifted block
-			if is_vertically_shifted and is_horizontally_shifted then
-				if vertical_shade < config.max_shade_no_matrix and horizontal_shade < config.max_shade_no_matrix then
-					is_horizontally_shifted = false
-					is_vertically_shifted = false
-				elseif vertical_shade < horizontal_shade then
-					is_horizontally_shifted = false
-				else
-					is_vertically_shifted = false
+				if is_vertically_shifted and is_horizontally_shifted then
+					if
+						vertical_shade < config.max_shade_no_matrix
+						and horizontal_shade < config.max_shade_no_matrix
+					then
+						is_horizontally_shifted = false
+						is_vertically_shifted = false
+					elseif 2 * (1 - vertical_shade) > (1 - horizontal_shade) then
+						is_horizontally_shifted = false
+					else
+						is_vertically_shifted = false
+					end
 				end
-			end
 
-			if is_vertically_shifted and horizontal_shade > 0 then
-				draw_vertically_shifted_sub_block(
-					math.max(row, G.top_centerlines[col]),
-					math.min(row + 1, G.bottom_centerlines[col]),
-					col,
-					horizontal_shade
-				)
-				goto continue
-			end
+				-- Draw shifted block
+				if is_vertically_shifted then
+					draw_vertically_shifted_sub_block(
+						row + intersections[TOP],
+						row + 1 - intersections[BOTTOM],
+						col,
+						horizontal_shade
+					)
+					goto continue
+				end
 
-			if is_horizontally_shifted and vertical_shade > 0 then
-				draw_horizontally_shifted_sub_block(
-					row,
-					math.max(col, G.left_centerlines[row]),
-					math.min(col + 1, G.right_centerlines[row]),
-					vertical_shade
-				)
-				goto continue
+				if is_horizontally_shifted then
+					draw_horizontally_shifted_sub_block(
+						row,
+						col + intersections[LEFT],
+						col + 1 - intersections[RIGHT],
+						vertical_shade
+					)
+					goto continue
+				end
 			end
 
 			-- Draw matrix
@@ -410,7 +474,8 @@ M.draw_quad = function(corners, target_position)
 				{ 1, 1 },
 			}
 
-			for i = 1, 2 do
+			for i = 1, 0 do
+				-- for i = 1, 2 do
 				-- Intersection with top quad edge
 				row_float = 2 * (G.top_fractions[col][i] - row)
 				matrix_index = math.floor(row_float) + 1
