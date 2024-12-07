@@ -23,7 +23,7 @@ M.vertical_bar_cursor = false
 M.hide_target_hack = true
 
 -- Number of windows that stay open for rendering.
-M.max_kept_windows = 30
+M.max_kept_windows = 50
 
 M.time_interval = 17 -- milliseconds
 
