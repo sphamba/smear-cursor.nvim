@@ -25,6 +25,9 @@ local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 local can_hide = vim.fn.has("nvim-0.10") == 1
 local extmark_id = 999
 
+-- Switch between bulging above and below the line
+local bulge_above = false
+
 ---@type table<number, {active:number, windows:{window_id:number, buffer_id:number}[]}>
 local all_tab_windows = {}
 
@@ -167,6 +170,43 @@ local function draw_matrix_character(row, col, matrix)
 	M.draw_character(row, col, character, color.get_hl_group({ level = hl_group_index }))
 end
 
+local function get_top_block_properties(micro_shift, thickness, shade)
+	local character_index = math.ceil(micro_shift)
+	if character_index == 0 then return end
+
+	local character_thickness = character_index / 8
+	shade = shade * thickness / character_thickness
+	local hl_group_index = round(shade * config.color_levels)
+	if hl_group_index == 0 then return end
+
+	local character_list, hl_group
+
+	if config.legacy_computing_symbols_support then
+		character_list = TOP_BLOCKS
+		hl_group = color.get_hl_group({ level = hl_group_index })
+	else
+		character_list = BOTTOM_BLOCKS
+		hl_group = color.get_hl_group({ level = hl_group_index, inverted = true })
+	end
+
+	return character_index, character_list, hl_group
+end
+
+local function get_bottom_block_properties(micro_shift, thickness, shade)
+	local character_index = math.floor(micro_shift)
+	if character_index == 8 then return end
+
+	local character_thickness = 1 - character_index / 8
+	shade = shade * thickness / character_thickness
+	local hl_group_index = round(shade * config.color_levels)
+	if hl_group_index == 0 then return end
+
+	local character_list = BOTTOM_BLOCKS
+	local hl_group = color.get_hl_group({ level = hl_group_index })
+
+	return character_index, character_list, hl_group
+end
+
 local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade)
 	if row_top >= row_bottom then return end
 	-- logging.debug("top: " .. row_top .. ", bottom: " .. row_bottom .. ", col: " .. col)
@@ -174,40 +214,68 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade
 	local row = math.floor(row_top)
 	local center = (row_top + row_bottom) / 2 % 1
 	local thickness = row_bottom - row_top
-	local character_list, character_index, hl_group
+	local character_index, character_list, hl_group
+	local gap_top = row_top % 1
+	local gap_bottom = (1 - row_bottom) % 1
 
-	if center < 0.5 then
-		local micro_shift = center * 16
-		character_index = math.ceil(micro_shift)
-		if character_index == 0 then return end
-
-		local character_thickness = character_index / 8
-		shade = shade * thickness / character_thickness
-		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then return end
-
-		if config.legacy_computing_symbols_support then
-			character_list = TOP_BLOCKS
-			hl_group = color.get_hl_group({ level = hl_group_index })
+	if math.max(gap_top, gap_bottom) / 2 < math.min(gap_top, gap_bottom) then
+		-- Draw alternating block
+		if bulge_above then
+			local micro_shift = (row_bottom % 1) * 8
+			character_index, character_list, hl_group = get_top_block_properties(micro_shift, thickness, shade)
 		else
-			character_list = BOTTOM_BLOCKS
-			hl_group = color.get_hl_group({ level = hl_group_index, inverted = true })
+			local micro_shift = (row_top % 1) * 8
+			character_index, character_list, hl_group = get_bottom_block_properties(micro_shift, thickness, shade)
 		end
+	elseif center < 0.5 then
+		-- Draw top block
+		local micro_shift = center * 16
+		character_index, character_list, hl_group = get_top_block_properties(micro_shift, thickness, shade)
 	else
+		-- Draw bottom block
 		local micro_shift = center * 16 - 8
-		character_index = math.floor(micro_shift)
-		if character_index == 8 then return end
-
-		local character_thickness = 1 - character_index / 8
-		shade = shade * thickness / character_thickness
-		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then return end
-
-		character_list = BOTTOM_BLOCKS
-		hl_group = color.get_hl_group({ level = hl_group_index })
+		character_index, character_list, hl_group = get_bottom_block_properties(micro_shift, thickness, shade)
 	end
 
+	if character_index == nil then return end
 	draw_partial_block(row, col, character_list, character_index, hl_group)
+end
+
+local function get_left_block_properties(micro_shift, thickness, shade)
+	local character_index = math.ceil(micro_shift)
+	if character_index == 0 then return end
+
+	local character_thickness = character_index / 8
+	shade = shade * thickness / character_thickness
+	local hl_group_index = round(shade * config.color_levels)
+	if hl_group_index == 0 then return end
+
+	local character_list = LEFT_BLOCKS
+	local hl_group = color.get_hl_group({ level = hl_group_index })
+
+	return character_index, character_list, hl_group
+end
+
+local function get_right_block_properties(micro_shift, thickness, shade)
+	local character_index = math.floor(micro_shift)
+	if character_index == 8 then return end
+
+	local character_thickness = 1 - character_index / 8
+	shade = shade * thickness / character_thickness
+	local hl_group_index = round(shade * config.color_levels)
+	if hl_group_index == 0 then return end
+
+	local character_list, hl_group
+
+	if config.legacy_computing_symbols_support then
+		character_list = RIGHT_BLOCKS
+		hl_group = color.get_hl_group({ level = hl_group_index })
+	else
+		character_list = LEFT_BLOCKS
+		hl_group = color.get_hl_group({ level = hl_group_index, inverted = true })
+	end
+
+	return character_index, character_list, hl_group
 end
 
 local function draw_horizontally_shifted_sub_block(row, col_left, col_right, shade)
@@ -219,37 +287,29 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	local thickness = col_right - col_left
 	local character_list, character_index, hl_group
 
-	if center < 0.5 then
-		local micro_shift = center * 16
-		character_index = math.ceil(micro_shift)
-		if character_index == 0 then return end
+	local gap_left = col_left % 1
+	local gap_right = (1 - col_right) % 1
 
-		local character_thickness = character_index / 8
-		shade = shade * thickness / character_thickness
-		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then return end
-
-		character_list = LEFT_BLOCKS
-		hl_group = color.get_hl_group({ level = hl_group_index })
-	else
-		local micro_shift = center * 16 - 8
-		character_index = math.floor(micro_shift)
-		if character_index == 8 then return end
-
-		local character_thickness = 1 - character_index / 8
-		shade = shade * thickness / character_thickness
-		local hl_group_index = round(shade * config.color_levels)
-		if hl_group_index == 0 then return end
-
-		if config.legacy_computing_symbols_support then
-			character_list = RIGHT_BLOCKS
-			hl_group = color.get_hl_group({ level = hl_group_index })
+	if math.max(gap_left, gap_right) / 2 < math.min(gap_left, gap_right) then
+		-- Draw alternating block
+		if bulge_above then
+			local micro_shift = (col_right % 1) * 8
+			character_index, character_list, hl_group = get_left_block_properties(micro_shift, thickness, shade)
 		else
-			character_list = LEFT_BLOCKS
-			hl_group = color.get_hl_group({ level = hl_group_index, inverted = true })
+			local micro_shift = (col_left % 1) * 8
+			character_index, character_list, hl_group = get_right_block_properties(micro_shift, thickness, shade)
 		end
+	elseif center < 0.5 then
+		-- Draw left block
+		local micro_shift = center * 16
+		character_index, character_list, hl_group = get_left_block_properties(micro_shift, thickness, shade)
+	else
+		-- Draw right block
+		local micro_shift = center * 16 - 8
+		character_index, character_list, hl_group = get_right_block_properties(micro_shift, thickness, shade)
 	end
 
+	if character_index == nil then return end
 	draw_partial_block(row, col, character_list, character_index, hl_group)
 end
 
@@ -464,6 +524,7 @@ end
 M.draw_quad = function(corners, target_position)
 	if target_position == nil then target_position = { 0, 0 } end
 
+	bulge_above = not bulge_above
 	local G = precompute_quad_geometry(corners)
 
 	for row = G.top, G.bottom do

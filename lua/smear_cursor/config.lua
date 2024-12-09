@@ -58,7 +58,7 @@ M.max_shade_no_matrix = 0.75 -- 0: more overhangs, 1: more matrices
 M.matrix_pixel_threshold = 0.7 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
 M.volume_reduction_exponent = 0.3 -- 0: no reduction, 1: full reduction
-M.minimum_volume_factor = 0.5 -- 0: no limit, 1: no reduction
+M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
 
 -- For debugging ---------------------------------------------------------------
 

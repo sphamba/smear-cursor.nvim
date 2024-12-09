@@ -114,6 +114,32 @@ draw.draw_quad({
 	{ row + 3, col - 1 },
 })
 
+-- Thin line with alternating bulges
+
+row = 13
+col = 26
+
+for i = 0, 1 do
+	draw.draw_quad({
+		{ row, 3 * i + col + 0.3 },
+		{ row, 3 * i + col + 0.7 },
+		{ row + 9, 3 * i + col + 2.7 },
+		{ row + 9, 3 * i + col + 2.3 },
+	})
+end
+
+row = 15
+col = 32
+
+for i = 0, 1 do
+	draw.draw_quad({
+		{ row + 0.3, 14 * i + col },
+		{ row + 2.3, 14 * i + col + 17 },
+		{ row + 2.7, 14 * i + col + 17 },
+		{ row + 0.7, 14 * i + col },
+	})
+end
+
 -- Lines
 
 row = 23
