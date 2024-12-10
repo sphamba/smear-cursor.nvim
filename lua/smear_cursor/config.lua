@@ -59,6 +59,7 @@ M.matrix_pixel_threshold = 0.7 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
 M.volume_reduction_exponent = 0.3 -- 0: no reduction, 1: full reduction
 M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
+M.max_length = 25 -- Maximum smear length
 
 -- For debugging ---------------------------------------------------------------
 
