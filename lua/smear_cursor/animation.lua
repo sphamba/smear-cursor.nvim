@@ -9,6 +9,7 @@ local target_position = { 0, 0 }
 local current_corners = {}
 local target_corners = {}
 local stiffnesses = { 0, 0, 0, 0 }
+local previous_ending_drawn = false -- only draw previous smear once
 
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
@@ -139,6 +140,7 @@ local function animate()
 	end
 
 	draw.clear()
+	previous_ending_drawn = false
 
 	if max_distance <= config.distance_stop_animating then
 		animating = false
@@ -200,9 +202,12 @@ M.change_target_position = function(row, col, jump)
 
 	-- Draw end of previous smear
 	if animating then
-		set_stiffnesses(1, 0)
-		update()
-		draw.draw_quad(shrink_volume(current_corners), target_position)
+		if not previous_ending_drawn then
+			set_stiffnesses(1, 0)
+			update()
+			draw.draw_quad(shrink_volume(current_corners), target_position)
+			previous_ending_drawn = true
+		end
 		set_corners(current_corners, target_position[1], target_position[2])
 	end
 
