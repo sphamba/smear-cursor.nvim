@@ -49,6 +49,18 @@ M.listen = function()
 	]],
 		{}
 	)
+
+	if #config.filetypes_disabled > 0 then
+		vim.api.nvim_exec2(
+			[[
+		augroup SmearCursorIgnore
+			autocmd!
+			autocmd BufEnter * lua require("smear_cursor").enabled = not vim.tbl_contains(require("smear_cursor").filetypes_disabled, vim.bo.filetype)
+		augroup END
+	]],
+			{}
+		)
+	end
 end
 
 M.unlisten = function()

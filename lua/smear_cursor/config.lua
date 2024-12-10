@@ -25,6 +25,9 @@ M.hide_target_hack = true
 -- Number of windows that stay open for rendering.
 M.max_kept_windows = 50
 
+-- List of filetypes where the plugin is disabled.
+M.filetypes_disabled = {}
+
 M.time_interval = 17 -- milliseconds
 
 -- Smear configuration ---------------------------------------------------------
