@@ -30,12 +30,48 @@ vim.defer_fn(function()
 end, 0)
 
 local function update()
+	local distance_head_to_target = math.huge
+	local index_head = 0
+
+	-- Move toward targets
 	for i = 1, 4 do
 		local distance_squared = (current_corners[i][1] - target_corners[i][1]) ^ 2
 			+ (current_corners[i][2] - target_corners[i][2]) ^ 2
 		local stiffness = math.min(1, stiffnesses[i] * distance_squared ^ config.slowdown_exponent)
+
+		if distance_squared < distance_head_to_target then
+			distance_head_to_target = distance_squared
+			index_head = i
+		end
+
 		for j = 1, 2 do
 			current_corners[i][j] = current_corners[i][j] + (target_corners[i][j] - current_corners[i][j]) * stiffness
+		end
+	end
+
+	-- Shorten smear if too long
+	local smear_length = 0
+
+	for i = 1, 4 do
+		if i ~= index_head then
+			-- stylua: ignore
+			local distance = math.sqrt(
+				(current_corners[i][1] - current_corners[index_head][1]) ^ 2 +
+				(current_corners[i][2] - current_corners[index_head][2]) ^ 2
+			)
+			smear_length = math.max(smear_length, distance)
+		end
+	end
+
+	if smear_length <= config.max_length then return end
+	local factor = config.max_length / smear_length
+
+	for i = 1, 4 do
+		if i ~= index_head then
+			for j = 1, 2 do
+				current_corners[i][j] = current_corners[index_head][j]
+					+ (current_corners[i][j] - current_corners[index_head][j]) * factor
+			end
 		end
 	end
 end
