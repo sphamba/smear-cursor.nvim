@@ -10,6 +10,8 @@ local current_corners = {}
 local target_corners = {}
 local stiffnesses = { 0, 0, 0, 0 }
 local previous_ending_drawn = false -- only draw previous smear once
+local previous_buffer_id = -1
+local previous_top_row = -1
 
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
@@ -189,6 +191,13 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 		distances[i] = distance
 	end
 
+	if max_distance == min_distance then
+		for i = 1, 4 do
+			stiffnesses[i] = head_stiffness
+		end
+		return
+	end
+
 	for i = 1, 4 do
 		local x = (distances[i] - min_distance) / (max_distance - min_distance)
 		local stiffness = head_stiffness + (trailing_stiffness - head_stiffness) * x ^ config.trailing_exponent
@@ -196,7 +205,20 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 	end
 end
 
+local function scroll_buffer_space()
+	local current_buffer_id = vim.api.nvim_get_current_buf()
+	local current_top_row = vim.fn.line("w0")
+	if current_buffer_id == previous_buffer_id and current_top_row ~= previous_top_row then
+		-- Jump to show smear in buffer space instead of screen space
+		local shift = screen.get_screen_distance(previous_top_row, current_top_row)
+		set_corners(current_corners, current_corners[1][1] - shift, current_corners[1][2])
+	end
+	previous_buffer_id = current_buffer_id
+	previous_top_row = current_top_row
+end
+
 M.change_target_position = function(row, col, jump)
+	if not jump and config.scroll_buffer_space then scroll_buffer_space() end
 	if target_position[1] == row and target_position[2] == col then return end
 	draw.clear()
 
