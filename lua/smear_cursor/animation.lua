@@ -10,8 +10,13 @@ local current_corners = {}
 local target_corners = {}
 local stiffnesses = { 0, 0, 0, 0 }
 local previous_ending_drawn = false -- only draw previous smear once
+
+local previous_window_id = -1
+local current_window_id = -1
 local previous_buffer_id = -1
+local current_buffer_id = -1
 local previous_top_row = -1
+local current_top_row = -1
 
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
@@ -25,11 +30,21 @@ local function set_corners(corners, row, col)
 	corners[4] = { row + 1, col }
 end
 
+local function update_current_ids_and_row()
+	previous_window_id = current_window_id
+	previous_buffer_id = current_buffer_id
+	previous_top_row = current_top_row
+	current_window_id = vim.api.nvim_get_current_win()
+	current_buffer_id = vim.api.nvim_get_current_buf()
+	current_top_row = vim.fn.line("w0")
+end
+
 vim.defer_fn(function()
 	local cursor_row, cursor_col = screen.get_screen_cursor_position()
 	target_position = { cursor_row, cursor_col }
 	set_corners(current_corners, cursor_row, cursor_col)
 	set_corners(target_corners, cursor_row, cursor_col)
+	update_current_ids_and_row()
 end, 0)
 
 local function update()
@@ -206,20 +221,37 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 end
 
 local function scroll_buffer_space()
-	local current_buffer_id = vim.api.nvim_get_current_buf()
-	local current_top_row = vim.fn.line("w0")
-	if current_buffer_id == previous_buffer_id and current_top_row ~= previous_top_row then
-		-- Jump to show smear in buffer space instead of screen space
+	if current_top_row ~= previous_top_row then
+		-- Shift to show smear in buffer space instead of screen space
 		local shift = screen.get_screen_distance(previous_top_row, current_top_row)
 		set_corners(current_corners, current_corners[1][1] - shift, current_corners[1][2])
 		target_position[1] = target_position[1] - shift
 	end
-	previous_buffer_id = current_buffer_id
-	previous_top_row = current_top_row
 end
 
-M.change_target_position = function(row, col, jump)
-	if not jump and config.scroll_buffer_space then scroll_buffer_space() end
+M.jump = function(row, col)
+	target_position = { row, col }
+	set_corners(target_corners, row, col)
+	set_corners(current_corners, row, col)
+	draw.clear()
+end
+
+M.change_target_position = function(row, col)
+	update_current_ids_and_row()
+
+	if current_window_id == previous_window_id and current_buffer_id == previous_buffer_id then
+		if config.scroll_buffer_space then scroll_buffer_space() end
+		if not config.smear_between_neighbor_lines and not animating and math.abs(row - target_position[1]) <= 1 then
+			M.jump(row, col)
+			return
+		end
+	else
+		if not config.smear_between_buffers then
+			M.jump(row, col)
+			return
+		end
+	end
+
 	if target_position[1] == row and target_position[2] == col then return end
 	draw.clear()
 
@@ -237,11 +269,6 @@ M.change_target_position = function(row, col, jump)
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
 	set_stiffnesses(config.stiffness, config.trailing_stiffness)
-
-	if jump then
-		set_corners(current_corners, row, col)
-		return
-	end
 
 	if not animating then animate() end
 end
