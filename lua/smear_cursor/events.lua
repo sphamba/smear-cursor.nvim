@@ -3,19 +3,9 @@ local config = require("smear_cursor.config")
 local screen = require("smear_cursor.screen")
 local M = {}
 
-local switching_buffer = false
-
 local function move_cursor()
 	local row, col = screen.get_screen_cursor_position()
-	local jump = (not config.smear_between_buffers and switching_buffer)
-		or (
-			not config.smear_between_neighbor_lines
-			and not switching_buffer
-			and math.abs(row - animation.target_position[1]) <= 1
-		)
-	animation.change_target_position(row, col, jump)
-
-	switching_buffer = false
+	animation.change_target_position(row, col)
 end
 
 M.move_cursor = function()
@@ -24,15 +14,11 @@ end
 
 local function jump_cursor()
 	local row, col = screen.get_screen_cursor_position()
-	animation.change_target_position(row, col, true)
+	animation.jump(row, col)
 end
 
 M.jump_cursor = function()
 	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
-end
-
-M.flag_switching_buffer = function()
-	switching_buffer = true
 end
 
 M.listen = function()
@@ -43,7 +29,6 @@ M.listen = function()
 			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
 			autocmd CursorMoved,WinScrolled * lua require("smear_cursor.events").move_cursor()
 			autocmd CursorMovedI,CursorHold * lua require("smear_cursor.events").jump_cursor()
-			autocmd BufLeave,WinLeave * lua require("smear_cursor.events").flag_switching_buffer()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
