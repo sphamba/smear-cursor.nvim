@@ -220,12 +220,26 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 	end
 end
 
+local function clamp_to_buffer(position)
+	local window_origin = vim.api.nvim_win_get_position(current_window_id)
+	local window_row = window_origin[1] + 1
+	-- local window_col = window_origin[2] + 1
+	local window_height = vim.api.nvim_win_get_height(current_window_id)
+	-- local window_width = vim.api.nvim_win_get_width(current_window_id)
+
+	position[1] = math.max(window_row, math.min(window_row + window_height - 1, position[1]))
+end
+
 local function scroll_buffer_space()
 	if current_top_row ~= previous_top_row then
 		-- Shift to show smear in buffer space instead of screen space
 		local shift = screen.get_screen_distance(previous_top_row, current_top_row)
-		set_corners(current_corners, current_corners[1][1] - shift, current_corners[1][2])
+		local shifted_position = { current_corners[1][1] - shift, current_corners[1][2] }
+		clamp_to_buffer(shifted_position)
+		set_corners(current_corners, shifted_position[1], shifted_position[2])
+
 		target_position[1] = target_position[1] - shift
+		clamp_to_buffer(target_position)
 	end
 end
 
