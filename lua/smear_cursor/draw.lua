@@ -102,6 +102,8 @@ end
 
 M.draw_character = function(row, col, character, hl_group)
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
+	if row < 1 or row > vim.o.lines or col < 1 or col > vim.o.columns then return end
+
 	local current_tab = vim.api.nvim_get_current_tabpage()
 	local _, buffer_id = get_window(current_tab, row, col)
 
