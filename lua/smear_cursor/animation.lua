@@ -212,6 +212,7 @@ local function scroll_buffer_space()
 		-- Jump to show smear in buffer space instead of screen space
 		local shift = screen.get_screen_distance(previous_top_row, current_top_row)
 		set_corners(current_corners, current_corners[1][1] - shift, current_corners[1][2])
+		target_position[1] = target_position[1] - shift
 	end
 	previous_buffer_id = current_buffer_id
 	previous_top_row = current_top_row
