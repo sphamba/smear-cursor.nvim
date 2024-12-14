@@ -17,6 +17,8 @@ local previous_buffer_id = -1
 local current_buffer_id = -1
 local previous_top_row = -1
 local current_top_row = -1
+local previous_line = -1
+local current_line = -1
 
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
@@ -34,9 +36,11 @@ local function update_current_ids_and_row()
 	previous_window_id = current_window_id
 	previous_buffer_id = current_buffer_id
 	previous_top_row = current_top_row
+	previous_line = current_line
 	current_window_id = vim.api.nvim_get_current_win()
 	current_buffer_id = vim.api.nvim_get_current_buf()
 	current_top_row = vim.fn.line("w0")
+	current_line = vim.fn.line(".")
 end
 
 vim.defer_fn(function()
@@ -231,7 +235,7 @@ local function clamp_to_buffer(position)
 end
 
 local function scroll_buffer_space()
-	if current_top_row ~= previous_top_row then
+	if current_top_row ~= previous_top_row and current_line ~= previous_line then
 		-- Shift to show smear in buffer space instead of screen space
 		local shift = screen.get_screen_distance(previous_top_row, current_top_row)
 		local shifted_position = { current_corners[1][1] - shift, current_corners[1][2] }
