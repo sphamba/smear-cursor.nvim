@@ -9,6 +9,8 @@ local function move_cursor()
 end
 
 M.move_cursor = function()
+	local row, col = screen.get_screen_cursor_position()
+	animation.set_previous_target_position(row, col)
 	vim.defer_fn(move_cursor, 0) -- for screen.get_screen_cursor_position()
 end
 

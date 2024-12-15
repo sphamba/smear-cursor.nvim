@@ -5,6 +5,7 @@ local screen = require("smear_cursor.screen")
 local M = {}
 
 local animating = false
+local previous_target_position = { 0, 0 }
 local target_position = { 0, 0 }
 local current_corners = {}
 local target_corners = {}
@@ -234,14 +235,19 @@ local function clamp_to_buffer(position)
 	position[1] = math.max(window_row, math.min(window_row + window_height - 1, position[1]))
 end
 
+M.set_previous_target_position = function(row, col)
+	previous_target_position = { row, col }
+end
+
 local function scroll_buffer_space()
 	if current_top_row ~= previous_top_row and current_line ~= previous_line then
 		-- Shift to show smear in buffer space instead of screen space
-		local shift = screen.get_screen_distance(previous_top_row, current_top_row)
+		local shift = screen.get_screen_distance(previous_line, current_line)
 		local shifted_position = { current_corners[1][1] - shift, current_corners[1][2] }
 		clamp_to_buffer(shifted_position)
 		set_corners(current_corners, shifted_position[1], shifted_position[2])
 
+		previous_target_position[1] = previous_target_position[1] - shift
 		target_position[1] = target_position[1] - shift
 		clamp_to_buffer(target_position)
 	end
@@ -256,10 +262,11 @@ end
 
 M.change_target_position = function(row, col)
 	update_current_ids_and_row()
+	target_position = { row, col }
 
 	if current_window_id == previous_window_id and current_buffer_id == previous_buffer_id then
 		if config.scroll_buffer_space then scroll_buffer_space() end
-		if not config.smear_between_neighbor_lines and not animating and math.abs(row - target_position[1]) <= 1 then
+		if not config.smear_between_neighbor_lines and not animating and math.abs(target_position[1] - previous_target_position[1]) <= 1 then
 			M.jump(row, col)
 			return
 		end
@@ -270,7 +277,7 @@ M.change_target_position = function(row, col)
 		end
 	end
 
-	if target_position[1] == row and target_position[2] == col then return end
+	-- if target_position[1] == row and target_position[2] == col then return end
 	draw.clear()
 
 	-- Draw end of previous smear
@@ -278,14 +285,13 @@ M.change_target_position = function(row, col)
 		if not previous_ending_drawn then
 			set_stiffnesses(1, 0)
 			update()
-			draw.draw_quad(shrink_volume(current_corners), target_position)
+			draw.draw_quad(shrink_volume(current_corners), previous_target_position)
 			previous_ending_drawn = true
 		end
-		set_corners(current_corners, target_position[1], target_position[2])
 	end
 
-	target_position = { row, col }
-	set_corners(target_corners, row, col)
+	set_corners(current_corners, previous_target_position[1], previous_target_position[2])
+	set_corners(target_corners, target_position[1], target_position[2])
 	set_stiffnesses(config.stiffness, config.trailing_stiffness)
 
 	if not animating then animate() end
