@@ -169,21 +169,27 @@ local function animate()
 		return
 	end
 
-	local shrunk_corners = shrink_volume(current_corners)
+	-- Only shrink the volume if not moving on a straight line
+	local current_center = get_center(current_corners)
+	local target_center = get_center(target_corners)
+	local straight_line = math.abs(target_center[1] - current_center[1]) < 1 / 8
+		or math.abs(target_center[2] - current_center[2]) < 1 / 8
+	local drawn_corners = straight_line and current_corners or shrink_volume(current_corners)
+
 	if config.hide_target_hack then
 		-- stylua: ignore
 		local target_reached = (
-			math.floor(shrunk_corners[1][1]) == target_position[1] and
-			math.floor(shrunk_corners[1][2]) == target_position[2]
+			math.floor(drawn_corners[1][1]) == target_position[1] and
+			math.floor(drawn_corners[1][2]) == target_position[2]
 		) or (
-			math.floor(shrunk_corners[2][1]) == target_position[1] and
-			math.ceil(shrunk_corners[2][2]) - 1 == target_position[2]
+			math.floor(drawn_corners[2][1]) == target_position[1] and
+			math.ceil(drawn_corners[2][2]) - 1 == target_position[2]
 		) or (
-			math.ceil(shrunk_corners[3][1]) - 1 == target_position[1] and
-			math.ceil(shrunk_corners[3][2]) - 1 == target_position[2]
+			math.ceil(drawn_corners[3][1]) - 1 == target_position[1] and
+			math.ceil(drawn_corners[3][2]) - 1 == target_position[2]
 		) or (
-			math.ceil(shrunk_corners[4][1]) - 1 == target_position[1] and
-			math.floor(shrunk_corners[4][2]) == target_position[2]
+			math.ceil(drawn_corners[4][1]) - 1 == target_position[1] and
+			math.floor(drawn_corners[4][2]) == target_position[2]
 		)
 
 		if not target_reached then
@@ -192,7 +198,7 @@ local function animate()
 		end
 	end
 
-	draw.draw_quad(shrunk_corners, target_position)
+	draw.draw_quad(drawn_corners, target_position)
 	vim.defer_fn(animate, config.time_interval)
 end
 
