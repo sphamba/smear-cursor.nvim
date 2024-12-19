@@ -59,13 +59,6 @@ return {
   "sphamba/smear-cursor.nvim",
 
   opts = {
-    -- Smear cursor color. Defaults to Cursor GUI color if not set.
-    -- Set to "none" to match the text color at the target cursor position.
-    cursor_color = "#d3cdc3",
-
-    -- Background color. Defaults to Normal GUI background color if not set.
-    normal_bg = "#282828",
-
     -- Smear cursor when switching buffers or windows.
     smear_between_buffers = true,
 
@@ -85,10 +78,20 @@ return {
 Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) and [`lua/smear_cursor/color.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/color.lua) for the full list of configuration options that can be set with `opts`.
 
 > [!TIP]
-> Some terminals override the cursor color set by Neovim. If that is the case, manually put the actual cursor color in your config, as shown above, to get a matching smear color.
+> Some terminals override the cursor color set by Neovim. If that is the case, manually put the actual cursor color in your config to get a matching smear color:
+> ```lua
+>   opts = {
+>     -- Smear cursor color. Defaults to Cursor GUI color if not set.
+>     -- Set to "none" to match the text color at the target cursor position.
+>     cursor_color = "#d3cdc3",
+>   }
+> ```
 
 
-### Faster smear
+### Examples
+
+<details>
+<summary>🔥 Faster smear</summary>
 
 As an example of further configuration, you can tune the smear dynamics to be snappier:
 ```lua
@@ -100,7 +103,6 @@ As an example of further configuration, you can tune the smear dynamics to be sn
   },
 ```
 
-
 > [!WARNING]
 > **🔥 FIRE HAZARD 🔥** Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
 > ```lua
@@ -108,13 +110,15 @@ As an example of further configuration, you can tune the smear dynamics to be sn
 >     cursor_color = "#ff8800",
 >     stiffness = 0.3,
 >     trailing_stiffness = 0.1,
->     trailing_exponent = 3,
+>     trailing_exponent = 5,
 >     gamma = 1,
->     volume_reduction_exponent = -0.1,
 >   }
 > ```
 
-### Transparent background
+</details>
+
+<details>
+<summary>🌌 Transparent background</summary>
 
 Drawing the smear over a transparent background works better when using a font that supports legacy computing symbols, therefore setting the following option:
 ```lua
@@ -129,6 +133,8 @@ If your font does not support legacy computing symbols, there will be a shadow u
     transparent_bg_fallback_color = "#303030",
   },
 ```
+
+</details>
 
 
 ### Using `init.vim`
