@@ -86,7 +86,7 @@ local function get_window(tab, row, col)
 		style = "minimal",
 		focusable = false,
 		noautocmd = true,
-		zindex = 300,
+		zindex = config.windows_zindex,
 	})
 
 	set_buffer_options(

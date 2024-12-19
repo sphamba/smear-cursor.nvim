@@ -14,7 +14,7 @@ local metatable = {
 	__index = function(table, key)
 		if key == "enabled" then return enabled end
 
-		if key == "cursor_color" or key == "normal_bg" then return color[key] end
+		if vim.tbl_contains(color.config_variables, key) then return color[key] end
 
 		if config[key] ~= nil then return config[key] end
 
@@ -29,7 +29,7 @@ local metatable = {
 			else
 				events.unlisten()
 			end
-		elseif key == "cursor_color" or key == "normal_bg" then
+		elseif vim.tbl_contains(color.config_variables, key) then
 			color[key] = value
 		elseif key == "legacy_computing_symbols_support" then
 			config.legacy_computing_symbols_support = value
