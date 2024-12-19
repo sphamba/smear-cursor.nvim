@@ -82,7 +82,7 @@ return {
 }
 ```
 
-Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) for the full list of configuration options that can be set with `opts`.
+Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua) and [`lua/smear_cursor/color.lua`](https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/color.lua) for the full list of configuration options that can be set with `opts`.
 
 > [!TIP]
 > Some terminals override the cursor color set by Neovim. If that is the case, manually put the actual cursor color in your config, as shown above, to get a matching smear color.
