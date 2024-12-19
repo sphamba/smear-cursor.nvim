@@ -1,3 +1,23 @@
+-- The following options can be set using the `setup` function.
+-- Refer to the README for more information.
+
+-- Color configuration ---------------------------------------------------------
+
+-- Smear cursor color. Defaults to Cursor GUI color if not set.
+-- Set to "none" to match the text color at the target cursor position.
+local cursor_color = nil
+
+-- Cterm color gradient, from bg color (excluded) to cursor color (included)
+-- When set, `cursor_color` is ignored
+local cterm_cursor_colors = nil
+
+-- Background color. Defaults to Normal GUI background color if not set.
+local normal_bg = nil
+
+local transparent_bg_fallback_color = "#303030"
+
+--------------------------------------------------------------------------------
+
 local config = require("smear_cursor.config")
 local round = require("smear_cursor.math").round
 local M = {}
@@ -9,10 +29,7 @@ local function get_hl_color(group, attr)
 	return nil
 end
 
-local cursor_color = nil
 local color_at_cursor = nil
-local normal_bg = nil
-local transparent_bg_fallback_color = "#303030"
 local cache = {} ---@type table<string, boolean>
 
 local function hex_to_rgb(hex)
@@ -118,6 +135,8 @@ setmetatable(M, {
 	__index = function(_, key)
 		if key == "cursor_color" then
 			return cursor_color
+		elseif key == "cterm_cursor_colors" then
+			return cterm_cursor_colors
 		elseif key == "normal_bg" then
 			return normal_bg
 		elseif key == "transparent_bg_fallback_color" then
@@ -130,6 +149,10 @@ setmetatable(M, {
 	__newindex = function(table, key, value)
 		if key == "cursor_color" then
 			cursor_color = value
+			M.clear_cache()
+		elseif key == "cterm_cursor_colors" then
+			cterm_cursor_colors = value
+			config.color_levels = #value
 			M.clear_cache()
 		elseif key == "normal_bg" then
 			normal_bg = value
