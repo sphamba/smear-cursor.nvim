@@ -136,6 +136,19 @@ If your font does not support legacy computing symbols, there will be a shadow u
 
 </details>
 
+<details>
+<summary>🔲 No GUI colors</summary>
+
+If you are not using `termguicolors`, you need to manually set a color gradient for the smear (it can be a single color):
+```lua
+  opts = {
+    cterm_cursor_colors = { 240, 245, 250, 255 },
+    cterm_bg = 235,
+  }
+```
+
+</details>
+
 
 ### Using `init.vim`
 

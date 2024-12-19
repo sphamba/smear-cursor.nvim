@@ -1,26 +1,55 @@
 -- The following options can be set using the `setup` function.
 -- Refer to the README for more information.
 
+local config = require("smear_cursor.config")
+local round = require("smear_cursor.math").round
+local C = {}
+local M = {}
+
 -- Color configuration ---------------------------------------------------------
 
 -- Smear cursor color. Defaults to Cursor GUI color if not set.
 -- Set to "none" to match the text color at the target cursor position.
-local cursor_color = nil
-
--- Cterm color gradient, from bg color (excluded) to cursor color (included)
--- When set, `cursor_color` is ignored
-local cterm_cursor_colors = nil
+C.cursor_color = nil
 
 -- Background color. Defaults to Normal GUI background color if not set.
-local normal_bg = nil
+C.normal_bg = nil
 
-local transparent_bg_fallback_color = "#303030"
+-- Set when the background is transparent and when not using legacy computing symbols.
+C.transparent_bg_fallback_color = "#303030"
+
+-- Cterm color gradient, from bg color (excluded) to cursor color (included)
+C.cterm_cursor_colors = {
+	240,
+	241,
+	242,
+	243,
+	244,
+	245,
+	246,
+	247,
+	248,
+	249,
+	250,
+	251,
+	252,
+	253,
+	254,
+	255,
+}
+
+-- Cterm background color. Must set when not using legacy computing symbols.
+C.cterm_bg = 235
 
 --------------------------------------------------------------------------------
 
-local config = require("smear_cursor.config")
-local round = require("smear_cursor.math").round
-local M = {}
+M.config_variables = {
+	"cursor_color",
+	"normal_bg",
+	"transparent_bg_fallback_color",
+	"cterm_cursor_colors",
+	"cterm_bg",
+}
 
 -- Get a color from a highlight group
 local function get_hl_color(group, attr)
@@ -77,30 +106,30 @@ function M.get_color_at_cursor()
 end
 
 function M.update_color_at_cursor()
-	if cursor_color ~= "none" then return end
+	if C.cursor_color ~= "none" then return end
 	color_at_cursor = M.get_color_at_cursor()
 end
 
 ---@param opts? {level?: number, inverted?: boolean}
 function M.get_hl_group(opts)
 	opts = opts or {}
-	local _cursor_color = cursor_color
+	local _cursor_color = C.cursor_color
 
-	local hl_group = ("SmearCursorNormal%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level) or "")
+	local hl_group = ("SmearCursor%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level or ""))
 
-	-- Get the cursor color from the treesitter highlight group
-	-- at the cursor.
-	if cursor_color == "none" then
+	-- Get the cursor color from the treesitter highlight group at the cursor.
+	if _cursor_color == "none" and C.cterm_cursor_colors == nil then
 		_cursor_color = color_at_cursor
 		if _cursor_color then hl_group = hl_group .. "_" .. _cursor_color:sub(2) end
 	end
 
 	if cache[hl_group] then return hl_group end
 
-	local _normal_bg = normal_bg or get_hl_color("Normal", "bg") or "none"
-
 	-- Retrieve the cursor color and the normal background color if not set by the user
 	_cursor_color = _cursor_color or get_hl_color("Cursor", "bg") or get_hl_color("Normal", "fg") or "#d0d0d0"
+	local _normal_bg = C.normal_bg or get_hl_color("Normal", "bg") or "none"
+	---@type integer?
+	local _cterm_cursor_color = C.cterm_cursor_colors and C.cterm_cursor_colors[#C.cterm_cursor_colors] or nil
 
 	-- Blending breaks with transparent backgrounds
 	local blending = config.legacy_computing_symbols_support and _normal_bg ~= "none"
@@ -108,21 +137,25 @@ function M.get_hl_group(opts)
 	if opts.level then
 		local opacity = (opts.level / config.color_levels) ^ (1 / config.gamma)
 		_cursor_color = interpolate_colors(
-			_normal_bg == "none" and transparent_bg_fallback_color or _normal_bg,
+			_normal_bg == "none" and C.transparent_bg_fallback_color or _normal_bg,
 			_cursor_color,
 			opacity
 		)
+		_cterm_cursor_color = C.cterm_cursor_colors and C.cterm_cursor_colors[opts.level] or nil
 	end
 
 	---@type vim.api.keyset.highlight
 	-- stylua: ignore
 	local hl = opts.inverted and {
-		fg = _normal_bg == "none" and transparent_bg_fallback_color or _normal_bg,
+		fg = _normal_bg == "none" and C.transparent_bg_fallback_color or _normal_bg,
 		bg = _cursor_color,
+		ctermfg = C.cterm_bg or (C.cterm_cursor_colors and C.cterm_cursor_colors[1]),
+		ctermbg = _cterm_cursor_color,
 		blend = 0,
 	} or {
 		fg = _cursor_color,
 		bg = "none",
+		ctermfg = _cterm_cursor_color,
 		blend = blending and 100 or 0,
 	}
 
@@ -133,36 +166,22 @@ end
 
 setmetatable(M, {
 	__index = function(_, key)
-		if key == "cursor_color" then
-			return cursor_color
-		elseif key == "cterm_cursor_colors" then
-			return cterm_cursor_colors
-		elseif key == "normal_bg" then
-			return normal_bg
-		elseif key == "transparent_bg_fallback_color" then
-			return transparent_bg_fallback_color
+		if vim.tbl_contains(M.config_variables, key) then
+			return C[key]
 		else
 			return nil
 		end
 	end,
 
 	__newindex = function(table, key, value)
-		if key == "cursor_color" then
-			cursor_color = value
-			M.clear_cache()
-		elseif key == "cterm_cursor_colors" then
-			cterm_cursor_colors = value
-			config.color_levels = #value
-			M.clear_cache()
-		elseif key == "normal_bg" then
-			normal_bg = value
-			M.clear_cache()
-		elseif key == "transparent_bg_fallback_color" then
-			transparent_bg_fallback_color = value
+		if vim.tbl_contains(M.config_variables, key) then
+			C[key] = value
 			M.clear_cache()
 		else
 			rawset(table, key, value)
 		end
+
+		if key == "cterm_cursor_colors" then config.color_levels = #value end
 	end,
 })
 
