@@ -9,8 +9,7 @@ Table of Contents                             *smear-cursor-table-of-contents*
   - Using vim-plug                  |smear-cursor-installation-using-vim-plug|
 2. Configuration                                  |smear-cursor-configuration|
   - Using lazy.nvim               |smear-cursor-configuration-using-lazy.nvim|
-  - Faster smear                     |smear-cursor-configuration-faster-smear|
-  - Transparent background |smear-cursor-configuration-transparent-background|
+  - Examples                             |smear-cursor-configuration-examples|
   - Using init.vim                 |smear-cursor-configuration-using-init.vim|
 3. Known issues                                    |smear-cursor-known-issues|
 
@@ -65,13 +64,6 @@ Here are the default configuration options:
       "sphamba/smear-cursor.nvim",
     
       opts = {
-        -- Smear cursor color. Defaults to Cursor GUI color if not set.
-        -- Set to "none" to match the text color at the target cursor position.
-        cursor_color = "#d3cdc3",
-    
-        -- Background color. Defaults to Normal GUI background color if not set.
-        normal_bg = "#282828",
-    
         -- Smear cursor when switching buffers or windows.
         smear_between_buffers = true,
     
@@ -90,14 +82,25 @@ Here are the default configuration options:
 
 Refer to `lua/smear_cursor/config.lua`
 <https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/config.lua>
+and `lua/smear_cursor/color.lua`
+<https://github.com/sphamba/smear-cursor.nvim/blob/main/lua/smear_cursor/color.lua>
 for the full list of configuration options that can be set with `opts`.
 
 
   [!TIP] Some terminals override the cursor color set by Neovim. If that is the
-  case, manually put the actual cursor color in your config, as shown above, to
-  get a matching smear color.
+  case, manually put the actual cursor color in your config to get a matching
+  smear color:
+  >lua
+        opts = {
+          -- Smear cursor color. Defaults to Cursor GUI color if not set.
+          -- Set to "none" to match the text color at the target cursor position.
+          cursor_color = "#d3cdc3",
+        }
+  <
 
-FASTER SMEAR                         *smear-cursor-configuration-faster-smear*
+EXAMPLES                                 *smear-cursor-configuration-examples*
+
+Faster smear ~
 
 As an example of further configuration, you can tune the smear dynamics to be
 snappier:
@@ -120,13 +123,11 @@ snappier:
           cursor_color = "#ff8800",
           stiffness = 0.3,
           trailing_stiffness = 0.1,
-          trailing_exponent = 3,
+          trailing_exponent = 5,
           gamma = 1,
-          volume_reduction_exponent = -0.1,
         }
   <
-
-TRANSPARENT BACKGROUND     *smear-cursor-configuration-transparent-background*
+Transparent background ~
 
 Drawing the smear over a transparent background works better when using a font
 that supports legacy computing symbols, therefore setting the following option:
@@ -144,6 +145,18 @@ under the smear. You may set a color for this shadow to be less noticeable:
       opts = {
         transparent_bg_fallback_color = "#303030",
       },
+<
+
+No GUI colors ~
+
+If you are not using `termguicolors`, you need to manually set a color gradient
+for the smear (it can be a single color):
+
+>lua
+      opts = {
+        cterm_cursor_colors = { 240, 245, 250, 255 },
+        cterm_bg = 235,
+      }
 <
 
 
