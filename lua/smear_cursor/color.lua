@@ -118,7 +118,7 @@ function M.get_hl_group(opts)
 	local hl_group = ("SmearCursor%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level or ""))
 
 	-- Get the cursor color from the treesitter highlight group at the cursor.
-	if _cursor_color == "none" and C.cterm_cursor_colors == nil then
+	if _cursor_color == "none" then
 		_cursor_color = color_at_cursor
 		if _cursor_color then hl_group = hl_group .. "_" .. _cursor_color:sub(2) end
 	end
