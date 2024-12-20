@@ -126,7 +126,9 @@ function M.get_hl_group(opts)
 	if cache[hl_group] then return hl_group end
 
 	-- Retrieve the cursor color and the normal background color if not set by the user
-	_cursor_color = _cursor_color or get_hl_color("Cursor", "bg") or get_hl_color("Normal", "fg") or "#d0d0d0"
+	if _cursor_color == "none" then
+		_cursor_color = get_hl_color("Cursor", "bg") or get_hl_color("Normal", "fg") or "#d0d0d0"
+	end
 	local _normal_bg = C.normal_bg or get_hl_color("Normal", "bg") or "none"
 	---@type integer?
 	local _cterm_cursor_color = C.cterm_cursor_colors and C.cterm_cursor_colors[#C.cterm_cursor_colors] or nil
