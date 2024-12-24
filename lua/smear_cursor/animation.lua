@@ -173,6 +173,7 @@ local function animate()
 
 	if max_distance <= config.distance_stop_animating then
 		set_corners(current_corners, target_position[1], target_position[2])
+		vim.cmd.redraw()
 		stop_animation()
 		return
 	end
