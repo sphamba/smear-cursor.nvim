@@ -5,6 +5,7 @@ local screen = require("smear_cursor.screen")
 local M = {}
 
 local animating = false
+local timer = nil
 local target_position = { 0, 0 }
 local current_corners = {}
 local target_corners = {}
@@ -148,8 +149,15 @@ local function shrink_volume(corners)
 	return shrunk_corners
 end
 
+local function stop_animation()
+	if not animating then return end
+	timer:stop()
+	timer:close()
+	timer = nil
+	animating = false
+end
+
 local function animate()
-	animating = true
 	update()
 
 	local max_distance = 0
@@ -164,8 +172,8 @@ local function animate()
 	previous_ending_drawn = false
 
 	if max_distance <= config.distance_stop_animating then
-		animating = false
 		set_corners(current_corners, target_position[1], target_position[2])
+		stop_animation()
 		return
 	end
 
@@ -199,7 +207,14 @@ local function animate()
 	end
 
 	draw.draw_quad(drawn_corners, target_position)
-	vim.defer_fn(animate, config.time_interval)
+	vim.cmd.redraw()
+end
+
+local function start_anination()
+	if animating then return end
+	timer = vim.uv.new_timer()
+	animating = true
+	timer:start(0, config.time_interval, vim.schedule_wrap(animate))
 end
 
 local function set_stiffnesses(head_stiffness, trailing_stiffness)
@@ -285,6 +300,7 @@ M.change_target_position = function(row, col)
 			set_stiffnesses(1, 0)
 			update()
 			draw.draw_quad(shrink_volume(current_corners), target_position)
+			vim.cmd.redraw()
 			previous_ending_drawn = true
 		end
 		set_corners(current_corners, target_position[1], target_position[2])
@@ -294,7 +310,7 @@ M.change_target_position = function(row, col)
 	set_corners(target_corners, row, col)
 	set_stiffnesses(config.stiffness, config.trailing_stiffness)
 
-	if not animating then animate() end
+	start_anination()
 end
 
 setmetatable(M, {
