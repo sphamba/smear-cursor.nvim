@@ -21,14 +21,32 @@ M.jump_cursor = function()
 	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
 end
 
+local function get_cmd_row()
+	return vim.o.lines - vim.opt.cmdheight._value + 1
+end
+
+M.enter_cmd = function()
+	local row = get_cmd_row()
+	local col = vim.fn.getcmdpos()
+	animation.change_target_position(row, col)
+end
+
+M.change_cmd = function()
+	local row = get_cmd_row()
+	local col = vim.fn.getcmdpos()
+	animation.jump(row, col)
+end
+
 M.listen = function()
 	vim.api.nvim_exec2(
 		[[
 		augroup SmearCursor
 			autocmd!
 			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
-			autocmd CursorMoved,WinScrolled * lua require("smear_cursor.events").move_cursor()
+			autocmd CmdlineLeave,CmdwinEnter,CursorMoved,WinScrolled * lua require("smear_cursor.events").move_cursor()
 			autocmd CursorMovedI * lua require("smear_cursor.events").jump_cursor()
+			autocmd CmdlineEnter,CmdwinLeave * lua require("smear_cursor.events").enter_cmd()
+			autocmd CmdlineChanged * lua require("smear_cursor.events").change_cmd()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
