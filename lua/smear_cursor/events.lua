@@ -27,13 +27,13 @@ end
 
 M.enter_cmd = function()
 	local row = get_cmd_row()
-	local col = vim.fn.getcmdpos()
+	local col = vim.fn.getcmdpos() + 1
 	animation.change_target_position(row, col)
 end
 
 M.change_cmd = function()
 	local row = get_cmd_row()
-	local col = vim.fn.getcmdpos()
+	local col = vim.fn.getcmdpos() + 1
 	animation.jump(row, col)
 end
 
