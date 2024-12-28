@@ -10,7 +10,6 @@ local target_position = { 0, 0 }
 local current_corners = {}
 local target_corners = {}
 local stiffnesses = { 0, 0, 0, 0 }
-local previous_ending_drawn = false -- only draw previous smear once
 
 local previous_window_id = -1
 local current_window_id = -1
@@ -294,18 +293,6 @@ M.change_target_position = function(row, col)
 
 	if target_position[1] == row and target_position[2] == col then return end
 	draw.clear()
-
-	-- Draw end of previous smear
-	if animating then
-		if not previous_ending_drawn then
-			set_stiffnesses(1, 0)
-			update()
-			draw.draw_quad(shrink_volume(current_corners), target_position)
-			vim.cmd.redraw()
-			previous_ending_drawn = true
-		end
-		set_corners(current_corners, target_position[1], target_position[2])
-	end
 
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
