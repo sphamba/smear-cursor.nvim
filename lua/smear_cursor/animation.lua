@@ -150,7 +150,7 @@ local function shrink_volume(corners)
 end
 
 local function stop_animation()
-	if not animating then return end
+	if timer == nil then return end
 	timer:stop()
 	timer:close()
 	timer = nil
@@ -158,6 +158,7 @@ local function stop_animation()
 end
 
 local function animate()
+	animating = true
 	update()
 
 	local max_distance = 0
@@ -212,10 +213,9 @@ local function animate()
 end
 
 local function start_anination()
-	if animating then return end
+	if timer ~= nil then return end
 	timer = vim.uv.new_timer()
-	animating = true
-	timer:start(0, config.time_interval, vim.schedule_wrap(animate))
+	timer:start(config.delay_animation_start, config.time_interval, vim.schedule_wrap(animate))
 end
 
 local function set_stiffnesses(head_stiffness, trailing_stiffness)
@@ -310,6 +310,7 @@ M.change_target_position = function(row, col)
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
 	set_stiffnesses(config.stiffness, config.trailing_stiffness)
+	-- print(row, col, current_corners[1][1], current_corners[1][2])
 
 	start_anination()
 end
