@@ -34,7 +34,14 @@ M.windows_zindex = 300
 -- List of filetypes where the plugin is disabled.
 M.filetypes_disabled = {}
 
+-- Sets animation framerate
 M.time_interval = 17 -- milliseconds
+
+-- After changing target position, wait before triggering animation.
+-- Useful if the target changes and rapidly comes back to its original position.
+-- E.g. when hitting a keybinding that triggers CmdlineEnter.
+-- Increase if the cursor makes weird jumps when hitting keys.
+M.delay_animation_start = 5 -- milliseconds
 
 -- Smear configuration ---------------------------------------------------------
 
