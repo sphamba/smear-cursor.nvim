@@ -20,9 +20,17 @@ local current_top_row = -1
 local previous_line = -1
 local current_line = -1
 
+local function cursor_is_vertical_bar()
+	if vim.api.nvim_get_mode()["mode"] == "i" then
+		return config.vertical_bar_cursor_insert_mode
+	else
+		return config.vertical_bar_cursor
+	end
+end
+
 local function set_corners(corners, row, col)
 	corners[1] = { row, col }
-	if config.vertical_bar_cursor then
+	if cursor_is_vertical_bar() then
 		corners[2] = { row, col + 1 / 8 }
 		corners[3] = { row + 1, col + 1 / 8 }
 	else
@@ -54,6 +62,7 @@ end, 0)
 local function update()
 	local distance_head_to_target = math.huge
 	local index_head = 0
+	local max_length = vim.api.nvim_get_mode()["mode"] == "i" and config.max_length_insert_mode or config.max_length
 
 	-- Move toward targets
 	for i = 1, 4 do
@@ -85,8 +94,8 @@ local function update()
 		end
 	end
 
-	if smear_length <= config.max_length then return end
-	local factor = config.max_length / smear_length
+	if smear_length <= max_length then return end
+	local factor = max_length / smear_length
 
 	for i = 1, 4 do
 		if i ~= index_head then
@@ -170,7 +179,6 @@ local function animate()
 	end
 
 	draw.clear()
-	previous_ending_drawn = false
 
 	if max_distance <= config.distance_stop_animating then
 		set_corners(current_corners, target_position[1], target_position[2])
@@ -185,6 +193,8 @@ local function animate()
 	local straight_line = math.abs(target_center[1] - current_center[1]) < 1 / 8
 		or math.abs(target_center[2] - current_center[2]) < 1 / 8
 	local drawn_corners = straight_line and current_corners or shrink_volume(current_corners)
+
+	local vertical_bar = cursor_is_vertical_bar()
 
 	if config.hide_target_hack then
 		-- stylua: ignore
@@ -203,12 +213,12 @@ local function animate()
 		)
 
 		if not target_reached then
-			local character = config.vertical_bar_cursor and "▏" or "█"
+			local character = vertical_bar and "▏" or "█"
 			draw.draw_character(target_position[1], target_position[2], character, color.get_hl_group())
 		end
 	end
 
-	draw.draw_quad(drawn_corners, target_position)
+	draw.draw_quad(drawn_corners, target_position, vertical_bar)
 	vim.cmd.redraw()
 end
 
@@ -218,11 +228,22 @@ local function start_anination()
 	timer:start(config.delay_animation_start, config.time_interval, vim.schedule_wrap(animate))
 end
 
-local function set_stiffnesses(head_stiffness, trailing_stiffness)
+local function set_stiffnesses()
 	local target_center = get_center(target_corners)
 	local distances = {}
 	local min_distance = math.huge
 	local max_distance = 0
+	local head_stiffness, trailing_stiffness, trailing_exponent
+
+	if vim.api.nvim_get_mode()["mode"] == "i" then
+		head_stiffness = config.stiffness_insert_mode
+		trailing_stiffness = config.trailing_stiffness_insert_mode
+		trailing_exponent = config.trailing_exponent_insert_mode
+	else
+		head_stiffness = config.stiffness
+		trailing_stiffness = config.trailing_stiffness
+		trailing_exponent = config.trailing_exponent
+	end
 
 	for i = 1, 4 do
 		local distance =
@@ -241,7 +262,7 @@ local function set_stiffnesses(head_stiffness, trailing_stiffness)
 
 	for i = 1, 4 do
 		local x = (distances[i] - min_distance) / (max_distance - min_distance)
-		local stiffness = head_stiffness + (trailing_stiffness - head_stiffness) * x ^ config.trailing_exponent
+		local stiffness = head_stiffness + (trailing_stiffness - head_stiffness) * x ^ trailing_exponent
 		stiffnesses[i] = math.min(1, stiffness)
 	end
 end
@@ -301,13 +322,11 @@ M.change_target_position = function(row, col)
 		end
 	end
 
-	if target_position[1] == row and target_position[2] == col then return end
 	draw.clear()
 
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
-	set_stiffnesses(config.stiffness, config.trailing_stiffness)
-	-- print(row, col, current_corners[1][1], current_corners[1][2])
+	set_stiffnesses()
 
 	start_anination()
 end

@@ -27,8 +27,13 @@ M.scroll_buffer_space = true
 M.legacy_computing_symbols_support = false
 
 -- Set to `true` if your cursor is a vertical bar in normal mode.
--- Use with `matrix_pixel_threshold = 0.3`
 M.vertical_bar_cursor = false
+
+-- Smear cursor in insert mode
+M.smear_insert_mode = true
+
+-- Set to `true` if your cursor is a vertical bar in insert mode.
+M.vertical_bar_cursor_insert_mode = true
 
 -- Attempt to hide the real cursor by drawing a character below it.
 M.hide_target_hack = true
@@ -72,6 +77,11 @@ M.slowdown_exponent = 0
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
 
+-- Set of parameters for insert mode
+M.stiffness_insert_mode = 0.6
+M.trailing_stiffness_insert_mode = 0.6
+M.trailing_exponent_insert_mode = 1
+
 -- When to switch between rasterization methods
 M.max_slope_horizontal = 0.5
 M.min_slope_vertical = 2
@@ -80,10 +90,12 @@ M.color_levels = 16 -- Minimum 1, don't set manually if using cterm_cursor_color
 M.gamma = 2.2 -- For color blending
 M.max_shade_no_matrix = 0.75 -- 0: more overhangs, 1: more matrices
 M.matrix_pixel_threshold = 0.7 -- 0: all pixels, 1: no pixel
+M.matrix_pixel_threshold_vertical_bar = 0.3 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
 M.volume_reduction_exponent = 0.3 -- 0: no reduction, 1: full reduction
 M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
 M.max_length = 25 -- Maximum smear length
+M.max_length_insert_mode = 1
 
 -- For debugging ---------------------------------------------------------------
 

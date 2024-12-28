@@ -37,6 +37,14 @@ M.jump_cursor = function()
 	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
 end
 
+M.move_cursor_insert_mode = function()
+	if config.smear_insert_mode then
+		M.move_cursor()
+	else
+		M.jump_cursor()
+	end
+end
+
 M.listen = function()
 	vim.api.nvim_exec2(
 		[[
@@ -44,7 +52,7 @@ M.listen = function()
 			autocmd!
 			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
 			autocmd CursorMoved,ModeChanged,WinScrolled * lua require("smear_cursor.events").move_cursor()
-			autocmd CursorMovedI * lua require("smear_cursor.events").jump_cursor()
+			autocmd CursorMovedI * lua require("smear_cursor.events").move_cursor_insert_mode()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
