@@ -151,9 +151,11 @@ local function draw_partial_block(row, col, character_list, character_index, hl_
 	M.draw_character(row, col, character, hl_group)
 end
 
-local function draw_matrix_character(row, col, matrix)
+local function draw_matrix_character(row, col, matrix, vertical_bar)
 	local max = math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
-	if max < config.matrix_pixel_threshold then return end
+	local matrix_pixel_threshold = vertical_bar and config.matrix_pixel_threshold_vertical_bar
+		or config.matrix_pixel_threshold
+	if max < matrix_pixel_threshold then return end
 	local threshold = max * config.matrix_pixel_min_factor
 	local bit_1 = (matrix[1][1] > threshold) and 1 or 0
 	local bit_2 = (matrix[1][2] > threshold) and 1 or 0
@@ -523,7 +525,7 @@ local function update_matrix_with_edge(edge_index, matrix_index, row, col, G, ma
 	update_matrix_with_edge_functions[edge_type](edge_index, matrix_index, row, col, G, matrix)
 end
 
-M.draw_quad = function(corners, target_position)
+M.draw_quad = function(corners, target_position, vertical_bar)
 	if target_position == nil then target_position = { 0, 0 } end
 
 	bulge_above = not bulge_above
@@ -537,7 +539,7 @@ M.draw_quad = function(corners, target_position)
 
 		for col = math.max(G.left, math.floor(left)), math.min(G.right, math.ceil(right)) do
 			-- Check if on target
-			if row == target_position[1] and col == target_position[2] then goto continue end
+			if not vertical_bar and row == target_position[1] and col == target_position[2] then goto continue end
 
 			local intersections = {}
 			for i = 1, 4 do
@@ -620,7 +622,7 @@ M.draw_quad = function(corners, target_position)
 				end
 			end
 
-			draw_matrix_character(row, col, matrix)
+			draw_matrix_character(row, col, matrix, vertical_bar)
 
 			::continue::
 		end
