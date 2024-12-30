@@ -11,6 +11,9 @@ M.smear_between_buffers = true
 -- Smear cursor when moving within line or to neighbor lines
 M.smear_between_neighbor_lines = true
 
+-- Smear cursor when entering or leaving command line mode
+M.smear_to_cmd = true
+
 -- Draw the smear in buffer space instead of screen space when scrolling
 M.scroll_buffer_space = true
 

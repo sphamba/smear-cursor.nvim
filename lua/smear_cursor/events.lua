@@ -26,6 +26,7 @@ local function get_cmd_row()
 end
 
 M.cmd_update = function()
+	if not config.smear_to_cmd then return end
 	local row = get_cmd_row()
 	local col = vim.fn.getcmdpos() + 1
 	animation.change_target_position(row, col)
