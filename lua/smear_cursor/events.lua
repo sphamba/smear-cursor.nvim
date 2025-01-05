@@ -3,13 +3,29 @@ local config = require("smear_cursor.config")
 local screen = require("smear_cursor.screen")
 local M = {}
 
-local function move_cursor()
-	local row, col = screen.get_screen_cursor_position()
+local function get_cmd_row()
+	return vim.o.lines - vim.opt.cmdheight._value + 1
+end
+
+local function move_cursor_cmd()
+	if not config.smear_to_cmd then return end
+	local row = get_cmd_row()
+	local col = vim.fn.getcmdpos() + 1
 	animation.change_target_position(row, col)
 end
 
+local function move_cursor()
+	if vim.api.nvim_get_mode().mode == "c" then
+		move_cursor_cmd()
+	else
+		local row, col = screen.get_screen_cursor_position()
+		animation.change_target_position(row, col)
+	end
+end
+
 M.move_cursor = function()
-	vim.defer_fn(move_cursor, 0) -- for screen.get_screen_cursor_position()
+	-- Must defer for screen.get_screen_cursor_position() and vim.api.nvim.get_mode()
+	vim.defer_fn(move_cursor, 0)
 end
 
 local function jump_cursor()
@@ -21,17 +37,6 @@ M.jump_cursor = function()
 	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
 end
 
-local function get_cmd_row()
-	return vim.o.lines - vim.opt.cmdheight._value + 1
-end
-
-M.cmd_update = function()
-	if not config.smear_to_cmd then return end
-	local row = get_cmd_row()
-	local col = vim.fn.getcmdpos() + 1
-	animation.change_target_position(row, col)
-end
-
 M.listen = function()
 	vim.api.nvim_exec2(
 		[[
@@ -40,7 +45,7 @@ M.listen = function()
 			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
 			autocmd CmdlineLeave,CmdwinEnter,CursorMoved,WinScrolled * lua require("smear_cursor.events").move_cursor()
 			autocmd CursorMovedI * lua require("smear_cursor.events").jump_cursor()
-			autocmd CmdlineEnter,CmdlineChanged,CmdwinLeave * lua require("smear_cursor.events").cmd_update()
+			autocmd CmdlineEnter,CmdlineChanged,CmdwinLeave * lua require("smear_cursor.events").move_cursor()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
