@@ -44,7 +44,7 @@ M.time_interval = 17 -- milliseconds
 -- Useful if the target changes and rapidly comes back to its original position.
 -- E.g. when hitting a keybinding that triggers CmdlineEnter.
 -- Increase if the cursor makes weird jumps when hitting keys.
-M.delay_animation_start = 5 -- milliseconds
+M.delay_animation_start = 0 -- milliseconds
 
 -- Smear configuration ---------------------------------------------------------
 
