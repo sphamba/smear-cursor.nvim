@@ -43,9 +43,8 @@ M.listen = function()
 		augroup SmearCursor
 			autocmd!
 			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
-			autocmd CmdlineLeave,CmdwinEnter,CursorMoved,WinScrolled * lua require("smear_cursor.events").move_cursor()
+			autocmd CursorMoved,ModeChanged,WinScrolled * lua require("smear_cursor.events").move_cursor()
 			autocmd CursorMovedI * lua require("smear_cursor.events").jump_cursor()
-			autocmd CmdlineEnter,CmdlineChanged,CmdwinLeave * lua require("smear_cursor.events").move_cursor()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
