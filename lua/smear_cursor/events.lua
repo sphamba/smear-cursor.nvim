@@ -71,6 +71,9 @@ M.move_cursor_insert_mode = function(trigger)
 	end
 end
 
+local api__redraw = nil
+local api_set_cursor = nil
+
 M.listen = function()
 	vim.api.nvim_exec2(
 		[[
@@ -96,6 +99,37 @@ M.listen = function()
 			{}
 		)
 	end
+
+	-- Override nvim__redraw to update cursor position
+	-- if api__redraw == nil then
+	-- 	api__redraw = vim.api.nvim__redraw
+
+	-- 	vim.api.nvim__redraw = function(opts, ...)
+	-- 		api__redraw(opts, ...)
+	-- 		if opts and opts.cursor then M.move_cursor() end
+	-- 	end
+	-- end
+
+	-- Override nvim_win_set_cursor to update cursor position
+	if api_set_cursor == nil and config.override_api_set_cursor_hack then
+		local api_set_cursor = vim.api.nvim_win_set_cursor
+
+		vim.api.nvim_win_set_cursor = function(window_id, position, ...)
+			api_set_cursor(window_id, position, ...)
+
+			vim.defer_fn(function()
+				local window_info = vim.fn.getwininfo(window_id)[1]
+				local window_config = vim.api.nvim_win_get_config(window_id)
+				local row, col = position[1], position[2]
+				if #window_config.relative > 0 then
+					row = row + window_info.winrow - 1
+					col = col + window_info.wincol
+				end
+				-- print(row, col)
+				animation.change_target_position(row, col)
+			end, 10)
+		end
+	end
 end
 
 M.unlisten = function()
@@ -107,6 +141,16 @@ M.unlisten = function()
 	]],
 		{}
 	)
+
+	if api__redraw ~= nil then
+		vim.api.nvim__redraw = api__redraw
+		api__redraw = nil
+	end
+
+	if api_set_cursor ~= nil then
+		vim.api.nvim_win_set_cursor = api_set_cursor
+		api_set_cursor = nil
+	end
 end
 
 return M

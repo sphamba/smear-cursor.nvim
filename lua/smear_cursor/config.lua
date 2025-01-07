@@ -39,6 +39,9 @@ M.vertical_bar_cursor_insert_mode = true
 -- Attempt to hide the real cursor by drawing a character below it.
 M.hide_target_hack = true
 
+-- Override `vim.api.nvim_win_set_cursor` to trigger the animation when called.
+M.override_api_set_cursor_hack = true
+
 -- Number of windows that stay open for rendering.
 M.max_kept_windows = 50
 
