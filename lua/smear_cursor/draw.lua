@@ -9,6 +9,7 @@ local LEFT_BLOCKS       = { " ", "▏", "▎", "▍", "▌", "▋", "▊", "▉"
 local TOP_BLOCKS        = { " ", "▔", "🮂", "🮃", "▀", "🮄", "🮅", "🮆", "█" }
 local RIGHT_BLOCKS      = { "█", "🮋", "🮊", "🮉", "▐", "🮈", "🮇", "▕", " " }
 local MATRIX_CHARACTERS = { "▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "▚", "▐", "▜", "▄", "▙", "▟", "█" }
+local VERTICAL_BARS     = { "▏", "🭰", "🭱", "🭲", "🭳", "🭳", "🭵", "▕" }
 -- stylua: ignore end
 
 -- Enums for drawing quad
@@ -245,6 +246,21 @@ local function draw_vertically_shifted_sub_block(row_top, row_bottom, col, shade
 	draw_partial_block(row, col, character_list, character_index, hl_group)
 end
 
+local function get_vertical_bar_properties(micro_shift, thickness, shade)
+	local character_index = math.floor(micro_shift)
+	if character_index < 0 or character_index >= 8 then return end
+
+	local character_thickness = 1 / 8
+	shade = math.min(1, shade * thickness / character_thickness)
+	local hl_group_index = round(shade * config.color_levels)
+	if hl_group_index == 0 then return end
+
+	local character_list = VERTICAL_BARS
+	local hl_group = color.get_hl_group({ level = hl_group_index })
+
+	return character_index, character_list, hl_group
+end
+
 local function get_left_block_properties(micro_shift, thickness, shade)
 	local character_index = math.ceil(micro_shift)
 	if character_index == 0 then return end
@@ -294,7 +310,11 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	local gap_left = col_left % 1
 	local gap_right = (1 - col_right) % 1
 
-	if math.max(gap_left, gap_right) / 2 < math.min(gap_left, gap_right) then
+	if config.legacy_computing_symbols_support and thickness <= 1.5 / 8 then
+		-- Draw vertical bar
+		local micro_shift = center * 8
+		character_index, character_list, hl_group = get_vertical_bar_properties(micro_shift, thickness, shade)
+	elseif math.max(gap_left, gap_right) / 2 < math.min(gap_left, gap_right) then
 		-- Draw alternating block
 		if bulge_above then
 			local micro_shift = (col_right % 1) * 8
