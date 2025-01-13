@@ -171,16 +171,24 @@ local function animate()
 	update()
 
 	local max_distance = 0
+	local left_bound = vim.o.columns
+	local right_bound = 0
 	for i = 1, 4 do
 		local distance = math.sqrt(
 			(current_corners[i][1] - target_corners[i][1]) ^ 2 + (current_corners[i][2] - target_corners[i][2]) ^ 2
 		)
 		max_distance = math.max(max_distance, distance)
+		left_bound = math.min(left_bound, current_corners[i][2])
+		right_bound = math.max(right_bound, current_corners[i][2])
 	end
+	local thickness = right_bound - left_bound
 
 	draw.clear()
 
-	if max_distance <= config.distance_stop_animating then
+	if
+		max_distance <= config.distance_stop_animating
+		or (thickness <= 1.5 / 8 and max_distance <= config.distance_stop_animating_vertical_bar)
+	then
 		set_corners(current_corners, target_position[1], target_position[2])
 		vim.cmd.redraw()
 		stop_animation()

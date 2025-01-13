@@ -78,9 +78,10 @@ M.slowdown_exponent = 0
 M.distance_stop_animating = 0.1
 
 -- Set of parameters for insert mode
-M.stiffness_insert_mode = 0.5
-M.trailing_stiffness_insert_mode = 0.5
+M.stiffness_insert_mode = 0.4
+M.trailing_stiffness_insert_mode = 0.4
 M.trailing_exponent_insert_mode = 1
+M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1) if using legacy computing symbols
 
 -- When to switch between rasterization methods
 M.max_slope_horizontal = 0.5
