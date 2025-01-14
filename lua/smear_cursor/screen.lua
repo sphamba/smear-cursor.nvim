@@ -16,6 +16,13 @@ M.get_screen_cursor_position = function()
 	return row, col
 end
 
+M.get_screen_cmd_cursor_position = function()
+	local row = vim.o.lines - vim.opt.cmdheight._value + 1
+	local col = vim.fn.getcmdpos() + 1
+
+	return row, col
+end
+
 M.get_screen_distance = function(row_start, row_end)
 	local reversed = false
 
