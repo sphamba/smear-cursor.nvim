@@ -21,7 +21,7 @@ local previous_line = -1
 local current_line = -1
 
 local function cursor_is_vertical_bar()
-	if vim.api.nvim_get_mode()["mode"] == "i" then
+	if vim.api.nvim_get_mode().mode == "i" then
 		return config.vertical_bar_cursor_insert_mode
 	else
 		return config.vertical_bar_cursor
@@ -62,7 +62,7 @@ end, 0)
 local function update()
 	local distance_head_to_target = math.huge
 	local index_head = 0
-	local max_length = vim.api.nvim_get_mode()["mode"] == "i" and config.max_length_insert_mode or config.max_length
+	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
 
 	-- Move toward targets
 	for i = 1, 4 do
@@ -243,7 +243,7 @@ local function set_stiffnesses()
 	local max_distance = 0
 	local head_stiffness, trailing_stiffness, trailing_exponent
 
-	if vim.api.nvim_get_mode()["mode"] == "i" then
+	if vim.api.nvim_get_mode().mode == "i" then
 		head_stiffness = config.stiffness_insert_mode
 		trailing_stiffness = config.trailing_stiffness_insert_mode
 		trailing_exponent = config.trailing_exponent_insert_mode
@@ -330,6 +330,7 @@ M.change_target_position = function(row, col)
 		end
 	end
 
+	if target_position[1] == row and target_position[2] == col and vim.api.nvim_get_mode().mode ~= "i" then return end
 	draw.clear()
 
 	target_position = { row, col }
