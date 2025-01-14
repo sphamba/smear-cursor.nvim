@@ -233,7 +233,7 @@ end
 local function start_anination()
 	if timer ~= nil then return end
 	timer = vim.uv.new_timer()
-	timer:start(config.delay_animation_start, config.time_interval, vim.schedule_wrap(animate))
+	timer:start(0, config.time_interval, vim.schedule_wrap(animate))
 end
 
 local function set_stiffnesses()
