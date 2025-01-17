@@ -9,7 +9,12 @@ local M = {}
 M.smear_between_buffers = true
 
 -- Smear cursor when moving within line or to neighbor lines
+-- Use `min_horizontal_distance_smear` and `min_vertical_distance_smear` for finer control
 M.smear_between_neighbor_lines = true
+
+-- Only smear cursor when moving at least these distances
+M.min_horizontal_distance_smear = 0
+M.min_vertical_distance_smear = 0
 
 -- Smear cursor when entering or leaving command line mode
 M.smear_to_cmd = true
