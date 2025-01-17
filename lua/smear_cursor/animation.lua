@@ -280,7 +280,16 @@ M.change_target_position = function(row, col)
 
 	if current_window_id == previous_window_id and current_buffer_id == previous_buffer_id then
 		if config.scroll_buffer_space then scroll_buffer_space() end
-		if not config.smear_between_neighbor_lines and not animating and math.abs(row - target_position[1]) <= 1 then
+		if
+			not animating
+			and (
+				(not config.smear_between_neighbor_lines and math.abs(row - target_position[1]) <= 1)
+				or (
+					math.abs(row - target_position[1]) < config.min_vertical_distance_smear
+					and math.abs(col - target_position[2]) < config.min_horizontal_distance_smear
+				)
+			)
+		then
 			M.jump(row, col)
 			return
 		end
