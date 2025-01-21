@@ -7,6 +7,7 @@ local latest_mode = nil
 local latest_row = nil
 local latest_col = nil
 local timer = nil
+local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
 
 local EVENT_TRIGGER = nil
 local AFTER_DELAY = 1
@@ -29,6 +30,7 @@ local function move_cursor(trigger, jump)
 		timer:stop()
 		timer:close()
 	end
+	timer = nil
 
 	if trigger == AFTER_DELAY and mode == latest_mode and row == latest_row and col == latest_col then
 		if jump then
@@ -70,6 +72,12 @@ M.jump_cursor = function()
 	end, 0)
 end
 
+local function on_key(key, typed)
+	vim.defer_fn(function()
+		if timer == nil then M.move_cursor() end
+	end, config.delay_after_key)
+end
+
 M.listen = function()
 	vim.api.nvim_exec2(
 		[[
@@ -84,6 +92,9 @@ M.listen = function()
 	]],
 		{}
 	)
+
+	-- To catch changes that do not trigger events (e.g. opening/closing folds)
+	vim.on_key(on_key, cursor_namespace)
 
 	if #config.filetypes_disabled > 0 then
 		vim.api.nvim_exec2(
@@ -107,6 +118,8 @@ M.unlisten = function()
 	]],
 		{}
 	)
+
+	vim.on_key(nil, cursor_namespace)
 end
 
 return M

@@ -57,6 +57,9 @@ M.time_interval = 17 -- milliseconds
 -- Increase if the cursor makes weird jumps when hitting keys.
 M.delay_event_to_smear = 1 -- milliseconds
 
+-- Delay for `vim.on_key` to avoid redundancy with vim events triggers.
+M.delay_after_key = 1 -- milliseconds
+
 -- Smear configuration ---------------------------------------------------------
 
 -- How fast the smear's head moves towards the target.
