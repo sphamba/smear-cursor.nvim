@@ -17,6 +17,13 @@ M.get_screen_cursor_position = function()
 end
 
 M.get_screen_cmd_cursor_position = function()
+	if vim.g.ui_cmdline_pos ~= nil then
+		local row = vim.g.ui_cmdline_pos[1]
+		local col = vim.g.ui_cmdline_pos[2] + vim.fn.getcmdpos() + 1
+
+		return row, col
+	end
+
 	local row = vim.o.lines - vim.opt.cmdheight._value + 1
 	local col = vim.fn.getcmdpos() + 1
 
