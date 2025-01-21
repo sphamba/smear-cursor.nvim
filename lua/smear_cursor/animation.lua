@@ -204,7 +204,7 @@ local function animate()
 
 	local vertical_bar = cursor_is_vertical_bar()
 
-	if config.hide_target_hack then
+	if config.hide_target_hack and not vertical_bar then
 		-- stylua: ignore
 		local target_reached = (
 			math.floor(drawn_corners[1][1]) == target_position[1] and
