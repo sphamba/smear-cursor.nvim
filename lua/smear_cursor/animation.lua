@@ -125,6 +125,7 @@ local function shrink_volume(corners)
 		double_volumes[i] = edges[1][2] * edges[2][1] - edges[1][1] * edges[2][2]
 	end
 	local volume = (double_volumes[1] + double_volumes[2]) / 2
+	if volume <= 0 then return corners end
 
 	local center = get_center(corners)
 	local factor = (1 / volume) ^ (config.volume_reduction_exponent / 2)
