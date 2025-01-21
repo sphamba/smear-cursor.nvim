@@ -29,7 +29,8 @@ M.legacy_computing_symbols_support = false
 -- Set to `true` if your cursor is a vertical bar in normal mode.
 M.vertical_bar_cursor = false
 
--- Smear cursor in insert mode
+-- Smear cursor in insert mode.
+-- See also `vertical_bar_cursor_insert_mode` and `distance_stop_animating_vertical_bar`.
 M.smear_insert_mode = true
 
 -- Set to `true` if your cursor is a vertical bar in insert mode.
