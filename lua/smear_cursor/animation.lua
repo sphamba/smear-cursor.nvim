@@ -190,7 +190,7 @@ local function animate()
 		or (thickness <= 1.5 / 8 and max_distance <= config.distance_stop_animating_vertical_bar)
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
-		vim.cmd.redraw()
+		if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
 		stop_animation()
 		return
 	end
@@ -227,7 +227,7 @@ local function animate()
 	end
 
 	draw.draw_quad(drawn_corners, target_position, vertical_bar)
-	vim.cmd.redraw()
+	if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
 end
 
 local function start_anination()
