@@ -11,7 +11,8 @@ local timer = nil
 local EVENT_TRIGGER = nil
 local AFTER_DELAY = 1
 
-local function move_cursor(trigger)
+local function move_cursor(trigger, jump)
+	-- Calls to this function must deferred for screen.get_screen_cursor_position() and vim.api.nvim.get_mode() to work
 	trigger = trigger or EVENT_TRIGGER
 	local row, col
 	local mode = vim.api.nvim_get_mode().mode
@@ -30,7 +31,11 @@ local function move_cursor(trigger)
 	end
 
 	if trigger == AFTER_DELAY and mode == latest_mode and row == latest_row and col == latest_col then
-		animation.change_target_position(row, col)
+		if jump then
+			animation.jump(row, col)
+		else
+			animation.change_target_position(row, col)
+		end
 	else -- try until the cursor stops moving
 		latest_mode = mode
 		latest_row = row
@@ -41,34 +46,28 @@ local function move_cursor(trigger)
 			config.delay_event_to_smear,
 			0,
 			vim.schedule_wrap(function()
-				move_cursor(AFTER_DELAY)
+				move_cursor(AFTER_DELAY, jump)
 			end)
 		)
 	end
 end
 
-M.move_cursor = function(trigger)
-	-- Must defer for screen.get_screen_cursor_position() and vim.api.nvim.get_mode()
+M.move_cursor = function()
 	vim.defer_fn(function()
-		move_cursor(trigger)
+		move_cursor(EVENT_TRIGGER, false)
 	end, 0)
 end
 
-local function jump_cursor()
-	local row, col = screen.get_screen_cursor_position()
-	animation.jump(row, col)
+M.move_cursor_insert_mode = function()
+	vim.defer_fn(function()
+		move_cursor(EVENT_TRIGGER, not config.smear_insert_mode)
+	end, 0)
 end
 
 M.jump_cursor = function()
-	vim.defer_fn(jump_cursor, 0) -- for screen.get_screen_cursor_position()
-end
-
-M.move_cursor_insert_mode = function(trigger)
-	if config.smear_insert_mode then
-		M.move_cursor(trigger)
-	else
-		M.jump_cursor()
-	end
+	vim.defer_fn(function()
+		move_cursor(EVENT_TRIGGER, true)
+	end, 0)
 end
 
 M.listen = function()
@@ -77,8 +76,9 @@ M.listen = function()
 		augroup SmearCursor
 			autocmd!
 			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
-			autocmd CmdlineChanged,CursorMoved,ModeChanged,WinScrolled * lua require("smear_cursor.events").move_cursor(nil)
-			autocmd CursorMovedI * lua require("smear_cursor.events").move_cursor_insert_mode(nil)
+			autocmd CursorMoved,ModeChanged,WinScrolled * lua require("smear_cursor.events").move_cursor()
+			autocmd CursorMovedI * lua require("smear_cursor.events").move_cursor_insert_mode()
+			autocmd CmdlineChanged * lua require("smear_cursor.events").jump_cursor()
 			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
 		augroup END
 	]],
