@@ -79,46 +79,61 @@ local function on_key(key, typed)
 end
 
 M.listen = function()
-	vim.api.nvim_exec2(
-		[[
-		augroup SmearCursor
-			autocmd!
-			autocmd CursorMoved,CursorMovedI * lua require("smear_cursor.color").update_color_at_cursor()
-			autocmd CursorMoved,ModeChanged,WinScrolled * lua require("smear_cursor.events").move_cursor()
-			autocmd CursorMovedI * lua require("smear_cursor.events").move_cursor_insert_mode()
-			autocmd CmdlineChanged * lua require("smear_cursor.events").jump_cursor()
-			autocmd ColorScheme * lua require("smear_cursor.color").clear_cache()
-		augroup END
-	]],
-		{}
-	)
+	local group = vim.api.nvim_create_augroup("SmearCursor", { clear = true })
+
+	vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+		group = group,
+		callback = function()
+			require("smear_cursor.color").update_color_at_cursor()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd({ "CursorMoved", "ModeChanged", "WinScrolled" }, {
+		group = group,
+		callback = function()
+			require("smear_cursor.events").move_cursor()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("CursorMovedI", {
+		group = group,
+		callback = function()
+			require("smear_cursor.events").move_cursor_insert_mode()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("CmdlineChanged", {
+		group = group,
+		callback = function()
+			require("smear_cursor.events").jump_cursor()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = group,
+		callback = function()
+			require("smear_cursor.color").clear_cache()
+		end,
+	})
 
 	-- To catch changes that do not trigger events (e.g. opening/closing folds)
 	vim.on_key(on_key, cursor_namespace)
 
 	if #config.filetypes_disabled > 0 then
-		vim.api.nvim_exec2(
-			[[
-		augroup SmearCursorIgnore
-			autocmd!
-			autocmd BufEnter * lua require("smear_cursor").enabled = not vim.tbl_contains(require("smear_cursor").filetypes_disabled, vim.bo.filetype)
-		augroup END
-	]],
-			{}
-		)
+		local ignore_group = vim.api.nvim_create_augroup("SmearCursorIgnore", { clear = true })
+		vim.api.nvim_create_autocmd("BufEnter", {
+			pattern = "*",
+			group = ignore_group,
+			callback = function()
+				require("smear_cursor").enabled =
+					not vim.tbl_contains(require("smear_cursor").filetypes_disabled, vim.bo.filetype)
+			end,
+		})
 	end
 end
 
 M.unlisten = function()
-	vim.api.nvim_exec2(
-		[[
-		augroup SmearCursor
-			autocmd!
-		augroup END
-	]],
-		{}
-	)
-
+	vim.api.nvim_create_augroup("SmearCursor", { clear = true })
 	vim.on_key(nil, cursor_namespace)
 end
 
