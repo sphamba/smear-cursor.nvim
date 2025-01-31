@@ -17,10 +17,16 @@ M.get_screen_cursor_position = function()
 end
 
 M.get_screen_cmd_cursor_position = function()
-	if vim.g.ui_cmdline_pos ~= nil then
-		local row = vim.g.ui_cmdline_pos["row"]
-		local col = vim.g.ui_cmdline_pos["col"] + vim.fn.getcmdpos() + 1
+	if vim.g.ui_cmdline_pos ~= nil then -- noice.nvim
+		local row = vim.g.ui_cmdline_pos[1]
+		local col = vim.g.ui_cmdline_pos[2]
 
+		if not row or not col then
+			row = vim.g.ui_cmdline_pos.row
+			col = vim.g.ui_cmdline_pos.col
+		end
+
+		col = col + vim.fn.getcmdpos() + 1
 		return row, col
 	end
 
