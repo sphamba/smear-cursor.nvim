@@ -5,11 +5,6 @@ local M = {}
 
 local enabled = false
 
-local function initialize()
-	events.listen()
-	events.jump_cursor()
-end
-
 local metatable = {
 	__index = function(table, key)
 		if key == "enabled" then return enabled end
@@ -25,9 +20,11 @@ local metatable = {
 		if key == "enabled" then
 			enabled = value
 			if enabled then
-				initialize()
+				events.listen()
+				events.jump_cursor()
 			else
 				events.unlisten()
+				events.jump_cursor()
 			end
 		elseif vim.tbl_contains(color.config_variables, key) then
 			color[key] = value
