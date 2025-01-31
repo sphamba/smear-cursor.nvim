@@ -120,9 +120,10 @@ snappier:
 <
 
 
-  [!WARNING] **FIRE HAZARD **Feel free to experiment with all the configuration
-  options, but be aware that some combinations may cause your cursor to flicker
-  or even **catch fire**. That can happen with the following settings:
+  **FIRE HAZARD **
+  Feelfree to experiment with all the configuration options, but be aware that
+  some combinations may cause your cursor to flicker or even **catch fire**. That
+  can happen with the following settings:
   >lua
         opts = {
           cursor_color = "#ff8800",
