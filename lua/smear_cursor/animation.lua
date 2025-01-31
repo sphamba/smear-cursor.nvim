@@ -331,6 +331,7 @@ M.change_target_position = function(row, col)
 	end
 
 	if target_position[1] == row and target_position[2] == col and vim.api.nvim_get_mode().mode ~= "i" then return end
+	if target_position[1] == row and vim.api.nvim_get_mode().mode == "c" then return end
 	draw.clear()
 
 	target_position = { row, col }
