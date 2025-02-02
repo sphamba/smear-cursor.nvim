@@ -37,7 +37,8 @@ M.smear_insert_mode = true
 M.vertical_bar_cursor_insert_mode = true
 
 -- Attempt to hide the real cursor by drawing a character below it.
-M.hide_target_hack = true
+-- Can be useful when not using `termguicolors`
+M.hide_target_hack = false
 
 -- Number of windows that stay open for rendering.
 M.max_kept_windows = 50
@@ -82,8 +83,8 @@ M.slowdown_exponent = 0
 M.distance_stop_animating = 0.1
 
 -- Set of parameters for insert mode
-M.stiffness_insert_mode = 0.4
-M.trailing_stiffness_insert_mode = 0.4
+M.stiffness_insert_mode = 0.3
+M.trailing_stiffness_insert_mode = 0.3
 M.trailing_exponent_insert_mode = 1
 M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1) if using legacy computing symbols
 

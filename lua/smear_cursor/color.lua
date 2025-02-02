@@ -185,4 +185,9 @@ setmetatable(M, {
 	end,
 })
 
+vim.api.nvim_set_hl(0, "SmearCursorHidden", {
+	fg = "white",
+	blend = 100,
+})
+
 return M
