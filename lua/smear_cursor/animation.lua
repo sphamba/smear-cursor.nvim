@@ -31,12 +31,21 @@ local function cursor_is_vertical_bar()
 	end
 end
 
+local function cursor_is_horizontal_bar()
+	return vim.api.nvim_get_mode().mode == "R" and config.horizontal_bar_cursor_replace_mode
+end
+
 local function set_corners(corners, row, col)
-	corners[1] = { row, col }
 	if cursor_is_vertical_bar() then
+		corners[1] = { row, col }
 		corners[2] = { row, col + 1 / 8 }
 		corners[3] = { row + 1, col + 1 / 8 }
+	elseif cursor_is_horizontal_bar() then
+		corners[1] = { row + 7 / 8, col }
+		corners[2] = { row + 7 / 8, col + 1 }
+		corners[3] = { row + 1, col + 1 }
 	else
+		corners[1] = { row, col }
 		corners[2] = { row, col + 1 }
 		corners[3] = { row + 1, col + 1 }
 	end
