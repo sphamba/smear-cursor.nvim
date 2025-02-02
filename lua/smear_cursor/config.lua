@@ -36,6 +36,12 @@ M.smear_insert_mode = true
 -- Set to `true` if your cursor is a vertical bar in insert mode.
 M.vertical_bar_cursor_insert_mode = true
 
+-- Smear cursor in replace mode.
+M.smear_replace_mode = false
+
+-- Set to `true` if your cursor is a horizontal bar in replace mode.
+M.horizontal_bar_cursor_replace_mode = true
+
 -- Attempt to hide the real cursor by drawing a character below it.
 -- Can be useful when not using `termguicolors`
 M.hide_target_hack = false
