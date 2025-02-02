@@ -20,6 +20,9 @@ local current_top_row = -1
 local previous_line = -1
 local current_line = -1
 
+local original_guicursor = nil
+local cursor_hidden = false
+
 local function cursor_is_vertical_bar()
 	if vim.api.nvim_get_mode().mode == "i" then
 		return config.vertical_bar_cursor_insert_mode
@@ -166,6 +169,25 @@ local function stop_animation()
 	animating = false
 end
 
+local function hide_cursor()
+	if not config.hide_target_hack then
+		if cursor_hidden then return end
+		original_guicursor = vim.o.guicursor
+		cursor_hidden = true
+		vim.o.guicursor = "a:SmearCursorHidden"
+	elseif not cursor_is_vertical_bar() then
+		local character = "█"
+		draw.draw_character(target_position[1], target_position[2], character, color.get_hl_group())
+	end
+end
+
+local function unhide_cursor()
+	if not cursor_hidden then return end
+	cursor_hidden = false
+
+	vim.o.guicursor = original_guicursor
+end
+
 local function animate()
 	animating = true
 	update()
@@ -191,6 +213,7 @@ local function animate()
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
 		if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
+		unhide_cursor()
 		stop_animation()
 		return
 	end
@@ -202,31 +225,27 @@ local function animate()
 		or math.abs(target_center[2] - current_center[2]) < 1 / 8
 	local drawn_corners = straight_line and current_corners or shrink_volume(current_corners)
 
-	local vertical_bar = cursor_is_vertical_bar()
-
-	if config.hide_target_hack and not vertical_bar then
+	local target_reached = false
+	for i = 1, 4 do
 		-- stylua: ignore
-		local target_reached = (
-			math.floor(drawn_corners[1][1]) == target_position[1] and
-			math.floor(drawn_corners[1][2]) == target_position[2]
-		) or (
-			math.floor(drawn_corners[2][1]) == target_position[1] and
-			math.ceil(drawn_corners[2][2]) - 1 == target_position[2]
-		) or (
-			math.ceil(drawn_corners[3][1]) - 1 == target_position[1] and
-			math.ceil(drawn_corners[3][2]) - 1 == target_position[2]
-		) or (
-			math.ceil(drawn_corners[4][1]) - 1 == target_position[1] and
-			math.floor(drawn_corners[4][2]) == target_position[2]
-		)
-
-		if not target_reached then
-			local character = vertical_bar and "▏" or "█"
-			draw.draw_character(target_position[1], target_position[2], character, color.get_hl_group())
+		if (
+			drawn_corners[i][1] >= target_corners[1][1] and
+			drawn_corners[i][1] <= target_corners[3][1] and
+			drawn_corners[i][2] >= target_corners[1][2] and
+			drawn_corners[i][2] <= target_corners[3][2]
+		) then
+			target_reached = true
+			break
 		end
 	end
 
-	draw.draw_quad(drawn_corners, target_position, vertical_bar)
+	if target_reached then
+		unhide_cursor()
+	else
+		hide_cursor()
+	end
+
+	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar())
 	if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
 end
 
@@ -338,6 +357,7 @@ M.change_target_position = function(row, col)
 	set_corners(target_corners, row, col)
 	set_stiffnesses()
 
+	hide_cursor()
 	start_anination()
 end
 
