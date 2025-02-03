@@ -121,7 +121,7 @@ M.listen = function()
 end
 
 M.unlisten = function()
-	vim.api.nvim_clear_autocmds({ group = "SmearCursor" })
+	pcall(vim.api.nvim_clear_autocmds, { group = "SmearCursor" })
 	vim.on_key(nil, cursor_namespace)
 end
 
