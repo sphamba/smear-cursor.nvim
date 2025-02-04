@@ -180,7 +180,7 @@ end
 
 local function hide_cursor()
 	if not config.hide_target_hack then
-		if cursor_hidden then return end
+		if cursor_hidden or vim.o.guicursor == "a:NeoscrollHiddenCursor" then return end
 		original_guicursor = vim.o.guicursor
 		cursor_hidden = true
 		vim.o.guicursor = "a:SmearCursorHidden"
