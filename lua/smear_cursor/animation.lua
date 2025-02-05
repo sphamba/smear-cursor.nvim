@@ -20,9 +20,6 @@ local current_top_row = -1
 local previous_line = -1
 local current_line = -1
 
-local original_guicursor = nil
-local cursor_hidden = false
-
 local function cursor_is_vertical_bar()
 	if vim.api.nvim_get_mode().mode == "i" then
 		return config.vertical_bar_cursor_insert_mode
@@ -178,23 +175,17 @@ local function stop_animation()
 	animating = false
 end
 
-local function hide_cursor()
+local function hide_real_cursor()
 	if not config.hide_target_hack then
-		if cursor_hidden or vim.o.guicursor == "a:NeoscrollHiddenCursor" then return end
-		original_guicursor = vim.o.guicursor
-		cursor_hidden = true
-		vim.o.guicursor = "a:SmearCursorHidden"
+		color.hide_real_cursor()
 	elseif not cursor_is_vertical_bar() then
 		local character = "█"
 		draw.draw_character(target_position[1], target_position[2], character, color.get_hl_group())
 	end
 end
 
-local function unhide_cursor()
-	if not cursor_hidden then return end
-	cursor_hidden = false
-
-	vim.o.guicursor = original_guicursor
+local function unhide_real_cursor()
+	if not config.hide_target_hack then color.unhide_real_cursor() end
 end
 
 local function animate()
@@ -222,7 +213,7 @@ local function animate()
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
 		if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
-		unhide_cursor()
+		unhide_real_cursor()
 		stop_animation()
 		return
 	end
@@ -249,9 +240,9 @@ local function animate()
 	end
 
 	if target_reached then
-		unhide_cursor()
+		unhide_real_cursor()
 	else
-		hide_cursor()
+		hide_real_cursor()
 	end
 
 	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar())
@@ -366,7 +357,7 @@ M.change_target_position = function(row, col)
 	set_corners(target_corners, row, col)
 	set_stiffnesses()
 
-	hide_cursor()
+	hide_real_cursor()
 	start_anination()
 end
 

@@ -153,6 +153,13 @@ If you are not using `termguicolors`, you need to manually set a color gradient 
   }
 ```
 
+If you are not using `guicursor`, and you notice the cursor getting duplicated (smear visible at the same time as the _real_ cursor), try setting
+```lua
+  opts = {
+    hide_target_hack = true,
+  }
+```
+
 </details>
 
 
