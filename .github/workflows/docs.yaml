@@ -24,7 +24,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: "chore(build): auto-generate vimdoc"
+          commit-message: "docs: auto-generate vimdoc"
           branch: "docs-auto-generate"
           title: "docs: auto-generate vimdoc"
           body: "This pull request contains auto-generated Vim documentation."
