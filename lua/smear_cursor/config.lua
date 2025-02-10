@@ -69,7 +69,7 @@ M.time_interval = 17 -- milliseconds
 M.delay_event_to_smear = 1 -- milliseconds
 
 -- Delay for `vim.on_key` to avoid redundancy with vim events triggers.
-M.delay_after_key = 1 -- milliseconds
+M.delay_after_key = 5 -- milliseconds
 
 -- Smear configuration ---------------------------------------------------------
 
