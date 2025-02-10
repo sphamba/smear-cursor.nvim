@@ -20,6 +20,7 @@ local function move_cursor(trigger, jump)
 	local mode = vim.api.nvim_get_mode().mode
 
 	if mode == "R" and not config.smear_replace_mode then jump = true end
+	if mode == "t" and not config.smear_terminal_mode then jump = true end
 
 	if mode ~= "c" then
 		row, col = screen.get_screen_cursor_position()

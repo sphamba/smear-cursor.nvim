@@ -39,6 +39,10 @@ M.vertical_bar_cursor_insert_mode = true
 -- Smear cursor in replace mode.
 M.smear_replace_mode = false
 
+-- Smear cursor in terminal mode.
+-- If the smear goes to the wrong location when enabled, try increasing `delay_after_key`.
+M.smear_terminal_mode = false
+
 -- Set to `true` if your cursor is a horizontal bar in replace mode.
 M.horizontal_bar_cursor_replace_mode = true
 
