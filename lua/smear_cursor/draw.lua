@@ -620,6 +620,13 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 				end
 
 				if is_horizontally_shifted then
+					if
+						1 - intersections[RIGHT] <= 1 / 8
+						and row == target_position[1]
+						and (col == target_position[2] or col == target_position[2] + 1)
+					then
+						goto continue
+					end
 					draw_horizontally_shifted_sub_block(
 						row,
 						col + intersections[LEFT],
