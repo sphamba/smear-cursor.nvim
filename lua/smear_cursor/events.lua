@@ -19,6 +19,7 @@ local function move_cursor(trigger, jump)
 	local row, col
 	local mode = vim.api.nvim_get_mode().mode
 
+	if mode == "i" and not config.smear_insert_mode then jump = true end
 	if mode == "R" and not config.smear_replace_mode then jump = true end
 	if mode == "t" and not config.smear_terminal_mode then jump = true end
 
@@ -64,12 +65,6 @@ M.move_cursor = function()
 	end, 0)
 end
 
-M.move_cursor_insert_mode = function()
-	vim.defer_fn(function()
-		move_cursor(EVENT_TRIGGER, not config.smear_insert_mode)
-	end, 0)
-end
-
 M.jump_cursor = function()
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, true)
@@ -78,7 +73,7 @@ end
 
 local function on_key(key, typed)
 	vim.defer_fn(function()
-		if timer == nil then M.move_cursor() end
+		if timer == nil then move_cursor(EVENT_TRIGGER, false) end
 	end, config.delay_after_key)
 end
 
@@ -94,8 +89,7 @@ M.listen = function()
 	local group = vim.api.nvim_create_augroup("SmearCursor", { clear = true })
 	local autocmds = {
 		update_color_at_cursor = { "CursorMoved", "CursorMovedI" },
-		move_cursor = { "CursorMoved", "ModeChanged", "WinScrolled" },
-		move_cursor_insert_mode = { "CursorMovedI" },
+		move_cursor = { "CursorMoved", "CursorMovedI", "ModeChanged", "WinScrolled" },
 		jump_cursor = { "CmdlineChanged" },
 		clear_cache = { "ColorScheme" },
 	}
