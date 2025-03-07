@@ -16,6 +16,11 @@ M.smear_between_neighbor_lines = true
 M.min_horizontal_distance_smear = 0
 M.min_vertical_distance_smear = 0
 
+-- Toggles for directions
+M.smear_horizontally = true
+M.smear_vertically = true
+M.smear_diagonally = true -- Neither horizontal nor vertical
+
 -- Smear cursor when entering or leaving command line mode
 M.smear_to_cmd = true
 

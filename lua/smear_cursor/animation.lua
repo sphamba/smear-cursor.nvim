@@ -333,10 +333,12 @@ M.change_target_position = function(row, col)
 			not animating
 			and (
 				(not config.smear_between_neighbor_lines and math.abs(row - target_position[1]) <= 1)
-				or (
-					math.abs(row - target_position[1]) < config.min_vertical_distance_smear
-					and math.abs(col - target_position[2]) < config.min_horizontal_distance_smear
-				)
+				or (math.abs(row - target_position[1]) < config.min_vertical_distance_smear and math.abs(
+					col - target_position[2]
+				) < config.min_horizontal_distance_smear)
+				or (not config.smear_horizontally and row == target_position[1])
+				or (not config.smear_vertically and col == target_position[2])
+				or (not config.smear_diagonally and row ~= target_position[1] and col ~= target_position[2])
 			)
 		then
 			M.jump(row, col)
