@@ -329,6 +329,7 @@ M.change_target_position = function(row, col)
 
 	if current_window_id == previous_window_id and current_buffer_id == previous_buffer_id then
 		if config.scroll_buffer_space then scroll_buffer_space() end
+		-- stylua: ignore
 		if
 			(not config.smear_between_neighbor_lines and math.abs(row - current_corners[1][1]) <= 1.5)
 			or (
