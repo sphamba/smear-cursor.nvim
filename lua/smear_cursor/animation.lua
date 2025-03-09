@@ -330,18 +330,25 @@ M.change_target_position = function(row, col)
 	if current_window_id == previous_window_id and current_buffer_id == previous_buffer_id then
 		if config.scroll_buffer_space then scroll_buffer_space() end
 		if
-			not animating
-			and (
-				(not config.smear_between_neighbor_lines and math.abs(row - target_position[1]) <= 1)
-				or (math.abs(row - target_position[1]) < config.min_vertical_distance_smear and math.abs(
-					col - target_position[2]
-				) < config.min_horizontal_distance_smear)
-				or (not config.smear_horizontally and row == target_position[1])
-				or (not config.smear_vertically and col == target_position[2])
-				or (not config.smear_diagonally and row ~= target_position[1] and col ~= target_position[2])
+			(not config.smear_between_neighbor_lines and math.abs(row - current_corners[1][1]) <= 1.5)
+			or (
+				math.abs(row - current_corners[1][1]) < config.min_vertical_distance_smear
+				and math.abs(col - current_corners[1][2]) < config.min_horizontal_distance_smear
+			)
+			or (not config.smear_horizontally and math.abs(row - current_corners[1][1]) <= 0.5)
+			or (not config.smear_vertically and math.abs(col - current_corners[1][2]) <= 0.5)
+			or (
+				not config.smear_diagonally
+				and math.abs(row - current_corners[1][1]) > 0.5
+				and math.abs(col - current_corners[1][2]) > 0.5
 			)
 		then
+			if animating then
+				unhide_real_cursor()
+				stop_animation()
+			end
 			M.jump(row, col)
+			if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
 			return
 		end
 	else
