@@ -559,7 +559,14 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 
 		for col = math.max(G.left, math.floor(left)), math.min(G.right, math.ceil(right)) do
 			-- Check if on target
-			if not vertical_bar and row == target_position[1] and col == target_position[2] then goto continue end
+			if
+				config.never_draw_over_target
+				and not vertical_bar
+				and row == target_position[1]
+				and col == target_position[2]
+			then
+				goto continue
+			end
 
 			local intersections = {}
 			for i = 1, 4 do
