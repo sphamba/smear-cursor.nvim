@@ -124,6 +124,21 @@ As an example of further configuration, you can tune the smear dynamics to be sn
 </details>
 
 <details>
+<summary>█ Smooth cursor without smear</summary>
+
+If you wish to only have a smoother cursor that keeps its rectangular shape (without the trail), you can set the following options:
+
+```lua
+  opts = {
+    stiffness = 0.5,
+    trailing_stiffness = 0.49,
+    never_draw_over_target = false,
+  },
+```
+
+</details>
+
+<details>
 <summary>🌌 Transparent background</summary>
 
 Drawing the smear over a transparent background works better when using a font that supports legacy computing symbols, therefore setting the following option:
