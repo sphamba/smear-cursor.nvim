@@ -239,7 +239,7 @@ local function animate()
 		end
 	end
 
-	if target_reached then
+	if target_reached and config.never_draw_over_target then
 		unhide_real_cursor()
 	else
 		hide_real_cursor()

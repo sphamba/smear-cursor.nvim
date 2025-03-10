@@ -51,6 +51,9 @@ M.smear_terminal_mode = false
 -- Set to `true` if your cursor is a horizontal bar in replace mode.
 M.horizontal_bar_cursor_replace_mode = true
 
+-- Set to `false` to allow the smear to overlap the target character, hiding it until the animation is over.
+M.never_draw_over_target = true
+
 -- Attempt to hide the real cursor by drawing a character below it.
 -- Can be useful when not using `termguicolors`
 M.hide_target_hack = false
@@ -84,7 +87,7 @@ M.stiffness = 0.6
 
 -- How fast the smear's tail moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.3
+M.trailing_stiffness = 0.4
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
@@ -98,8 +101,8 @@ M.slowdown_exponent = 0
 M.distance_stop_animating = 0.1
 
 -- Set of parameters for insert mode
-M.stiffness_insert_mode = 0.3
-M.trailing_stiffness_insert_mode = 0.3
+M.stiffness_insert_mode = 0.4
+M.trailing_stiffness_insert_mode = 0.4
 M.trailing_exponent_insert_mode = 1
 M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1) if using legacy computing symbols
 
