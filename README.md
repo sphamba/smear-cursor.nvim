@@ -11,6 +11,16 @@ This plugin is intended for terminals/GUIs that can only display text and do not
 
 [Demo](https://private-user-images.githubusercontent.com/17217484/389300116-fc95b4df-d791-4c53-9141-4f870eb03ab2.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzI0NzY0NDAsIm5iZiI6MTczMjQ3NjE0MCwicGF0aCI6Ii8xNzIxNzQ4NC8zODkzMDAxMTYtZmM5NWI0ZGYtZDc5MS00YzUzLTkxNDEtNGY4NzBlYjAzYWIyLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDExMjQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQxMTI0VDE5MjIyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTg1NjFhZjJlODQ4YmU2NjAzY2EzY2I3NWMzMzI5MWQ1Njk2MTExYmEwYmExNTMwMThmYTJjYjE2ZjIyOThjNjMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.Skw2VVyVWVkMe4ht6mvl_AZ_6QasJm8O6qsIZmcQ2XE)
 
+Some configuration examples:
+
+| Default | Faster |
+| --- | --- |
+| ![Image](https://github.com/user-attachments/assets/8d4ea0e6-6764-48ce-a182-7f1a63ffd762) | ![Image](https://github.com/user-attachments/assets/6c2ae042-55df-48a3-8e18-57517dc06633) |
+
+| Smooth cursor without smear | Fire hazard |
+| --- | --- |
+| ![Image](https://github.com/user-attachments/assets/47950a0c-2bbe-4148-b633-fea6d5e1f985) | ![Image](https://github.com/user-attachments/assets/ba847071-f918-4e8f-ae74-169a31e05368) |
+
 <!-- panvimdoc-ignore-end -->
 
 
@@ -94,6 +104,9 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 
 
 ### Examples
+
+> [!TIP]
+> See videos at the top for visual examples.
 
 <details>
 <summary>🔥 Faster smear</summary>
