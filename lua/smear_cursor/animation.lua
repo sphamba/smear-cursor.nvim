@@ -7,8 +7,8 @@ local M = {}
 local animating = false
 local timer = nil
 local target_position = { 0, 0 }
-local current_corners = {}
-local target_corners = {}
+local current_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
+local target_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local stiffnesses = { 0, 0, 0, 0 }
 
 local previous_window_id = -1
