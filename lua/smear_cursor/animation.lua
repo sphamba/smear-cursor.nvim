@@ -188,6 +188,12 @@ local function unhide_real_cursor()
 	if not config.hide_target_hack then color.unhide_real_cursor() end
 end
 
+M.replace_real_cursor = function()
+	if config.hide_target_hack or animating then return end
+	color.hide_real_cursor()
+	draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar())
+end
+
 local function animate()
 	animating = true
 	update()
@@ -321,6 +327,7 @@ M.jump = function(row, col)
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
 	set_corners(current_corners, row, col)
+	unhide_real_cursor()
 	draw.clear()
 end
 
