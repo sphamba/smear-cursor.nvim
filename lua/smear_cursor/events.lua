@@ -60,6 +60,7 @@ local function move_cursor(trigger, jump)
 end
 
 M.move_cursor = function()
+	animation.replace_real_cursor()
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, false)
 	end, 0)
