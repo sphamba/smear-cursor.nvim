@@ -129,6 +129,7 @@ As an example of further configuration, you can tune the smear dynamics to be sn
 >     stiffness = 0.3,
 >     trailing_stiffness = 0.1,
 >     trailing_exponent = 5,
+>     never_draw_over_target = true,
 >     hide_target_hack = true,
 >     gamma = 1,
 >   }
@@ -145,7 +146,6 @@ If you wish to only have a smoother cursor that keeps its rectangular shape (wit
   opts = {
     stiffness = 0.5,
     trailing_stiffness = 0.49,
-    never_draw_over_target = false,
   },
 ```
 

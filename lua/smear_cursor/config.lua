@@ -51,8 +51,8 @@ M.smear_terminal_mode = false
 -- Set to `true` if your cursor is a horizontal bar in replace mode.
 M.horizontal_bar_cursor_replace_mode = true
 
--- Set to `false` to allow the smear to overlap the target character, hiding it until the animation is over.
-M.never_draw_over_target = true
+-- Set to `true` to prevent the smear from overlapping the target character, hiding it until the animation is over.
+M.never_draw_over_target = false
 
 -- Attempt to hide the real cursor by drawing a character below it.
 -- Can be useful when not using `termguicolors`
