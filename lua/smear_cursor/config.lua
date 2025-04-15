@@ -56,6 +56,7 @@ M.never_draw_over_target = true
 
 -- Attempt to hide the real cursor by drawing a character below it.
 -- Can be useful when not using `termguicolors`
+-- Do not set to `true` if `never_draw_over_target` is `false`.
 M.hide_target_hack = false
 
 -- Number of windows that stay open for rendering.
