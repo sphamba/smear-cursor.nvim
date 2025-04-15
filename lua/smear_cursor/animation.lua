@@ -352,7 +352,6 @@ M.change_target_position = function(row, col)
 			)
 		then
 			if animating then
-				unhide_real_cursor()
 				stop_animation()
 			end
 			M.jump(row, col)
@@ -365,16 +364,6 @@ M.change_target_position = function(row, col)
 			return
 		end
 	end
-
-	if
-		(target_position[1] == row and target_position[2] == col and vim.api.nvim_get_mode().mode ~= "i")
-		or (target_position[1] == row and vim.api.nvim_get_mode().mode == "c")
-	then
-		unhide_real_cursor()
-		draw.clear()
-		return
-	end
-	draw.clear()
 
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
