@@ -102,6 +102,9 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 >   }
 > ```
 
+> [!NOTE]
+> Fonts with legacy computing symbols support seems to be rare. One notable example is [Cascadia Code](https://github.com/microsoft/cascadia-code/releases). You can still use smear-cursor.nvim without such a font.
+
 
 ### Examples
 
@@ -113,10 +116,12 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 
 As an example of further configuration, you can tune the smear dynamics to be snappier:
 ```lua
-  opts = {                         -- Default  Range
-    stiffness = 0.8,               -- 0.6      [0, 1]
-    trailing_stiffness = 0.5,      -- 0.3      [0, 1]
-    distance_stop_animating = 0.5, -- 0.1      > 0
+  opts = {                                -- Default  Range
+    stiffness = 0.8,                      -- 0.6      [0, 1]
+    trailing_stiffness = 0.5,             -- 0.4      [0, 1]
+    stiffness_insert_mode = 0.6,          -- 0.4      [0, 1]
+    trailing_stiffness_insert_mode = 0.6, -- 0.4      [0, 1]
+    distance_stop_animating = 0.5,        -- 0.1      > 0
   },
 ```
 
