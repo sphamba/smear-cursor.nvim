@@ -103,6 +103,11 @@ for the full list of configuration options that can be set with `opts`.
         }
   <
 
+  [!NOTE] Fonts with legacy computing symbols support seems to be rare. One
+  notable example is Cascadia Code
+  <https://github.com/microsoft/cascadia-code/releases>. You can still use
+  smear-cursor.nvim without such a font.
+
 EXAMPLES                                 *smear-cursor-configuration-examples*
 
 
@@ -113,10 +118,12 @@ As an example of further configuration, you can tune the smear dynamics to be
 snappier:
 
 >lua
-      opts = {                         -- Default  Range
-        stiffness = 0.8,               -- 0.6      [0, 1]
-        trailing_stiffness = 0.5,      -- 0.3      [0, 1]
-        distance_stop_animating = 0.5, -- 0.1      > 0
+      opts = {                                -- Default  Range
+        stiffness = 0.8,                      -- 0.6      [0, 1]
+        trailing_stiffness = 0.5,             -- 0.4      [0, 1]
+        stiffness_insert_mode = 0.6,          -- 0.4      [0, 1]
+        trailing_stiffness_insert_mode = 0.6, -- 0.4      [0, 1]
+        distance_stop_animating = 0.5,        -- 0.1      > 0
       },
 <
 
@@ -131,6 +138,7 @@ snappier:
           stiffness = 0.3,
           trailing_stiffness = 0.1,
           trailing_exponent = 5,
+          never_draw_over_target = true,
           hide_target_hack = true,
           gamma = 1,
         }
@@ -144,7 +152,6 @@ If you wish to only have a smoother cursor that keeps its rectangular shape
       opts = {
         stiffness = 0.5,
         trailing_stiffness = 0.49,
-        never_draw_over_target = false,
       },
 <
 
