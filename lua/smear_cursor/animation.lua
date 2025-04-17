@@ -176,6 +176,7 @@ local function stop_animation()
 end
 
 local function hide_real_cursor()
+	if vim.api.nvim_get_mode().mode == "c" then return end
 	if not config.hide_target_hack then
 		color.hide_real_cursor()
 	elseif not cursor_is_vertical_bar() then
@@ -245,7 +246,7 @@ local function animate()
 		end
 	end
 
-	if target_reached and config.never_draw_over_target then
+	if target_reached and (config.never_draw_over_target or vim.api.nvim_get_mode().mode == "c") then
 		unhide_real_cursor()
 	else
 		hide_real_cursor()
