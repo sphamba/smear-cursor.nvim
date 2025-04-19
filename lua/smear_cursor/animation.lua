@@ -366,6 +366,8 @@ M.change_target_position = function(row, col)
 		end
 	end
 
+	if target_position[1] == row and vim.api.nvim_get_mode().mode == "c" then return end
+
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
 	set_stiffnesses()

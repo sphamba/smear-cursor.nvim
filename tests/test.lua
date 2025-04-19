@@ -28,6 +28,7 @@ local foldable_lines = {
 -- - Split windows
 -- - Tabs
 -- - fclose!
+-- - successive cmds that should remain displayed (e.g. `:hi Normal`, `:`)
 
 -- 0│││1│││2│││3│││4
 -- ─┘│││││││││││││││
