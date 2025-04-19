@@ -190,6 +190,7 @@ If you are not using `guicursor`, and you notice the cursor getting duplicated (
 ```lua
   opts = {
     hide_target_hack = true,
+    never_draw_over_target = true,
   }
 ```
 
