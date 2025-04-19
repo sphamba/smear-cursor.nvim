@@ -190,7 +190,17 @@ local function unhide_real_cursor()
 end
 
 M.replace_real_cursor = function()
-	if config.hide_target_hack or animating then return end
+	local mode = vim.api.nvim_get_mode().mode
+	if
+		config.hide_target_hack
+		or animating
+		or (mode == "c" and not config.smear_to_cmd)
+		or (mode == "i" and not config.smear_insert_mode)
+		or (mode == "R" and not config.smear_replace_mode)
+		or (mode == "t" and not config.smear_terminal_mode)
+	then
+		return
+	end
 	color.hide_real_cursor()
 	draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar())
 end
