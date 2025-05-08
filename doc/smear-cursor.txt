@@ -127,6 +127,15 @@ snappier:
       },
 <
 
+If you notice a low framerate, you can try lowering the time interval between
+draws (default is 17ms):
+
+>lua
+      opts = {
+        time_interval = 7, -- milliseconds
+      },
+<
+
 
   **FIRE HAZARD **
   Feelfree to experiment with all the configuration options, but be aware that
