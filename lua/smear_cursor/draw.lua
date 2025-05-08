@@ -310,7 +310,10 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	local gap_left = col_left % 1
 	local gap_right = (1 - col_right) % 1
 
-	if config.legacy_computing_symbols_support and thickness <= 1.5 / 8 then
+	if
+		(config.legacy_computing_symbols_support or config.legacy_computing_symbols_support_vertical_bars)
+		and thickness <= 1.5 / 8
+	then
 		-- Draw vertical bar
 		local micro_shift = center * 8
 		character_index, character_list, hl_group = get_vertical_bar_properties(micro_shift, thickness, shade)

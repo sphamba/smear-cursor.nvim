@@ -30,6 +30,7 @@ M.scroll_buffer_space = true
 -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
 -- Smears will blend better on all backgrounds.
 M.legacy_computing_symbols_support = false
+M.legacy_computing_symbols_support_vertical_bars = false
 
 -- Set to `true` if your cursor is a vertical bar in normal mode.
 M.vertical_bar_cursor = false
