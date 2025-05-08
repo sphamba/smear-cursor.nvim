@@ -125,6 +125,13 @@ As an example of further configuration, you can tune the smear dynamics to be sn
   },
 ```
 
+If you notice a low framerate, you can try lowering the time interval between draws (default is 17ms):
+```lua
+  opts = {
+    time_interval = 7, -- milliseconds
+  },
+```
+
 > **🔥 FIRE HAZARD 🔥**
 >
 > Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
