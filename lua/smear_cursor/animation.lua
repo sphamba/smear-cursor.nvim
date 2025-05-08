@@ -278,14 +278,16 @@ local function set_stiffnesses()
 	local min_distance = math.huge
 	local max_distance = 0
 	local head_stiffness, trailing_stiffness, trailing_exponent
+	local BASE_TIME_INTERVAL = 17
+	local speed_correction = config.time_interval / BASE_TIME_INTERVAL
 
 	if vim.api.nvim_get_mode().mode == "i" then
-		head_stiffness = config.stiffness_insert_mode
-		trailing_stiffness = config.trailing_stiffness_insert_mode
+		head_stiffness = math.min(1, config.stiffness_insert_mode * speed_correction)
+		trailing_stiffness = math.min(1, config.trailing_stiffness_insert_mode * speed_correction)
 		trailing_exponent = config.trailing_exponent_insert_mode
 	else
-		head_stiffness = config.stiffness
-		trailing_stiffness = config.trailing_stiffness
+		head_stiffness = math.min(1, config.stiffness * speed_correction)
+		trailing_stiffness = math.min(1, config.trailing_stiffness * speed_correction)
 		trailing_exponent = config.trailing_exponent
 	end
 
