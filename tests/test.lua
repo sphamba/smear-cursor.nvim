@@ -28,7 +28,10 @@ local foldable_lines = {
 -- - Split windows
 -- - Tabs
 -- - fclose!
--- - successive cmds that should remain displayed (e.g. `:hi Normal`, `:`)
+-- - Fast successive cursor moved
+-- - Opening and closing folds
+-- - Motions (e.g. `%`)
+-- - Successive cmds that should remain displayed (e.g. `:hi Normal`, `:`)
 
 -- 0│││1│││2│││3│││4
 -- ─┘│││││││││││││││
