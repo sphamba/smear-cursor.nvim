@@ -90,8 +90,7 @@ M.listen = function()
 	local group = vim.api.nvim_create_augroup("SmearCursor", { clear = true })
 	local autocmds = {
 		update_color_at_cursor = { "CursorMoved", "CursorMovedI" },
-		move_cursor = { "CursorMoved", "CursorMovedI", "ModeChanged", "WinScrolled" },
-		jump_cursor = { "CmdlineChanged" },
+		move_cursor = { "CmdlineChanged", "CursorMoved", "CursorMovedI", "ModeChanged", "WinScrolled" },
 		clear_cache = { "ColorScheme" },
 	}
 

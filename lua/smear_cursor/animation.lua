@@ -205,6 +205,17 @@ M.replace_real_cursor = function()
 	draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar())
 end
 
+local function cmd_mode_redraw()
+	if vim.api.nvim_get_mode().mode ~= "c" then return end
+	local cmd_row = vim.o.lines - vim.opt.cmdheight._value + 1
+	for i = 1, 4 do
+		if current_corners[i][1] < cmd_row then
+			vim.cmd.redraw()
+			return
+		end
+	end
+end
+
 local function animate()
 	animating = true
 	update()
@@ -229,7 +240,7 @@ local function animate()
 		or (thickness <= 1.5 / 8 and max_distance <= config.distance_stop_animating_vertical_bar)
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
-		if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
+		cmd_mode_redraw()
 		unhide_real_cursor()
 		stop_animation()
 		return
@@ -263,7 +274,7 @@ local function animate()
 	end
 
 	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar())
-	if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
+	cmd_mode_redraw()
 end
 
 local function start_anination()
@@ -368,7 +379,7 @@ M.change_target_position = function(row, col)
 				stop_animation()
 			end
 			M.jump(row, col)
-			if vim.api.nvim_get_mode().mode == "c" then vim.cmd.redraw() end
+			cmd_mode_redraw()
 			return
 		end
 	else
@@ -377,8 +388,6 @@ M.change_target_position = function(row, col)
 			return
 		end
 	end
-
-	if target_position[1] == row and vim.api.nvim_get_mode().mode == "c" then return end
 
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
