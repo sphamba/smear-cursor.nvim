@@ -60,6 +60,8 @@ local function move_cursor(trigger, jump)
 end
 
 M.move_cursor = function()
+	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) then return end
+
 	animation.replace_real_cursor()
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, false)
@@ -76,10 +78,6 @@ local function on_key(key, typed)
 	vim.defer_fn(function()
 		if timer == nil then move_cursor(EVENT_TRIGGER, false) end
 	end, config.delay_after_key)
-end
-
-M.disable_in_filetypes = function()
-	require("smear_cursor").enabled = not vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype)
 end
 
 -- Aliases for autocmds
@@ -103,16 +101,6 @@ M.listen = function()
 
 	-- To catch changes that do not trigger events (e.g. opening/closing folds)
 	vim.on_key(on_key, cursor_namespace)
-
-	if #config.filetypes_disabled > 0 then
-		local ignore_group = vim.api.nvim_create_augroup("SmearCursorIgnore", { clear = true })
-
-		vim.api.nvim_create_autocmd("BufEnter", {
-			pattern = "*",
-			group = ignore_group,
-			callback = M.disable_in_filetypes,
-		})
-	end
 end
 
 M.unlisten = function()
