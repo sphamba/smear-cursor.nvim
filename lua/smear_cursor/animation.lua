@@ -6,6 +6,7 @@ local M = {}
 
 local animating = false
 local timer = nil
+local previous_time = 0
 local target_position = { 0, 0 }
 local current_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local target_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
@@ -73,11 +74,17 @@ local function update()
 	local index_head = 0
 	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
 
+	local current_time = vim.uv.now()
+	local time_interval = current_time - previous_time
+	previous_time = current_time
+	local BASE_TIME_INTERVAL = 17
+	local speed_correction = time_interval / BASE_TIME_INTERVAL
+
 	-- Move toward targets
 	for i = 1, 4 do
 		local distance_squared = (current_corners[i][1] - target_corners[i][1]) ^ 2
 			+ (current_corners[i][2] - target_corners[i][2]) ^ 2
-		local stiffness = math.min(1, stiffnesses[i] * distance_squared ^ config.slowdown_exponent)
+		local stiffness = math.min(1, stiffnesses[i] * speed_correction * distance_squared ^ config.slowdown_exponent)
 
 		if distance_squared < distance_head_to_target then
 			distance_head_to_target = distance_squared
@@ -286,6 +293,7 @@ end
 local function start_anination()
 	if timer ~= nil then return end
 	timer = vim.uv.new_timer()
+	previous_time = vim.uv.now()
 	timer:start(0, config.time_interval, vim.schedule_wrap(animate))
 end
 
@@ -295,16 +303,14 @@ local function set_stiffnesses()
 	local min_distance = math.huge
 	local max_distance = 0
 	local head_stiffness, trailing_stiffness, trailing_exponent
-	local BASE_TIME_INTERVAL = 17
-	local speed_correction = config.time_interval / BASE_TIME_INTERVAL
 
 	if vim.api.nvim_get_mode().mode == "i" then
-		head_stiffness = math.min(1, config.stiffness_insert_mode * speed_correction)
-		trailing_stiffness = math.min(1, config.trailing_stiffness_insert_mode * speed_correction)
+		head_stiffness = config.stiffness_insert_mode
+		trailing_stiffness = config.trailing_stiffness_insert_mode
 		trailing_exponent = config.trailing_exponent_insert_mode
 	else
-		head_stiffness = math.min(1, config.stiffness * speed_correction)
-		trailing_stiffness = math.min(1, config.trailing_stiffness * speed_correction)
+		head_stiffness = config.stiffness
+		trailing_stiffness = config.trailing_stiffness
 		trailing_exponent = config.trailing_exponent
 	end
 
