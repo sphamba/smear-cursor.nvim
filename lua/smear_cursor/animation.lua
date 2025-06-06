@@ -21,6 +21,8 @@ local current_top_row = -1
 local previous_line = -1
 local current_line = -1
 
+M.disabled_in_buffer = false
+
 local function cursor_is_vertical_bar()
 	if vim.api.nvim_get_mode().mode == "i" then
 		return config.vertical_bar_cursor_insert_mode
@@ -70,7 +72,7 @@ vim.defer_fn(function()
 end, 0)
 
 local function update()
-	local distance_head_to_target = math.huge
+	local distance_head_to_target_squared = math.huge
 	local index_head = 0
 	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
 
@@ -86,14 +88,24 @@ local function update()
 			+ (current_corners[i][2] - target_corners[i][2]) ^ 2
 		local stiffness = math.min(1, stiffnesses[i] * speed_correction * distance_squared ^ config.slowdown_exponent)
 
-		if distance_squared < distance_head_to_target then
-			distance_head_to_target = distance_squared
+		if distance_squared < distance_head_to_target_squared then
+			distance_head_to_target_squared = distance_squared
 			index_head = i
 		end
 
 		for j = 1, 2 do
 			current_corners[i][j] = current_corners[i][j] + (target_corners[i][j] - current_corners[i][j]) * stiffness
 		end
+	end
+
+	-- Disable smear if actual time interval is too long
+	if
+		distance_head_to_target_squared > (1 / 8) ^ 2
+		and config.delay_disable ~= nil
+		and time_interval > config.delay_disable
+	then
+		M.disabled_in_buffer = true
+		vim.notify("Smear cursor disabled in the current buffer due to high delay.")
 	end
 
 	-- Shorten smear if too long
@@ -180,6 +192,7 @@ local function stop_animation()
 	timer:close()
 	timer = nil
 	animating = false
+	previous_time = 0
 end
 
 local function hide_real_cursor()
@@ -196,7 +209,12 @@ local function unhide_real_cursor()
 	if not config.hide_target_hack then color.unhide_real_cursor() end
 end
 
-M.replace_real_cursor = function()
+M.reset_previous_time = function()
+	if previous_time == 0 then previous_time = vim.uv.now() end
+end
+
+M.replace_real_cursor = function(only_hide)
+	if only_hide == nil then only_hide = false end
 	local mode = vim.api.nvim_get_mode().mode
 	if
 		config.hide_target_hack
@@ -209,7 +227,7 @@ M.replace_real_cursor = function()
 		return
 	end
 	color.hide_real_cursor()
-	draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar())
+	if not only_hide then draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar()) end
 end
 
 local function check_must_redraw_cmd_mode()
@@ -293,7 +311,6 @@ end
 local function start_anination()
 	if timer ~= nil then return end
 	timer = vim.uv.new_timer()
-	previous_time = vim.uv.now()
 	timer:start(0, config.time_interval, vim.schedule_wrap(animate))
 end
 

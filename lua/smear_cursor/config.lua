@@ -72,6 +72,10 @@ M.filetypes_disabled = {}
 -- Sets animation framerate
 M.time_interval = 17 -- milliseconds
 
+-- Disable smear in the current buffer if the animation is stuck for at least this amount of time.
+-- Set to nil to disable this feature.
+M.delay_disable = nil -- milliseconds
+
 -- Amount of time the cursor has to stay still before triggering animation.
 -- Useful if the target changes and rapidly comes back to its original position.
 -- E.g. when hitting a keybinding that triggers CmdlineEnter.
