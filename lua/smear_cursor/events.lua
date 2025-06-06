@@ -59,29 +59,29 @@ local function move_cursor(trigger, jump)
 	end
 end
 
-M.move_cursor = function()
+local function move_cursor_from_event(replace_real_cursor, only_hide_real_cursor)
+	if only_hide_real_cursor == nil then only_hide_real_cursor = false end
 	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) or animation.disabled_in_buffer then return end
 
 	animation.reset_previous_time()
-	animation.replace_real_cursor()
+	if replace_real_cursor then animation.replace_real_cursor(only_hide_real_cursor) end
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, false)
 	end, 0)
+end
+
+M.move_cursor = function()
+	move_cursor_from_event(true, false)
+end
+
+local function on_key(key, typed)
+	move_cursor_from_event(false)
 end
 
 M.jump_cursor = function()
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, true)
 	end, 0)
-end
-
-local function on_key(key, typed)
-	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) or animation.disabled_in_buffer then return end
-
-	animation.reset_previous_time()
-	vim.defer_fn(function()
-		if timer == nil then move_cursor(EVENT_TRIGGER, false) end
-	end, config.delay_after_key)
 end
 
 M.re_enable = function()
