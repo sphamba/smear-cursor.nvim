@@ -60,8 +60,9 @@ local function move_cursor(trigger, jump)
 end
 
 M.move_cursor = function()
-	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) then return end
+	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) or animation.disabled_in_buffer then return end
 
+	animation.reset_previous_time()
 	animation.replace_real_cursor()
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, false)
@@ -75,9 +76,16 @@ M.jump_cursor = function()
 end
 
 local function on_key(key, typed)
+	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) or animation.disabled_in_buffer then return end
+
+	animation.reset_previous_time()
 	vim.defer_fn(function()
 		if timer == nil then move_cursor(EVENT_TRIGGER, false) end
 	end, config.delay_after_key)
+end
+
+M.re_enable = function()
+	animation.disabled_in_buffer = false
 end
 
 -- Aliases for autocmds
@@ -90,6 +98,7 @@ M.listen = function()
 		update_color_at_cursor = { "CursorMoved", "CursorMovedI" },
 		move_cursor = { "CmdlineChanged", "CursorMoved", "CursorMovedI", "ModeChanged", "WinScrolled" },
 		clear_cache = { "ColorScheme" },
+		re_enable = { "BufEnter" },
 	}
 
 	for function_name, events in pairs(autocmds) do
