@@ -76,10 +76,16 @@ local function update()
 	local index_head = 0
 	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
 
-	local current_time = vim.uv.now()
-	local time_interval = current_time - previous_time
-	previous_time = current_time
 	local BASE_TIME_INTERVAL = 17
+	local time_interval
+	if previous_time == 0 then
+		previous_time = vim.uv.now()
+		time_interval = BASE_TIME_INTERVAL
+	else
+		local current_time = vim.uv.now()
+		time_interval = current_time - previous_time
+		previous_time = current_time
+	end
 	local speed_correction = time_interval / BASE_TIME_INTERVAL
 
 	-- Move toward targets
@@ -207,10 +213,6 @@ end
 
 local function unhide_real_cursor()
 	if not config.hide_target_hack then color.unhide_real_cursor() end
-end
-
-M.reset_previous_time = function()
-	if previous_time == 0 then previous_time = vim.uv.now() end
 end
 
 M.replace_real_cursor = function(only_hide)

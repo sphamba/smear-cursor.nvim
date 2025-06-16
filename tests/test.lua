@@ -1,4 +1,4 @@
--- Instructions: open this file in Neovim and run `source %`
+-- Instructions: open this file in Neovim and run `source %` (or just `so`)
 
 local foldable_lines = {
 	{
@@ -32,6 +32,7 @@ local foldable_lines = {
 -- - Opening and closing folds
 -- - Motions (e.g. `%`)
 -- - Successive cmds that should remain displayed (e.g. `:hi Normal`, `:`)
+-- - Big and slow file (e.g. a binary)
 
 -- 0│││1│││2│││3│││4
 -- ─┘│││││││││││││││

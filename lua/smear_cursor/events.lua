@@ -63,7 +63,6 @@ local function move_cursor_from_event(replace_real_cursor, only_hide_real_cursor
 	if only_hide_real_cursor == nil then only_hide_real_cursor = false end
 	if vim.tbl_contains(config.filetypes_disabled, vim.bo.filetype) or animation.disabled_in_buffer then return end
 
-	animation.reset_previous_time()
 	if replace_real_cursor then animation.replace_real_cursor(only_hide_real_cursor) end
 	vim.defer_fn(function()
 		move_cursor(EVENT_TRIGGER, false)
