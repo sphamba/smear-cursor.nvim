@@ -89,11 +89,14 @@ M.delay_after_key = 5 -- milliseconds
 
 -- How fast the smear's head moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.stiffness = 0.6
+M.stiffness = 0.65
 
 -- How fast the smear's tail moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.4
+M.trailing_stiffness = 0.5
+
+-- Velocity reduction over time. O: no reduction, 1: full reduction
+M.damping = 0.6
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
@@ -107,8 +110,8 @@ M.slowdown_exponent = 0
 M.distance_stop_animating = 0.1
 
 -- Set of parameters for insert mode
-M.stiffness_insert_mode = 0.4
-M.trailing_stiffness_insert_mode = 0.4
+M.stiffness_insert_mode = 0.55
+M.trailing_stiffness_insert_mode = 0.55
 M.trailing_exponent_insert_mode = 1
 M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1) if using legacy computing symbols
 

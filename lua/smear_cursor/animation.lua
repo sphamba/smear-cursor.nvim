@@ -10,6 +10,7 @@ local previous_time = 0
 local target_position = { 0, 0 }
 local current_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local target_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
+local velocity_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local stiffnesses = { 0, 0, 0, 0 }
 
 local previous_window_id = -1
@@ -87,6 +88,7 @@ local function update()
 		previous_time = current_time
 	end
 	local speed_correction = time_interval / BASE_TIME_INTERVAL
+	local velocity_conservation_factor = math.max(0, 1 - config.damping * speed_correction)
 
 	-- Move toward targets
 	for i = 1, 4 do
@@ -100,7 +102,12 @@ local function update()
 		end
 
 		for j = 1, 2 do
-			current_corners[i][j] = current_corners[i][j] + (target_corners[i][j] - current_corners[i][j]) * stiffness
+			-- velocity_corners[i][j] = velocity_corners[i][j] * velocity_conservation_factor
+			-- 	+ (target_corners[i][j] - current_corners[i][j]) * stiffness
+			velocity_corners[i][j] = (
+				velocity_corners[i][j] + (target_corners[i][j] - current_corners[i][j]) * stiffness
+			) * velocity_conservation_factor
+			current_corners[i][j] = current_corners[i][j] + velocity_corners[i][j]
 		end
 	end
 
@@ -253,6 +260,7 @@ local function animate()
 	update()
 
 	local max_distance = 0
+	local max_velocity = 0
 	local left_bound = vim.o.columns
 	local right_bound = 0
 	local must_redraw_cmd_mode = check_must_redraw_cmd_mode()
@@ -260,7 +268,9 @@ local function animate()
 		local distance = math.sqrt(
 			(current_corners[i][1] - target_corners[i][1]) ^ 2 + (current_corners[i][2] - target_corners[i][2]) ^ 2
 		)
+		local velocity = math.sqrt(velocity_corners[i][1] ^ 2 + velocity_corners[i][2] ^ 2)
 		max_distance = math.max(max_distance, distance)
+		max_velocity = math.max(max_velocity, velocity)
 		left_bound = math.min(left_bound, current_corners[i][2])
 		right_bound = math.max(right_bound, current_corners[i][2])
 	end
@@ -269,8 +279,12 @@ local function animate()
 	draw.clear()
 
 	if
-		max_distance <= config.distance_stop_animating
-		or (thickness <= 1.5 / 8 and max_distance <= config.distance_stop_animating_vertical_bar)
+		(max_distance <= config.distance_stop_animating and max_velocity <= config.distance_stop_animating)
+		or (
+			thickness <= 1.5 / 8
+			and max_distance <= config.distance_stop_animating_vertical_bar
+			and max_velocity <= config.distance_stop_animating_vertical_bar
+		)
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
 		redraw_cmd_mode(must_redraw_cmd_mode)
