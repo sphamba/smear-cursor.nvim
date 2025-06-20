@@ -117,10 +117,11 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 As an example of further configuration, you can tune the smear dynamics to be snappier:
 ```lua
   opts = {                                -- Default  Range
-    stiffness = 0.8,                      -- 0.6      [0, 1]
-    trailing_stiffness = 0.5,             -- 0.4      [0, 1]
-    stiffness_insert_mode = 0.6,          -- 0.4      [0, 1]
-    trailing_stiffness_insert_mode = 0.6, -- 0.4      [0, 1]
+    stiffness = 0.9,                      -- 0.65     [0, 1]
+    trailing_stiffness = 0.7,             -- 0.5      [0, 1]
+    stiffness_insert_mode = 0.7,          -- 0.55     [0, 1]
+    trailing_stiffness_insert_mode = 0.7, -- 0.55     [0, 1]
+    damping = 0.65,                       -- 0.6      [0, 1]
     distance_stop_animating = 0.5,        -- 0.1      > 0
   },
 ```
@@ -132,6 +133,9 @@ If you notice a low framerate, you can try lowering the time interval between dr
   },
 ```
 
+You can also change the "bounciness" of the smear by adjusting the `damping` parameter (default to `0.6`). Increasing it (_e.g._ to `0.65`) will reduce the overshoot, while decreasing it (_e.g._ to `0.55`) will make the smear more elastic.
+
+
 > **🔥 FIRE HAZARD 🔥**
 >
 > Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
@@ -139,7 +143,8 @@ If you notice a low framerate, you can try lowering the time interval between dr
 >   opts = {
 >     cursor_color = "#ff8800",
 >     stiffness = 0.3,
->     trailing_stiffness = 0.1,
+>     trailing_stiffness = 0.15,
+>     damping = 0.5,
 >     trailing_exponent = 5,
 >     never_draw_over_target = true,
 >     hide_target_hack = true,
@@ -156,8 +161,9 @@ If you wish to only have a smoother cursor that keeps its rectangular shape (wit
 
 ```lua
   opts = {
-    stiffness = 0.5,
-    trailing_stiffness = 0.49,
+    stiffness = 0.65,
+    trailing_stiffness = 0.64,
+    damping = 0.63,
   },
 ```
 
