@@ -382,17 +382,28 @@ local function precompute_intersections_diagonal(corners, G, index)
 	local edges = {}
 	local fractions = {}
 
-	for row = G.top, G.bottom do
-		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
-		edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
-		fractions[row] = {}
+	if G.slopes[index] ~= G.slopes[index] then
+		for row = G.top, G.bottom do
+			centerlines[row] = corners[index][2]
+			edges[row] = centerlines[row]
+			fractions[row] = {}
 
-		for j = 1, 2 do
-			local shift = (j == 1) and -0.25 or 0.25
-			fractions[row][j] = centerlines[row] + shift / G.slopes[index]
+			for j = 1, 2 do
+				fractions[row][j] = centerlines[row]
+			end
+		end
+	else
+		for row = G.top, G.bottom do
+			centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
+			edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
+			fractions[row] = {}
+
+			for j = 1, 2 do
+				local shift = (j == 1) and -0.25 or 0.25
+				fractions[row][j] = centerlines[row] + shift / G.slopes[index]
+			end
 		end
 	end
-
 	G.I.centerlines[index] = centerlines
 	G.I.edges[index] = edges
 	G.I.fractions[index] = fractions
