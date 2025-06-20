@@ -119,8 +119,8 @@ As an example of further configuration, you can tune the smear dynamics to be sn
   opts = {                                -- Default  Range
     stiffness = 0.9,                      -- 0.65     [0, 1]
     trailing_stiffness = 0.7,             -- 0.5      [0, 1]
-    stiffness_insert_mode = 0.7,          -- 0.55     [0, 1]
-    trailing_stiffness_insert_mode = 0.7, -- 0.55     [0, 1]
+    stiffness_insert_mode = 0.8,          -- 0.6      [0, 1]
+    trailing_stiffness_insert_mode = 0.8, -- 0.6      [0, 1]
     damping = 0.65,                       -- 0.6      [0, 1]
     distance_stop_animating = 0.5,        -- 0.1      > 0
   },
@@ -162,8 +162,9 @@ If you wish to only have a smoother cursor that keeps its rectangular shape (wit
 ```lua
   opts = {
     stiffness = 0.65,
-    trailing_stiffness = 0.64,
+    trailing_stiffness = 0.65,
     damping = 0.63,
+    matrix_pixel_threshold = 0.5,
   },
 ```
 
