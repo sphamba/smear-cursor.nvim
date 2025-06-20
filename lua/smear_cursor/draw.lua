@@ -425,7 +425,7 @@ local function precompute_quad_geometry(corners)
 			corners[i % 4 + 1][1] - corners[i][1],
 			corners[i % 4 + 1][2] - corners[i][2],
 		}
-		if edges[i][2] != 0 then -- NaN check
+		if edges[i][2] ~= 0 then -- NaN check
 			G.slopes[i] = edges[i][1] / edges[i][2]
 		else
 			if edges[i][1] == 0 then 
