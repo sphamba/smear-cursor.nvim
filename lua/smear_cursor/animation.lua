@@ -73,7 +73,7 @@ end, 0)
 
 local function update()
 	local distance_head_to_target_squared = math.huge
-	local index_head = 0
+	local index_head = 1
 	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
 
 	local BASE_TIME_INTERVAL = 17
