@@ -382,28 +382,17 @@ local function precompute_intersections_diagonal(corners, G, index)
 	local edges = {}
 	local fractions = {}
 
-	if G.slopes[index] ~= G.slopes[index] then
-		for row = G.top, G.bottom do
-			-- centerlines[row] = corners[index][2]
-			edges[row] = centerlines[row]
-			fractions[row] = {}
+	for row = G.top, G.bottom do
+		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
+		edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
+		fractions[row] = {}
 
-			for j = 1, 2 do
-				fractions[row][j] = centerlines[row]
-			end
-		end
-	else
-		for row = G.top, G.bottom do
-			centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
-			edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
-			fractions[row] = {}
-
-			for j = 1, 2 do
-				local shift = (j == 1) and -0.25 or 0.25
-				fractions[row][j] = centerlines[row] + shift / G.slopes[index]
-			end
+		for j = 1, 2 do
+			local shift = (j == 1) and -0.25 or 0.25
+			fractions[row][j] = centerlines[row] + shift / G.slopes[index]
 		end
 	end
+	
 	G.I.centerlines[index] = centerlines
 	G.I.edges[index] = edges
 	G.I.fractions[index] = fractions
@@ -426,10 +415,6 @@ local function precompute_quad_geometry(corners)
 	G.bottom = math.ceil(math.max(corners[1][1], corners[2][1], corners[3][1], corners[4][1])) - 1
 	G.left = math.floor(math.min(corners[1][2], corners[2][2], corners[3][2], corners[4][2]))
 	G.right = math.ceil(math.max(corners[1][2], corners[2][2], corners[3][2], corners[4][2])) - 1
-
-	if G.top ~= G.top or G.bottom ~= G.bottom or G.left ~= G.left or G.right ~= G.right then
-		corners[0/0] = 0
-	end
 	
 	-- Slopes
 	local edges = {}
@@ -440,9 +425,8 @@ local function precompute_quad_geometry(corners)
 			corners[i % 4 + 1][1] - corners[i][1],
 			corners[i % 4 + 1][2] - corners[i][2],
 		}
-		if edges[i][2] ~= 0 then -- NaN check
-			G.slopes[i] = edges[i][1] / edges[i][2]
-		else
+		G.slopes[i] = edges[i][1] / edges[i][2]
+		if G.slopes[i] ~= G.slopes[i] then -- NaN check
 			if edges[i][1] == 0 then 
 				G.slopes[i] = 0
 			elseif edges[i][1] > 0 then
@@ -575,7 +559,14 @@ end
 
 M.draw_quad = function(corners, target_position, vertical_bar)
 	if target_position == nil then target_position = { 0, 0 } end
-
+	if corners == nil then corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } end
+	
+	for i = 1, 4 do
+		for j = 1, 2 do
+			if corners[i][j] ~= corners[i][j] then corners[i][j] = 0 end -- Nan check
+		end
+	end
+ 
 	bulge_above = not bulge_above
 	local G = precompute_quad_geometry(corners)
 
