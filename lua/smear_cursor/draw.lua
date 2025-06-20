@@ -20,6 +20,7 @@ local RIGHT = 4
 local LEFT_DIAGONAL = 5
 local RIGHT_DIAGONAL = 6
 local DIAGONAL = 7
+local NONE = 8
 
 -- Create a namespace for the extmarks
 local cursor_namespace = vim.api.nvim_create_namespace("smear_cursor")
@@ -405,6 +406,7 @@ local precompute_intersections_functions = {
 	[RIGHT] = precompute_intersections_vertical,
 	[LEFT_DIAGONAL] = precompute_intersections_diagonal,
 	[RIGHT_DIAGONAL] = precompute_intersections_diagonal,
+	[NONE] = function() end,
 }
 
 local function precompute_quad_geometry(corners)
@@ -434,7 +436,9 @@ local function precompute_quad_geometry(corners)
 	for i = 1, 4 do
 		local abs_slope = math.abs(G.slopes[i])
 
-		if abs_slope <= config.max_slope_horizontal then
+		if abs_slope ~= abs_slope then
+			G.edge_types[i] = NONE
+		elseif abs_slope <= config.max_slope_horizontal then
 			G.edge_types[i] = (edges[i][2] > 0) and TOP or BOTTOM
 		elseif abs_slope >= config.min_slope_vertical then
 			G.edge_types[i] = (edges[i][1] > 0) and RIGHT or LEFT
@@ -478,6 +482,9 @@ local get_edge_cell_intersection_functions = {
 	end,
 	[RIGHT_DIAGONAL] = function(edge_index, row, col, G)
 		return col + 1 - G.I.edges[edge_index][row]
+	end,
+	[NONE] = function()
+		return 0
 	end,
 }
 
@@ -541,6 +548,7 @@ local update_matrix_with_edge_functions = {
 	[RIGHT] = update_matrix_with_right_edge,
 	[LEFT_DIAGONAL] = update_matrix_with_left_edge,
 	[RIGHT_DIAGONAL] = update_matrix_with_right_edge,
+	[NONE] = function() end,
 }
 
 local function update_matrix_with_edge(edge_index, matrix_index, row, col, G, matrix)

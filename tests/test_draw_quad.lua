@@ -102,7 +102,7 @@ draw.draw_quad({
 	{ row + 5, col + 4 },
 })
 
--- Degenerate quads (aligned points)
+-- Degenerate quad (aligned points)
 
 row = 14
 col = 23
@@ -114,10 +114,22 @@ draw.draw_quad({
 	{ row + 3, col - 1 },
 })
 
+-- Degenerate quads (coincident points)
+
+row = 13
+col = 27
+
+draw.draw_quad({
+	{ row, col },
+	{ row, col },
+	{ row + 4, col + 4 },
+	{ row + 4, col },
+})
+
 -- Thin line with alternating bulges
 
 row = 13
-col = 26
+col = 31
 
 for i = 0, 1 do
 	draw.draw_quad({
@@ -129,7 +141,7 @@ for i = 0, 1 do
 end
 
 row = 15
-col = 32
+col = 37
 
 for i = 0, 1 do
 	draw.draw_quad({
