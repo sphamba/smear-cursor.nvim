@@ -341,6 +341,18 @@ local function draw_horizontally_shifted_sub_block(row, col_left, col_right, sha
 	draw_partial_block(row, col, character_list, character_index, hl_group)
 end
 
+local function ensure_clockwise(corners)
+	if
+		(corners[2][1] - corners[1][1]) * (corners[4][2] - corners[1][2])
+			- (corners[2][2] - corners[1][2]) * (corners[4][1] - corners[1][1])
+		> 0
+	then
+		corners = { corners[3], corners[2], corners[1], corners[4] }
+	end
+
+	return corners
+end
+
 local function precompute_intersections_horizontal(corners, G, index)
 	local centerlines = {}
 	local fractions = {}
@@ -560,15 +572,11 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 	if target_position == nil then target_position = { 0, 0 } end
 
 	bulge_above = not bulge_above
+	corners = ensure_clockwise(corners)
 	local G = precompute_quad_geometry(corners)
 
 	for row = G.top, G.bottom do
-		local left = corners[4][2] + (row + 0.5 - corners[4][1]) / G.slopes[4]
-		left = left - 0.5 / math.abs(G.slopes[4])
-		local right = corners[2][2] + (row + 0.5 - corners[2][1]) / G.slopes[2]
-		right = right + 0.5 / math.abs(G.slopes[2])
-
-		for col = math.max(G.left, math.floor(left)), math.min(G.right, math.ceil(right)) do
+		for col = G.left, G.right do
 			-- Check if on target
 			if
 				config.never_draw_over_target

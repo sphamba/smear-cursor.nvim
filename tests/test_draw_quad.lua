@@ -126,6 +126,30 @@ draw.draw_quad({
 	{ row + 4, col },
 })
 
+-- Degenerate quads (inverted)
+
+row = 18
+col = 22
+
+draw.draw_quad({
+	{ row, col },
+	{ row + 2, col },
+	{ row + 2, col + 2 },
+	{ row, col + 2 },
+})
+
+-- Degenerate quads (nans, should not be drawn)
+
+row = 18
+col = 25
+
+draw.draw_quad({
+	{ row, col },
+	{ 0 / 0, 0 / 0 },
+	{ row + 2, col + 2 },
+	{ row + 2, col },
+})
+
 -- Thin line with alternating bulges
 
 row = 13
