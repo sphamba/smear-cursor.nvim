@@ -384,7 +384,7 @@ local function precompute_intersections_diagonal(corners, G, index)
 
 	if G.slopes[index] ~= G.slopes[index] then
 		for row = G.top, G.bottom do
-			centerlines[row] = corners[index][2]
+			-- centerlines[row] = corners[index][2]
 			edges[row] = centerlines[row]
 			fractions[row] = {}
 
