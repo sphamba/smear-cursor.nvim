@@ -428,7 +428,7 @@ local function precompute_quad_geometry(corners)
 	G.right = math.ceil(math.max(corners[1][2], corners[2][2], corners[3][2], corners[4][2])) - 1
 
 	if G.top ~= G.top or G.bottom ~= G.bottom or G.left ~= G.left or G.right ~= G.right then
-		corners[0/0]
+		corners[0/0] = 0
 	end
 	
 	-- Slopes
