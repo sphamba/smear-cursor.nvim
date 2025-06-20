@@ -53,6 +53,20 @@ local function set_corners(corners, row, col)
 	corners[4] = { row + 1, col }
 end
 
+local function reset_velocity()
+	for i = 1, 4 do
+		velocity_corners[i] = { 0, 0 }
+	end
+end
+
+local function set_initial_velocity()
+	for i = 1, 4 do
+		for j = 1, 2 do
+			velocity_corners[i][j] = (current_corners[i][j] - target_corners[i][j]) * config.anticipation
+		end
+	end
+end
+
 local function update_current_ids_and_row()
 	previous_window_id = current_window_id
 	previous_buffer_id = current_buffer_id
@@ -287,6 +301,7 @@ local function animate()
 		)
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
+		reset_velocity()
 		redraw_cmd_mode(must_redraw_cmd_mode)
 		unhide_real_cursor()
 		stop_animation()
@@ -437,6 +452,7 @@ M.change_target_position = function(row, col)
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
 	set_stiffnesses()
+	if not animating then set_initial_velocity() end
 
 	hide_real_cursor()
 	start_anination()

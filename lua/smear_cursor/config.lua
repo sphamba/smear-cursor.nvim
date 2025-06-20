@@ -95,6 +95,9 @@ M.stiffness = 0.65
 -- 0: no movement, 1: instantaneous
 M.trailing_stiffness = 0.5
 
+-- Initial velocity factor in the direction opposite to the target
+M.anticipation = 0.55
+
 -- Velocity reduction over time. O: no reduction, 1: full reduction
 M.damping = 0.6
 
