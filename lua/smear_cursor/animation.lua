@@ -351,6 +351,7 @@ local function set_stiffnesses()
 	local min_distance = math.huge
 	local max_distance = 0
 	local head_stiffness, trailing_stiffness, trailing_exponent
+	local STIFFNESS_RESCALE_EXPONENT = 0.75 -- for backwards compatibility (similarity) with older versions
 
 	if vim.api.nvim_get_mode().mode == "i" then
 		head_stiffness = config.stiffness_insert_mode
@@ -361,6 +362,9 @@ local function set_stiffnesses()
 		trailing_stiffness = config.trailing_stiffness
 		trailing_exponent = config.trailing_exponent
 	end
+
+	head_stiffness = head_stiffness ^ STIFFNESS_RESCALE_EXPONENT
+	trailing_stiffness = trailing_stiffness ^ STIFFNESS_RESCALE_EXPONENT
 
 	for i = 1, 4 do
 		local distance =

@@ -117,10 +117,10 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 As an example of further configuration, you can tune the smear dynamics to be snappier:
 ```lua
   opts = {                                -- Default  Range
-    stiffness = 0.9,                      -- 0.65     [0, 1]
-    trailing_stiffness = 0.7,             -- 0.5      [0, 1]
-    stiffness_insert_mode = 0.8,          -- 0.6      [0, 1]
-    trailing_stiffness_insert_mode = 0.8, -- 0.6      [0, 1]
+    stiffness = 0.8,                      -- 0.6      [0, 1]
+    trailing_stiffness = 0.5,             -- 0.4      [0, 1]
+    stiffness_insert_mode = 0.7,          -- 0.5      [0, 1]
+    trailing_stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
     damping = 0.65,                       -- 0.6      [0, 1]
     distance_stop_animating = 0.5,        -- 0.1      > 0
   },
@@ -143,7 +143,7 @@ You can also change the "bounciness" of the smear by adjusting the `damping` par
 >   opts = {
 >     cursor_color = "#ff8800",
 >     stiffness = 0.3,
->     trailing_stiffness = 0.15,
+>     trailing_stiffness = 0.1,
 >     damping = 0.5,
 >     trailing_exponent = 5,
 >     never_draw_over_target = true,
@@ -161,8 +161,8 @@ If you wish to only have a smoother cursor that keeps its rectangular shape (wit
 
 ```lua
   opts = {
-    stiffness = 0.65,
-    trailing_stiffness = 0.65,
+    stiffness = 0.5,
+    trailing_stiffness = 0.5,
     damping = 0.63,
     matrix_pixel_threshold = 0.5,
   },
