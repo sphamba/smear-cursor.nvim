@@ -102,13 +102,15 @@ local function update()
 		previous_time = current_time
 	end
 	local speed_correction = time_interval / BASE_TIME_INTERVAL
-	local velocity_conservation_factor = math.max(0, 1 - config.damping * speed_correction)
+	local velocity_conservation_factor = math.exp(math.log(1 - config.damping) * speed_correction)
+	-- Empirical correction factor to maintain animation duration regardless of damping
+	local damping_correction_factor = 1 / (1 + 2.5 * velocity_conservation_factor)
 
 	-- Move toward targets
 	for i = 1, 4 do
 		local distance_squared = (current_corners[i][1] - target_corners[i][1]) ^ 2
 			+ (current_corners[i][2] - target_corners[i][2]) ^ 2
-		local stiffness = math.min(1, stiffnesses[i] * speed_correction * distance_squared ^ config.slowdown_exponent)
+		local stiffness = 1 - math.exp(math.log(1 - stiffnesses[i] * damping_correction_factor) * speed_correction)
 
 		if distance_squared < distance_head_to_target_squared then
 			distance_head_to_target_squared = distance_squared
@@ -116,11 +118,8 @@ local function update()
 		end
 
 		for j = 1, 2 do
-			-- velocity_corners[i][j] = velocity_corners[i][j] * velocity_conservation_factor
-			-- 	+ (target_corners[i][j] - current_corners[i][j]) * stiffness
-			velocity_corners[i][j] = (
-				velocity_corners[i][j] + (target_corners[i][j] - current_corners[i][j]) * stiffness
-			) * velocity_conservation_factor
+			velocity_corners[i][j] = velocity_corners[i][j] * velocity_conservation_factor
+				+ (target_corners[i][j] - current_corners[i][j]) * stiffness
 			current_corners[i][j] = current_corners[i][j] + velocity_corners[i][j]
 		end
 	end
@@ -351,7 +350,6 @@ local function set_stiffnesses()
 	local min_distance = math.huge
 	local max_distance = 0
 	local head_stiffness, trailing_stiffness, trailing_exponent
-	local STIFFNESS_RESCALE_EXPONENT = 0.75 -- for backwards compatibility (similarity) with older versions
 
 	if vim.api.nvim_get_mode().mode == "i" then
 		head_stiffness = config.stiffness_insert_mode
@@ -362,9 +360,6 @@ local function set_stiffnesses()
 		trailing_stiffness = config.trailing_stiffness
 		trailing_exponent = config.trailing_exponent
 	end
-
-	head_stiffness = head_stiffness ^ STIFFNESS_RESCALE_EXPONENT
-	trailing_stiffness = trailing_stiffness ^ STIFFNESS_RESCALE_EXPONENT
 
 	for i = 1, 4 do
 		local distance =

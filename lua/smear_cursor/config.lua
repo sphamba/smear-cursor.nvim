@@ -99,15 +99,11 @@ M.trailing_stiffness = 0.4
 M.anticipation = 0.55
 
 -- Velocity reduction over time. O: no reduction, 1: full reduction
-M.damping = 0.6
+M.damping = 0.65
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
 M.trailing_exponent = 2
-
--- How much the smear slows down when getting close to the target.
--- < 0: less slowdown, > 0: more slowdown. Keep small, e.g. [-0.2, 0.2]
-M.slowdown_exponent = 0
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
