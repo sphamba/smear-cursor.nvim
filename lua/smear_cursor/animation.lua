@@ -102,7 +102,8 @@ local function update()
 		previous_time = current_time
 	end
 	local speed_correction = time_interval / BASE_TIME_INTERVAL
-	local velocity_conservation_factor = math.exp(math.log(1 - config.damping) * speed_correction)
+	local damping = (vim.api.nvim_get_mode().mode == "i") and config.damping_insert_mode or config.damping
+	local velocity_conservation_factor = math.exp(math.log(1 - damping) * speed_correction)
 	-- Empirical correction factor to maintain animation duration regardless of damping
 	local damping_correction_factor = 1 / (1 + 2.5 * velocity_conservation_factor)
 
