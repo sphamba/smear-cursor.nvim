@@ -119,9 +119,9 @@ local function update()
 		end
 
 		for j = 1, 2 do
-			velocity_corners[i][j] = velocity_corners[i][j] * velocity_conservation_factor
-				+ (target_corners[i][j] - current_corners[i][j]) * stiffness
+			velocity_corners[i][j] = velocity_corners[i][j] + (target_corners[i][j] - current_corners[i][j]) * stiffness
 			current_corners[i][j] = current_corners[i][j] + velocity_corners[i][j]
+			velocity_corners[i][j] = velocity_corners[i][j] * velocity_conservation_factor
 		end
 	end
 
