@@ -86,6 +86,7 @@ local function get_window(tab, row, col)
 		width = 1,
 		height = 1,
 		style = "minimal",
+		border = "none",
 		focusable = false,
 		noautocmd = true,
 		zindex = config.windows_zindex,
