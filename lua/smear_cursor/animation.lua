@@ -271,13 +271,13 @@ end
 
 local function animate()
 	animating = true
+	local must_redraw_cmd_mode = check_must_redraw_cmd_mode()
 	update()
 
 	local max_distance = 0
 	local max_velocity = 0
 	local left_bound = vim.o.columns
 	local right_bound = 0
-	local must_redraw_cmd_mode = check_must_redraw_cmd_mode()
 	for i = 1, 4 do
 		local distance = math.sqrt(
 			(current_corners[i][1] - target_corners[i][1]) ^ 2 + (current_corners[i][2] - target_corners[i][2]) ^ 2
