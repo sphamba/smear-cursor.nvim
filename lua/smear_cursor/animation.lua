@@ -236,6 +236,16 @@ local function unhide_real_cursor()
 	if not config.hide_target_hack then color.unhide_real_cursor() end
 end
 
+local function check_smear_outside_cmd_row()
+	local cmd_row = vim.o.lines - vim.opt.cmdheight._value + 1
+
+	for i = 1, 4 do
+		if current_corners[i][1] < cmd_row then return true end
+	end
+
+	return false
+end
+
 M.replace_real_cursor = function(only_hide)
 	if only_hide == nil then only_hide = false end
 	local mode = vim.api.nvim_get_mode().mode
@@ -246,6 +256,7 @@ M.replace_real_cursor = function(only_hide)
 		or (mode == "i" and not config.smear_insert_mode)
 		or (mode == "R" and not config.smear_replace_mode)
 		or (mode == "t" and not config.smear_terminal_mode)
+		or not check_smear_outside_cmd_row()
 	then
 		return
 	end
@@ -253,25 +264,14 @@ M.replace_real_cursor = function(only_hide)
 	if not only_hide then draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar()) end
 end
 
-local function check_must_redraw_cmd_mode()
-	local cmd_row = vim.o.lines - vim.opt.cmdheight._value + 1
-
-	for i = 1, 4 do
-		if current_corners[i][1] < cmd_row then return true end
-	end
-
-	return false
-end
-
 local function redraw_cmd_mode(force)
 	if vim.api.nvim_get_mode().mode ~= "c" then return end
-
-	if force or check_must_redraw_cmd_mode() then vim.cmd.redraw() end
+	if force or check_smear_outside_cmd_row() then vim.cmd.redraw() end
 end
 
 local function animate()
 	animating = true
-	local must_redraw_cmd_mode = check_must_redraw_cmd_mode()
+	local must_redraw_cmd_mode = check_smear_outside_cmd_row()
 	update()
 
 	local max_distance = 0
