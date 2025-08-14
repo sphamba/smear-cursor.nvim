@@ -12,6 +12,7 @@ local current_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local target_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local velocity_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local stiffnesses = { 0, 0, 0, 0 }
+local cursor_hidden = false
 
 local previous_window_id = -1
 local current_window_id = -1
@@ -223,7 +224,8 @@ local function stop_animation()
 end
 
 local function hide_real_cursor()
-	if vim.api.nvim_get_mode().mode == "c" then return end
+	if cursor_hidden or vim.api.nvim_get_mode().mode == "c" then return end
+	cursor_hidden = true
 	if not config.hide_target_hack then
 		color.hide_real_cursor()
 	elseif not cursor_is_vertical_bar() then
@@ -233,6 +235,8 @@ local function hide_real_cursor()
 end
 
 local function unhide_real_cursor()
+	if not cursor_hidden then return end
+	cursor_hidden = false
 	if not config.hide_target_hack then color.unhide_real_cursor() end
 end
 
@@ -260,7 +264,10 @@ M.replace_real_cursor = function(only_hide)
 	then
 		return
 	end
-	color.hide_real_cursor()
+	if not cursor_hidden then
+		cursor_hidden = true
+		color.hide_real_cursor()
+	end
 	if not only_hide then draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar()) end
 end
 

@@ -31,7 +31,7 @@ local foldable_lines = {
 -- - Fast successive cursor moved
 -- - Opening and closing folds
 -- - Motions (e.g. `%`)
--- - Successive cmds that should remain displayed (e.g. `:hi Normal`, `:`)
+-- - Successive cmds that should remain displayed (e.g. `:hi Normal`, `:`, or `z=`)
 -- - Big and slow file (e.g. a binary)
 
 -- 0│││1│││2│││3│││4
