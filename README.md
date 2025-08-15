@@ -118,11 +118,11 @@ As an example of further configuration, you can tune the smear dynamics to be sn
 ```lua
   opts = {                                -- Default  Range
     stiffness = 0.8,                      -- 0.6      [0, 1]
-    trailing_stiffness = 0.5,             -- 0.4      [0, 1]
+    trailing_stiffness = 0.6,             -- 0.45     [0, 1]
     stiffness_insert_mode = 0.7,          -- 0.5      [0, 1]
     trailing_stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
-    damping = 0.8,                        -- 0.65     [0, 1]
-    damping_insert_mode = 0.8,            -- 0.7      [0, 1]
+    damping = 0.95,                       -- 0.85     [0, 1]
+    damping_insert_mode = 0.95,           -- 0.9      [0, 1]
     distance_stop_animating = 0.5,        -- 0.1      > 0
   },
 ```
@@ -134,7 +134,7 @@ If you notice a low framerate, you can try lowering the time interval between dr
   },
 ```
 
-You can also change the "bounciness" of the smear by adjusting the `damping` parameter (default to `0.65`). Increasing it (_e.g._ to `0.8`) will reduce the overshoot, while decreasing it (_e.g._ to `0.5`) will make the smear more elastic.
+You can also change the "bounciness" of the smear by adjusting the `damping` and `damping_insert_mode` parameters (default to `0.85` and `0.9` respectively). Decreasing them (_e.g._ to `0.65`) will make the smear appear more elastic (overshooting target position).
 
 
 > **🔥 FIRE HAZARD 🔥**
@@ -164,7 +164,6 @@ If you wish to only have a smoother cursor that keeps its rectangular shape (wit
   opts = {
     stiffness = 0.5,
     trailing_stiffness = 0.5,
-    damping = 0.67,
     matrix_pixel_threshold = 0.5,
   },
 ```

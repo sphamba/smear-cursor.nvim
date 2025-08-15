@@ -93,17 +93,17 @@ M.stiffness = 0.6
 
 -- How fast the smear's tail moves towards the target.
 -- 0: no movement, 1: instantaneous
-M.trailing_stiffness = 0.4
+M.trailing_stiffness = 0.45
 
 -- Initial velocity factor in the direction opposite to the target
 M.anticipation = 0.2
 
 -- Velocity reduction over time. O: no reduction, 1: full reduction
-M.damping = 0.65
+M.damping = 0.85
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
-M.trailing_exponent = 2
+M.trailing_exponent = 3
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
@@ -111,7 +111,7 @@ M.distance_stop_animating = 0.1
 -- Set of parameters for insert mode
 M.stiffness_insert_mode = 0.5
 M.trailing_stiffness_insert_mode = 0.5
-M.damping_insert_mode = 0.7
+M.damping_insert_mode = 0.9
 M.trailing_exponent_insert_mode = 1
 M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1) if using legacy computing symbols
 
