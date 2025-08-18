@@ -426,7 +426,7 @@ M.change_target_position = function(row, col)
 	update_current_ids_and_row()
 
 	if current_window_id == previous_window_id and current_buffer_id == previous_buffer_id then
-		if config.scroll_buffer_space and not vim.api.nvim_get_mode().mode == "c" then scroll_buffer_space() end
+		if config.scroll_buffer_space and check_smear_outside_cmd_row() then scroll_buffer_space() end
 		-- stylua: ignore
 		if
 			(not config.smear_between_neighbor_lines and math.abs(row - current_corners[1][1]) <= 1.5)
