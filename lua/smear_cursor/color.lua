@@ -11,6 +11,7 @@ local M = {}
 -- Smear cursor color. Defaults to Cursor GUI color if not set.
 -- Set to "none" to match the text color at the target cursor position.
 C.cursor_color = nil
+C.cursor_color_insert_mode = nil
 
 -- Background color. Defaults to Normal GUI background color if not set.
 C.normal_bg = nil
@@ -45,6 +46,7 @@ C.cterm_bg = 235
 
 M.config_variables = {
 	"cursor_color",
+	"cursor_color_insert_mode",
 	"normal_bg",
 	"transparent_bg_fallback_color",
 	"cterm_cursor_colors",
@@ -106,14 +108,14 @@ function M.get_color_at_cursor()
 end
 
 function M.update_color_at_cursor()
-	if C.cursor_color ~= "none" then return end
+	if C.cursor_color ~= "none" and C.cursor_color_insert_mode ~= "none" then return end
 	color_at_cursor = M.get_color_at_cursor()
 end
 
 ---@param opts? {level?: number, inverted?: boolean}
 function M.get_hl_group(opts)
 	opts = opts or {}
-	local _cursor_color = C.cursor_color
+	local _cursor_color = (vim.api.nvim_get_mode().mode == "i") and C.cursor_color_insert_mode or C.cursor_color
 
 	local hl_group = ("SmearCursor%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level or ""))
 
