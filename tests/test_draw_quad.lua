@@ -244,7 +244,7 @@ for i = 8, 0, -1 do
 		{ row, col + 1 / 8 },
 		{ row + 9, col + i + 1 / 8 },
 		{ row + 9, col + i },
-	})
+	}, { 0, 0 }, true)
 
 	col = col + 5
 end
