@@ -119,8 +119,8 @@ M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1)
 -- When to switch between rasterization methods
 M.max_slope_horizontal = (1 / 3) / 1.5
 M.min_slope_vertical = 2 * 1.5
-M.max_angle_difference_diagonal = math.pi / 4 -- radians
-M.max_offset_diagonal = 0.24 -- cell widths
+M.max_angle_difference_diagonal = math.pi / 16 -- radians
+M.max_offset_diagonal = 0.2 -- cell widths
 
 M.color_levels = 16 -- Minimum 1, don't set manually if using cterm_cursor_colors
 M.gamma = 2.2 -- For color blending
