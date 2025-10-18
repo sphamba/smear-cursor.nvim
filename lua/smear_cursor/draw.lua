@@ -675,7 +675,7 @@ local function update_matrix_with_edge(edge_index, matrix_index, row, col, G, ma
 	update_matrix_with_edge_functions[edge_type](edge_index, matrix_index, row, col, G, matrix)
 end
 
-local function draw_diagonal_block(row, col, edge_index, G)
+local function draw_diagonal_block(row, col, edge_index, G, vertical_bar)
 	local edge_type = G.edge_types[edge_index]
 	local slope = G.slopes[edge_index]
 	local blocks = (edge_type == LEFT_DIAGONAL and RIGHT_DIAGONAL_BLOCKS or LEFT_DIAGONAL_BLOCKS)[slope]
@@ -690,7 +690,8 @@ local function draw_diagonal_block(row, col, edge_index, G)
 			end
 		end
 		if matching_char ~= nil and min_offset <= config.max_offset_diagonal then
-			M.draw_character(row, col, matching_char, color.get_hl_group({ level = config.color_levels }))
+			local shade = vertical_bar and math.floor(config.color_levels / 8) or config.color_levels
+			M.draw_character(row, col, matching_char, color.get_hl_group({ level = shade }))
 			return true
 		end
 	end
@@ -800,7 +801,7 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 
 			-- Try to render as diagonal block
 			if only_diagonal and config.use_diagonal_blocks and config.legacy_computing_symbols_support then
-				local has_drawn_diagonal_block = draw_diagonal_block(row, col, diagonal_edge_index, G)
+				local has_drawn_diagonal_block = draw_diagonal_block(row, col, diagonal_edge_index, G, vertical_bar)
 				if has_drawn_diagonal_block then goto continue end
 			end
 
