@@ -12,94 +12,94 @@ local MATRIX_CHARACTERS    = { "▘", "▝", "▀", "▖", "▌", "▞", "▛", 
 local VERTICAL_BARS        = { "▏", "🭰", "🭱", "🭲", "🭳", "🭳", "🭵", "▕" }
 local LEFT_DIAGONAL_BLOCKS = {
 	[-2] = {            -- slope Y/X
-		[-1 / 2] = "🭛", -- Y intersection -> symbol
-		[ 1 / 2] = "🭟",
+		[-1 / 4] = "🭛", -- X intersection -> symbol
+		[ 1 / 4] = "🭟",
 	},
 	[-4 / 3] = {
-		[-1 / 2] = "🭙",
-		[ 1 / 2] = "🭟",
+		[-3 / 8] = "🭙",
+		[ 3 / 8] = "🭟",
 	},
 	[-1] = {
 		[     0] = "◤",
 	},
 	[-2 / 3] = {
-		[-1 / 2] = "🭗",
-		[-1 / 6] = "🭚",
-		[ 1 / 6] = "🭠",
-		[ 1 / 2] = "🭝",
+		[-3 / 4] = "🭗",
+		[-1 / 4] = "🭚",
+		[ 1 / 4] = "🭠",
+		[ 3 / 4] = "🭝",
 	},
 	[-1 / 3] = {
-		[-1 / 3] = "🭘",
+		[    -1] = "🭘",
 		[     0] = "🭜",
-		[ 1 / 3] = "🭞",
+		[     1] = "🭞",
 	},
 	[1 / 3] = {
-		[-1 / 3] = "🭍",
+		[    -1] = "🬽",
 		[     0] = "🭑",
-		[ 1 / 3] = "🬽",
+		[     1] = "🭍",
 	},
 	[2 / 3] = {
-		[-1 / 2] = "🭌",
-		[-1 / 6] = "🭏",
-		[ 1 / 6] = "🬿",
-		[ 1 / 2] = "🬼",
+		[-3 / 4] = "🬼",
+		[-1 / 4] = "🬿",
+		[ 1 / 4] = "🭏",
+		[ 3 / 4] = "🭌",
 	},
 	[1] = {
 		[     0] = "◣",
 	},
 	[4 / 3] = {
-		[-1 / 2] = "🭎",
-		[ 1 / 2] = "🬾",
+		[-3 / 8] = "🬾",
+		[ 3 / 8] = "🭎",
 	},
 	[2] = {
-		[-1 / 2] = "🭐",
-		[ 1 / 2] = "🭀",
+		[-1 / 4] = "🭀",
+		[ 1 / 4] = "🭐",
 	},
 }
 local RIGHT_DIAGONAL_BLOCKS = {
 	[-2] = {
-		[-1 / 2] = "🭅",
-		[ 1 / 2] = "🭋",
+		[-1 / 4] = "🭅",
+		[ 1 / 4] = "🭋",
 	},
 	[-4 / 3] = {
-		[-1 / 2] = "🭃",
-		[ 1 / 2] = "🭉",
+		[-3 / 8] = "🭃",
+		[ 3 / 8] = "🭉",
 	},
 	[-1] = {
 		[     0] = "◢",
 	},
 	[-2 / 3] = {
-		[-1 / 2] = "🭁",
-		[-1 / 6] = "🭄",
-		[ 1 / 6] = "🭊",
-		[ 1 / 2] = "🭇",
+		[-3 / 4] = "🭁",
+		[-1 / 4] = "🭄",
+		[ 1 / 4] = "🭊",
+		[ 3 / 4] = "🭇",
 	},
 	[-1 / 3] = {
-		[-1 / 3] = "🭂",
+		[    -1] = "🭂",
 		[     0] = "🭆",
-		[ 1 / 3] = "🭈",
+		[     1] = "🭈",
 	},
 	[1 / 3] = {
-		[-1 / 3] = "🭣",
+		[    -1] = "🭓",
 		[     0] = "🭧",
-		[ 1 / 3] = "🭓",
+		[     1] = "🭣",
 	},
 	[2 / 3] = {
-		[-1 / 2] = "🭢",
-		[-1 / 6] = "🭥",
-		[ 1 / 6] = "🭕",
-		[ 1 / 2] = "🭒",
+		[-3 / 4] = "🭒",
+		[-1 / 4] = "🭕",
+		[ 1 / 4] = "🭥",
+		[ 3 / 4] = "🭢",
 	},
 	[1] = {
 		[     0] = "◥",
 	},
 	[4 / 3] = {
-		[-1 / 2] = "🭤",
-		[ 1 / 2] = "🭔",
+		[-3 / 8] = "🭔",
+		[ 3 / 8] = "🭤",
 	},
 	[2] = {
-		[-1 / 2] = "🭦",
-		[ 1 / 2] = "🭖",
+		[-1 / 4] = "🭖",
+		[ 1 / 4] = "🭦",
 	},
 }
 -- stylua: ignore end
@@ -499,6 +499,20 @@ local function precompute_intersections_diagonal(corners, G, index)
 		end
 	end
 
+	-- Compute closest matching slope for diagonal blocks
+	local min_angle_difference = math.huge
+	local closest_slope = nil
+	for block_slope, _ in pairs(LEFT_DIAGONAL_BLOCKS) do
+		local angle_difference = math.abs(math.atan(block_slope) - math.atan(G.slopes[index]))
+		if angle_difference < min_angle_difference then
+			min_angle_difference = angle_difference
+			closest_slope = block_slope
+		end
+	end
+	if closest_slope ~= nil and min_angle_difference <= config.max_angle_difference_diagonal then
+		G.slopes[index] = closest_slope
+	end
+
 	G.I.centerlines[index] = centerlines
 	G.I.edges[index] = edges
 	G.I.fractions[index] = fractions
@@ -661,6 +675,29 @@ local function update_matrix_with_edge(edge_index, matrix_index, row, col, G, ma
 	update_matrix_with_edge_functions[edge_type](edge_index, matrix_index, row, col, G, matrix)
 end
 
+local function draw_diagonal_block(row, col, edge_index, G)
+	local edge_type = G.edge_types[edge_index]
+	local slope = G.slopes[edge_index]
+	local blocks = (edge_type == LEFT_DIAGONAL and RIGHT_DIAGONAL_BLOCKS or LEFT_DIAGONAL_BLOCKS)[slope]
+	if blocks ~= nil then
+		local min_offset = math.huge
+		local matching_char = nil
+		for shift, char in pairs(blocks) do
+			local offset = math.abs(G.I.centerlines[edge_index][row] - col - 0.5 - shift)
+			if offset < min_offset then
+				min_offset = offset
+				matching_char = char
+			end
+		end
+		if matching_char ~= nil and min_offset <= config.max_offset_diagonal then
+			M.draw_character(row, col, matching_char, color.get_hl_group({ level = config.color_levels }))
+			return true
+		end
+	end
+
+	return false
+end
+
 M.draw_quad = function(corners, target_position, vertical_bar)
 	if target_position == nil then target_position = { 0, 0 } end
 
@@ -681,14 +718,19 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 			end
 
 			local intersections = {}
+			local only_diagonal = true
+			local diagonal_edge_index = nil
 			for i = 1, 4 do
 				local intersection = get_edge_cell_intersection(i, row, col, G)
 				local edge_type = G.edge_types[i]
 				if edge_type == LEFT_DIAGONAL or edge_type == RIGHT_DIAGONAL then edge_type = DIAGONAL end
 				if edge_type ~= DIAGONAL and intersection >= 1 then goto continue end
 
+				if edge_type ~= DIAGONAL and intersection > 0 and intersection < 1 then only_diagonal = false end
+
 				if intersections[edge_type] == nil or intersections[edge_type] < intersection then
 					intersections[edge_type] = intersection
+					if edge_type == DIAGONAL then diagonal_edge_index = i end
 				end
 			end
 
@@ -754,6 +796,12 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 					)
 					goto continue
 				end
+			end
+
+			-- Try to render as diagonal block
+			if only_diagonal and config.use_diagonal_blocks and config.legacy_computing_symbols_support then
+				local has_drawn_diagonal_block = draw_diagonal_block(row, col, diagonal_edge_index, G)
+				if has_drawn_diagonal_block then goto continue end
 			end
 
 			-- Draw matrix
