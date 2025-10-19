@@ -1,5 +1,6 @@
 local color = require("smear_cursor.color")
 local config = require("smear_cursor.config")
+local atan_cached = require("smear_cursor.math").atan_cached
 local round = require("smear_cursor.math").round
 local M = {}
 
@@ -102,6 +103,7 @@ local RIGHT_DIAGONAL_BLOCKS = {
 		[ 1 / 4] = "🭦",
 	},
 }
+local BLOCK_ASPECT_RATIO = 2.0 -- height / width
 -- stylua: ignore end
 
 -- Enums for drawing quad
@@ -503,7 +505,7 @@ local function precompute_intersections_diagonal(corners, G, index)
 	local min_angle_difference = math.huge
 	local closest_slope = nil
 	for block_slope, _ in pairs(LEFT_DIAGONAL_BLOCKS) do
-		local angle_difference = math.abs(math.atan(block_slope) - math.atan(G.slopes[index]))
+		local angle_difference = math.abs(atan_cached(BLOCK_ASPECT_RATIO * block_slope) - G.angles[index])
 		if angle_difference < min_angle_difference then
 			min_angle_difference = angle_difference
 			closest_slope = block_slope
@@ -540,6 +542,7 @@ local function precompute_quad_geometry(corners)
 	-- Slopes
 	local edges = {}
 	G.slopes = {}
+	G.angles = {}
 
 	for i = 1, 4 do
 		edges[i] = {
@@ -547,6 +550,7 @@ local function precompute_quad_geometry(corners)
 			corners[i % 4 + 1][2] - corners[i][2],
 		}
 		G.slopes[i] = edges[i][1] / edges[i][2]
+		G.angles[i] = math.atan(BLOCK_ASPECT_RATIO * G.slopes[i])
 	end
 
 	-- Edge types
@@ -690,7 +694,7 @@ local function draw_diagonal_block(row, col, edge_index, G, vertical_bar)
 			end
 		end
 		if matching_char ~= nil and min_offset <= config.max_offset_diagonal then
-			local shade = vertical_bar and math.floor(config.color_levels / 8) or config.color_levels
+			local shade = vertical_bar and math.ceil(config.color_levels / 8) or config.color_levels
 			M.draw_character(row, col, matching_char, color.get_hl_group({ level = shade }))
 			return true
 		end
