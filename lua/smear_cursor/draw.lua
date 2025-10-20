@@ -492,11 +492,13 @@ local function precompute_intersections_diagonal(corners, G, index)
 
 	for row = G.top, G.bottom do
 		centerlines[row] = corners[index][2] + (row + 0.5 - corners[index][1]) / G.slopes[index]
-		edges[row] = centerlines[row] + (edge_type == LEFT_DIAGONAL and 0.5 or -0.5) / math.abs(G.slopes[index])
+		edges[row] = {}
 		fractions[row] = {}
 
 		for j = 1, 2 do
-			local shift = (j == 1) and -0.25 or 0.25
+			local shift = (edge_type == LEFT_DIAGONAL) and ((j == 1) and -0.5 or 0.5) or ((j == 1) and 0.5 or -0.5)
+			edges[row][j] = centerlines[row] + shift / math.abs(G.slopes[index])
+			shift = (j == 1) and -0.25 or 0.25
 			fractions[row][j] = centerlines[row] + shift / G.slopes[index]
 		end
 	end
@@ -600,20 +602,22 @@ local get_edge_cell_intersection_functions = {
 	[RIGHT] = function(edge_index, row, col, G)
 		return col + 1 - G.I.centerlines[edge_index][row]
 	end,
-	[LEFT_DIAGONAL] = function(edge_index, row, col, G)
-		return G.I.edges[edge_index][row] - col
+	[LEFT_DIAGONAL] = function(edge_index, row, col, G, low)
+		low = low or false
+		return G.I.edges[edge_index][row][low and 1 or 2] - col
 	end,
-	[RIGHT_DIAGONAL] = function(edge_index, row, col, G)
-		return col + 1 - G.I.edges[edge_index][row]
+	[RIGHT_DIAGONAL] = function(edge_index, row, col, G, low)
+		low = low or false
+		return col + 1 - G.I.edges[edge_index][row][low and 1 or 2]
 	end,
 	[NONE] = function()
 		return 0
 	end,
 }
 
-local function get_edge_cell_intersection(edge_index, row, col, G)
+local function get_edge_cell_intersection(edge_index, row, col, G, low)
 	local edge_type = G.edge_types[edge_index]
-	return get_edge_cell_intersection_functions[edge_type](edge_index, row, col, G)
+	return get_edge_cell_intersection_functions[edge_type](edge_index, row, col, G, low)
 end
 
 local function update_matrix_with_top_edge(edge_index, fraction_index, row, col, G, matrix)
@@ -723,7 +727,7 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 			end
 
 			local intersections = {}
-			local only_diagonal = true
+			local single_diagonal = true
 			local diagonal_edge_index = nil
 			for i = 1, 4 do
 				local intersection = get_edge_cell_intersection(i, row, col, G)
@@ -731,9 +735,15 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 				if edge_type == LEFT_DIAGONAL or edge_type == RIGHT_DIAGONAL then edge_type = DIAGONAL end
 				if edge_type ~= DIAGONAL and intersection >= 1 then goto continue end
 
-				if edge_type ~= DIAGONAL and intersection > 0 and intersection < 1 then only_diagonal = false end
+				if edge_type == DIAGONAL then
+					local intersection_low = get_edge_cell_intersection(i, row, col, G, true)
+					if intersection_low >= 1 then goto continue end
+					-- if intersections[DIAGONAL] ~= nil and intersection > 0 then single_diagonal = false end
+				else
+					if intersection > 0 then single_diagonal = false end
+				end
 
-				if intersections[edge_type] == nil or intersections[edge_type] < intersection then
+				if intersections[edge_type] == nil or intersection > intersections[edge_type] then
 					intersections[edge_type] = intersection
 					if edge_type == DIAGONAL then diagonal_edge_index = i end
 				end
@@ -804,7 +814,7 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 			end
 
 			-- Try to render as diagonal block
-			if only_diagonal and config.use_diagonal_blocks and config.legacy_computing_symbols_support then
+			if single_diagonal and config.use_diagonal_blocks and config.legacy_computing_symbols_support then
 				local has_drawn_diagonal_block = draw_diagonal_block(row, col, diagonal_edge_index, G, vertical_bar)
 				if has_drawn_diagonal_block then goto continue end
 			end

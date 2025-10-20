@@ -176,6 +176,29 @@ for i = 0, 1 do
 	})
 end
 
+-- Long tail
+
+row = 19
+col = 44
+-- stylua: ignore start
+local corner_offsets = {
+	{    0,    0 },
+	{    0, -0.5 },
+	{ -1/3,    0 },
+	{ -0.5, -0.5 },
+	{ -2 / 3, -1 },
+}
+-- stylua: ignore end
+for i = 0, 4 do
+	local offset = corner_offsets[i + 1]
+	draw.draw_quad({
+		{ row, 10 * i + col },
+		{ row + 4, 10 * i + col + 5 },
+		{ row + 5, 10 * i + col + 5 },
+		{ row + 5 + offset[1], 10 * i + col + 4 + offset[2] },
+	})
+end
+
 -- Lines
 
 row = 23
