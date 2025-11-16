@@ -713,6 +713,8 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 	bulge_above = not bulge_above
 	corners = ensure_clockwise(corners)
 	local G = precompute_quad_geometry(corners)
+	local min_shade_no_diagonal = vertical_bar and config.min_shade_no_diagonal_vertical_bar
+		or config.min_shade_no_diagonal
 
 	for row = G.top, G.bottom do
 		for col = G.left, G.right do
@@ -732,18 +734,22 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 			for i = 1, 4 do
 				local intersection = get_edge_cell_intersection(i, row, col, G)
 				local edge_type = G.edge_types[i]
-				if edge_type == LEFT_DIAGONAL or edge_type == RIGHT_DIAGONAL then edge_type = DIAGONAL end
-				if edge_type ~= DIAGONAL and intersection >= 1 then goto continue end
 
-				if edge_type == DIAGONAL then
+				if edge_type == LEFT_DIAGONAL or edge_type == RIGHT_DIAGONAL then
+					edge_type = DIAGONAL
 					local intersection_low = get_edge_cell_intersection(i, row, col, G, true)
 					if intersection_low >= 1 then goto continue end
-					-- if intersections[DIAGONAL] ~= nil and intersection > 0 then single_diagonal = false end
+					if intersection > min_shade_no_diagonal and intersections[DIAGONAL] ~= nil then
+						single_diagonal = false
+					end
 				else
-					if intersection > 0 then single_diagonal = false end
+					if intersection >= 1 then goto continue end
+					if intersection > min_shade_no_diagonal then single_diagonal = false end
 				end
 
-				if intersections[edge_type] == nil or intersection > intersections[edge_type] then
+				if
+					intersection > 0 and (intersections[edge_type] == nil or intersection > intersections[edge_type])
+				then
 					intersections[edge_type] = intersection
 					if edge_type == DIAGONAL then diagonal_edge_index = i end
 				end

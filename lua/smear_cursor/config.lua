@@ -121,12 +121,14 @@ M.max_slope_horizontal = (1 / 3) / 1.5
 M.min_slope_vertical = 2 * 1.5
 M.max_angle_difference_diagonal = math.pi / 16 -- radians
 M.max_offset_diagonal = 0.2 -- cell widths
+M.min_shade_no_diagonal = 0.2 -- 0: less diagonal blocks, 1: more diagonal blocks
+M.min_shade_no_diagonal_vertical_bar = 0.5
 
 M.color_levels = 16 -- Minimum 1, don't set manually if using cterm_cursor_colors
 M.gamma = 2.2 -- For color blending
 M.max_shade_no_matrix = 0.75 -- 0: more overhangs, 1: more matrices
 M.matrix_pixel_threshold = 0.7 -- 0: all pixels, 1: no pixel
-M.matrix_pixel_threshold_vertical_bar = 0.3 -- 0: all pixels, 1: no pixel
+M.matrix_pixel_threshold_vertical_bar = 0.25 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
 M.volume_reduction_exponent = 0.3 -- 0: no reduction, 1: full reduction
 M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
