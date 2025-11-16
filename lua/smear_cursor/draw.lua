@@ -248,7 +248,7 @@ local function draw_partial_block(row, col, character_list, character_index, hl_
 	M.draw_character(row, col, character, hl_group)
 end
 
-local function draw_matrix_character(row, col, matrix, vertical_bar)
+local function draw_matrix_character(row, col, matrix, vertical_bar, shade)
 	local max = math.max(matrix[1][1], matrix[1][2], matrix[2][1], matrix[2][2])
 	local matrix_pixel_threshold = vertical_bar and config.matrix_pixel_threshold_vertical_bar
 		or config.matrix_pixel_threshold
@@ -262,9 +262,9 @@ local function draw_matrix_character(row, col, matrix, vertical_bar)
 	if index == 0 then return end
 
 	local character = MATRIX_CHARACTERS[index]
-	local shade = matrix[1][1] + matrix[1][2] + matrix[2][1] + matrix[2][2]
-	local max_shade = bit_1 + bit_2 + bit_3 + bit_4
-	local hl_group_index = round(shade / max_shade * config.color_levels)
+	local matrix_shade = matrix[1][1] + matrix[1][2] + matrix[2][1] + matrix[2][2]
+	local max_matrix_shade = bit_1 + bit_2 + bit_3 + bit_4
+	local hl_group_index = round(shade * matrix_shade / max_matrix_shade * config.color_levels)
 	hl_group_index = math.min(hl_group_index, config.color_levels)
 	if hl_group_index == 0 then return end
 
@@ -683,31 +683,47 @@ local function update_matrix_with_edge(edge_index, matrix_index, row, col, G, ma
 	update_matrix_with_edge_functions[edge_type](edge_index, matrix_index, row, col, G, matrix)
 end
 
-local function draw_diagonal_block(row, col, edge_index, G, vertical_bar)
+local function draw_diagonal_block(row, col, edge_index, G, vertical_bar, shade)
 	local edge_type = G.edge_types[edge_index]
 	local slope = G.slopes[edge_index]
 	local blocks = (edge_type == LEFT_DIAGONAL and RIGHT_DIAGONAL_BLOCKS or LEFT_DIAGONAL_BLOCKS)[slope]
-	if blocks ~= nil then
-		local min_offset = math.huge
-		local matching_char = nil
-		for shift, char in pairs(blocks) do
-			local offset = math.abs(G.I.centerlines[edge_index][row] - col - 0.5 - shift)
-			if offset < min_offset then
-				min_offset = offset
-				matching_char = char
-			end
-		end
-		if matching_char ~= nil and min_offset <= config.max_offset_diagonal then
-			local shade = vertical_bar and math.ceil(config.color_levels / 8) or config.color_levels
-			M.draw_character(row, col, matching_char, color.get_hl_group({ level = shade }))
-			return true
+
+	if blocks == nil then return false end
+
+	local min_offset = math.huge
+	local matching_char = nil
+
+	for shift, char in pairs(blocks) do
+		local offset = math.abs(G.I.centerlines[edge_index][row] - col - 0.5 - shift)
+		if offset < min_offset then
+			min_offset = offset
+			matching_char = char
 		end
 	end
 
-	return false
+	if matching_char == nil or min_offset > config.max_offset_diagonal then return false end
+
+	if vertical_bar then shade = shade / 8 end
+	local hl_group_index = round(shade * config.color_levels)
+
+	if hl_group_index == 0 then return false end
+
+	M.draw_character(row, col, matching_char, color.get_hl_group({ level = hl_group_index }))
+	return true
 end
 
-M.draw_quad = function(corners, target_position, vertical_bar)
+local function compute_gradient_shade(row_center, col_center, gradient_origin, gradient_direction_scaled)
+	if gradient_origin == nil or gradient_direction_scaled == nil then return 1 end
+
+	local dy = row_center - gradient_origin[1]
+	local dx = col_center - gradient_origin[2]
+	local projection = dy * gradient_direction_scaled[1] + dx * gradient_direction_scaled[2]
+	projection = math.max(0, math.min(1, projection))
+
+	return (1 - projection) ^ config.gradient_exponent
+end
+
+M.draw_quad = function(corners, target_position, vertical_bar, gradient_origin, gradient_direction_scaled)
 	if target_position == nil then target_position = { 0, 0 } end
 
 	bulge_above = not bulge_above
@@ -797,6 +813,7 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 						row + 1 - intersections[BOTTOM],
 						col,
 						horizontal_shade
+							* compute_gradient_shade(row + 0.5, col + 0.5, gradient_origin, gradient_direction_scaled)
 					)
 					goto continue
 				end
@@ -814,14 +831,19 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 						col + intersections[LEFT],
 						col + 1 - intersections[RIGHT],
 						vertical_shade
+							* compute_gradient_shade(row + 0.5, col + 0.5, gradient_origin, gradient_direction_scaled)
 					)
 					goto continue
 				end
 			end
 
+			local gradient_shade =
+				compute_gradient_shade(row + 0.5, col + 0.5, gradient_origin, gradient_direction_scaled)
+
 			-- Try to render as diagonal block
 			if single_diagonal and config.use_diagonal_blocks and config.legacy_computing_symbols_support then
-				local has_drawn_diagonal_block = draw_diagonal_block(row, col, diagonal_edge_index, G, vertical_bar)
+				local has_drawn_diagonal_block =
+					draw_diagonal_block(row, col, diagonal_edge_index, G, vertical_bar, gradient_shade)
 				if has_drawn_diagonal_block then goto continue end
 			end
 
@@ -837,7 +859,7 @@ M.draw_quad = function(corners, target_position, vertical_bar)
 				end
 			end
 
-			draw_matrix_character(row, col, matrix, vertical_bar)
+			draw_matrix_character(row, col, matrix, vertical_bar, gradient_shade)
 
 			::continue::
 		end

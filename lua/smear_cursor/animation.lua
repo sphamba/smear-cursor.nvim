@@ -89,7 +89,9 @@ end, 0)
 
 local function update()
 	local distance_head_to_target_squared = math.huge
+	local distance_tail_to_target_squared = 0
 	local index_head = 1
+	local index_tail = 1
 	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
 
 	local BASE_TIME_INTERVAL = 17
@@ -117,6 +119,11 @@ local function update()
 		if distance_squared < distance_head_to_target_squared then
 			distance_head_to_target_squared = distance_squared
 			index_head = i
+		end
+
+		if distance_squared > distance_tail_to_target_squared then
+			distance_tail_to_target_squared = distance_squared
+			index_tail = i
 		end
 
 		for j = 1, 2 do
@@ -150,7 +157,7 @@ local function update()
 		end
 	end
 
-	if smear_length <= max_length then return end
+	if smear_length <= max_length then return index_head, index_tail end
 	local factor = max_length / smear_length
 
 	for i = 1, 4 do
@@ -161,6 +168,8 @@ local function update()
 			end
 		end
 	end
+
+	return index_head, index_tail
 end
 
 local function get_center(corners)
@@ -279,7 +288,7 @@ end
 local function animate()
 	animating = true
 	local must_redraw_cmd_mode = check_smear_outside_cmd_row()
-	update()
+	local index_head, index_tail = update()
 
 	local max_distance = 0
 	local max_velocity = 0
@@ -342,7 +351,18 @@ local function animate()
 		hide_real_cursor()
 	end
 
-	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar())
+	local gradient_origin = { drawn_corners[index_head][1], drawn_corners[index_head][2] }
+	local gradient_direction = {
+		drawn_corners[index_tail][1] - drawn_corners[index_head][1],
+		drawn_corners[index_tail][2] - drawn_corners[index_head][2],
+	}
+	local gradient_length_squared = gradient_direction[1] ^ 2 + gradient_direction[2] ^ 2
+	local gradient_direction_scaled = {
+		gradient_length_squared > 1 and gradient_direction[1] / gradient_length_squared or 0,
+		gradient_length_squared > 1 and gradient_direction[2] / gradient_length_squared or 0,
+	}
+
+	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar(), gradient_origin, gradient_direction_scaled)
 	redraw_cmd_mode(must_redraw_cmd_mode)
 end
 

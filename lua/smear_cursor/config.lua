@@ -126,6 +126,7 @@ M.min_shade_no_diagonal_vertical_bar = 0.5
 
 M.color_levels = 16 -- Minimum 1, don't set manually if using cterm_cursor_colors
 M.gamma = 2.2 -- For color blending
+M.gradient_exponent = 1.0 -- For longitudinal gradient. 0: no gradient, 1: linear, ...
 M.max_shade_no_matrix = 0.75 -- 0: more overhangs, 1: more matrices
 M.matrix_pixel_threshold = 0.7 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_threshold_vertical_bar = 0.25 -- 0: all pixels, 1: no pixel

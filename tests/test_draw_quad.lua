@@ -271,3 +271,24 @@ for i = 8, 0, -1 do
 
 	col = col + 5
 end
+
+-- Gradient
+
+row = 42
+col = 2
+
+draw.draw_quad({
+	{ row, col },
+	{ row, col + 16 },
+	{ row + 1, col + 16 },
+	{ row + 1, col },
+})
+
+row = row + 1
+
+draw.draw_quad({
+	{ row, col },
+	{ row, col + 16 },
+	{ row + 1, col + 16 },
+	{ row + 1, col },
+}, nil, nil, { row, col }, { 0, 1 / 16 })
