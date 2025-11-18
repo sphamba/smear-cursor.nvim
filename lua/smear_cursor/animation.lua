@@ -4,6 +4,8 @@ local draw = require("smear_cursor.draw")
 local screen = require("smear_cursor.screen")
 local M = {}
 
+local BASE_TIME_INTERVAL = 17
+
 local animating = false
 local timer = nil
 local previous_time = 0
@@ -22,6 +24,9 @@ local previous_top_row = -1
 local current_top_row = -1
 local previous_line = -1
 local current_line = -1
+
+local particles = {}
+local previous_center = { 0, 0 }
 
 M.disabled_in_buffer = false
 
@@ -79,23 +84,25 @@ local function update_current_ids_and_row()
 	current_line = vim.fn.line(".")
 end
 
+local function get_center(corners)
+	return {
+		(corners[1][1] + corners[2][1] + corners[3][1] + corners[4][1]) / 4,
+		(corners[1][2] + corners[2][2] + corners[3][2] + corners[4][2]) / 4,
+	}
+end
+
 vim.defer_fn(function()
 	local cursor_row, cursor_col = screen.get_screen_cursor_position()
 	target_position = { cursor_row, cursor_col }
 	set_corners(current_corners, cursor_row, cursor_col)
 	set_corners(target_corners, cursor_row, cursor_col)
+	previous_center = get_center(current_corners)
 	update_current_ids_and_row()
 end, 0)
 
-local function update()
-	local distance_head_to_target_squared = math.huge
-	local distance_tail_to_target_squared = 0
-	local index_head = 1
-	local index_tail = 1
-	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
-
-	local BASE_TIME_INTERVAL = 17
+local function get_effective_time_interval()
 	local time_interval
+
 	if previous_time == 0 then
 		previous_time = vim.uv.now()
 		time_interval = BASE_TIME_INTERVAL
@@ -104,6 +111,17 @@ local function update()
 		time_interval = current_time - previous_time
 		previous_time = current_time
 	end
+
+	return time_interval
+end
+
+local function update(time_interval)
+	local distance_head_to_target_squared = math.huge
+	local distance_tail_to_target_squared = 0
+	local index_head = 1
+	local index_tail = 1
+	local max_length = vim.api.nvim_get_mode().mode == "i" and config.max_length_insert_mode or config.max_length
+
 	local speed_correction = time_interval / BASE_TIME_INTERVAL
 	local damping = (vim.api.nvim_get_mode().mode == "i") and config.damping_insert_mode or config.damping
 	local velocity_conservation_factor = math.exp(math.log(1 - damping) * speed_correction)
@@ -172,11 +190,67 @@ local function update()
 	return index_head, index_tail
 end
 
-local function get_center(corners)
-	return {
-		(corners[1][1] + corners[2][1] + corners[3][1] + corners[4][1]) / 4,
-		(corners[1][2] + corners[2][2] + corners[3][2] + corners[4][2]) / 4,
+local function add_particles(time_interval)
+	local center = get_center(current_corners)
+	local movement = {
+		center[1] - previous_center[1],
+		center[2] - previous_center[2],
 	}
+	local movement_magnitude = math.sqrt((draw.BLOCK_ASPECT_RATIO * movement[1]) ^ 2 + movement[2] ^ 2)
+	local num_new_particles = movement_magnitude * config.particle_density * (time_interval / 1000)
+	num_new_particles = math.floor(num_new_particles) + (math.random() < (num_new_particles % 1) and 1 or 0)
+
+	for _ = 1, num_new_particles do
+		local s = math.random()
+		local particle_position = {
+			previous_center[1] + s * movement[1],
+			previous_center[2] + s * movement[2],
+		}
+
+		local velocity_magnitude = config.particle_max_initial_velocity * math.sqrt(math.random())
+		local velocity_angle = math.random() * 2 * math.pi
+		local particle_velocity = {
+			velocity_magnitude * math.cos(velocity_angle),
+			velocity_magnitude * math.sin(velocity_angle),
+		}
+
+		local new_particle = {
+			position = particle_position,
+			velocity = particle_velocity,
+			lifetime = config.particle_max_lifetime * math.random(),
+		}
+		table.insert(particles, new_particle)
+	end
+
+	previous_center = center
+end
+
+local function update_particles(time_interval)
+	local window_origin = vim.api.nvim_win_get_position(current_window_id)
+	local window_row = window_origin[1] + 1
+	local window_height = vim.api.nvim_win_get_height(current_window_id)
+
+	local i = 1
+	while i <= #particles do
+		local particle = particles[i]
+
+		particle.position[1] = particle.position[1]
+			+ (particle.velocity[1] * (time_interval / 1000)) / draw.BLOCK_ASPECT_RATIO
+		particle.position[2] = particle.position[2] + (particle.velocity[2] * (time_interval / 1000))
+		particle.lifetime = particle.lifetime - config.time_interval
+
+		if
+			particle.lifetime <= 0
+			or particle.position[1] < window_row
+			or particle.position[1] >= window_row + window_height
+		then
+			table.remove(particles, i)
+		else
+			i = i + 1
+		end
+	end
+
+	if config.particles_enabled then add_particles(time_interval) end
 end
 
 local function normalize(v)
@@ -288,7 +362,9 @@ end
 local function animate()
 	animating = true
 	local must_redraw_cmd_mode = check_smear_outside_cmd_row()
-	local index_head, index_tail = update()
+	local time_interval = get_effective_time_interval()
+	local index_head, index_tail = update(time_interval)
+	update_particles(time_interval)
 
 	local max_distance = 0
 	local max_velocity = 0
@@ -309,12 +385,14 @@ local function animate()
 	draw.clear()
 
 	if
-		(max_distance <= config.distance_stop_animating and max_velocity <= config.distance_stop_animating)
-		or (
-			thickness <= 1.5 / 8
-			and max_distance <= config.distance_stop_animating_vertical_bar
-			and max_velocity <= config.distance_stop_animating_vertical_bar
-		)
+		(
+			(max_distance <= config.distance_stop_animating and max_velocity <= config.distance_stop_animating)
+			or (
+				thickness <= 1.5 / 8
+				and max_distance <= config.distance_stop_animating_vertical_bar
+				and max_velocity <= config.distance_stop_animating_vertical_bar
+			)
+		) and #particles == 0
 	then
 		set_corners(current_corners, target_position[1], target_position[2])
 		reset_velocity()
@@ -362,6 +440,7 @@ local function animate()
 		gradient_length_squared > 1 and gradient_direction[2] / gradient_length_squared or 0,
 	}
 
+	draw.draw_particles(particles)
 	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar(), gradient_origin, gradient_direction_scaled)
 	redraw_cmd_mode(must_redraw_cmd_mode)
 end
@@ -428,6 +507,11 @@ local function scroll_buffer_space()
 		local shifted_position = { current_corners[1][1] - shift, current_corners[1][2] }
 		clamp_to_buffer(shifted_position)
 		set_corners(current_corners, shifted_position[1], shifted_position[2])
+		previous_center = get_center(current_corners)
+
+		for _, particle in ipairs(particles) do
+			particle.position[1] = particle.position[1] - shift
+		end
 
 		target_position[1] = target_position[1] - shift
 		clamp_to_buffer(target_position)
@@ -438,6 +522,7 @@ M.jump = function(row, col)
 	target_position = { row, col }
 	set_corners(target_corners, row, col)
 	set_corners(current_corners, row, col)
+	previous_center = get_center(current_corners)
 	unhide_real_cursor()
 	draw.clear()
 end

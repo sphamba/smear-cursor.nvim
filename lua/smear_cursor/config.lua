@@ -136,6 +136,13 @@ M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
 M.max_length = 25 -- Maximum smear length
 M.max_length_insert_mode = 1
 
+-- Particles configuration -----------------------------------------------------
+
+M.particles_enabled = false
+M.particle_density = 20 -- per character width per second
+M.particle_max_lifetime = 200 -- milliseconds
+M.particle_max_initial_velocity = 10 -- characters width per second
+
 -- For debugging ---------------------------------------------------------------
 
 M.logging_level = vim.log.levels.INFO

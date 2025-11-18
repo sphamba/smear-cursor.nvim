@@ -103,8 +103,15 @@ local RIGHT_DIAGONAL_BLOCKS = {
 		[ 1 / 4] = "🭦",
 	},
 }
-local BLOCK_ASPECT_RATIO = 2.0 -- height / width
+M.BLOCK_ASPECT_RATIO = 2.0 -- height / width
 -- stylua: ignore end
+
+local braille_characters = {}
+for i = 1, 255 do
+	local code = 0x2800 + i
+	braille_characters[i] =
+		string.char(0xE0 + math.floor(code / 0x1000), 0x80 + (math.floor(code / 0x40) % 0x40), 0x80 + (code % 0x40))
+end
 
 -- Enums for drawing quad
 local TOP = 1
@@ -507,7 +514,7 @@ local function precompute_intersections_diagonal(corners, G, index)
 	local min_angle_difference = math.huge
 	local closest_slope = nil
 	for block_slope, _ in pairs(LEFT_DIAGONAL_BLOCKS) do
-		local angle_difference = math.abs(atan_cached(BLOCK_ASPECT_RATIO * block_slope) - G.angles[index])
+		local angle_difference = math.abs(atan_cached(M.BLOCK_ASPECT_RATIO * block_slope) - G.angles[index])
 		if angle_difference < min_angle_difference then
 			min_angle_difference = angle_difference
 			closest_slope = block_slope
@@ -552,7 +559,7 @@ local function precompute_quad_geometry(corners)
 			corners[i % 4 + 1][2] - corners[i][2],
 		}
 		G.slopes[i] = edges[i][1] / edges[i][2]
-		G.angles[i] = math.atan(BLOCK_ASPECT_RATIO * G.slopes[i])
+		G.angles[i] = math.atan(M.BLOCK_ASPECT_RATIO * G.slopes[i])
 	end
 
 	-- Edge types
@@ -863,6 +870,17 @@ M.draw_quad = function(corners, target_position, vertical_bar, gradient_origin, 
 
 			::continue::
 		end
+	end
+end
+
+M.draw_particles = function(particles)
+	for _, particle in ipairs(particles) do
+		M.draw_character(
+			particle.position[1],
+			particle.position[2],
+			"*",
+			color.get_hl_group({ level = config.color_levels })
+		)
 	end
 end
 
