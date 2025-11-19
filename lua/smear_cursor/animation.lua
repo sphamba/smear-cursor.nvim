@@ -202,6 +202,11 @@ local function add_particles(time_interval)
 		center[2] - previous_center[2],
 	}
 	local movement_magnitude = math.sqrt((draw.BLOCK_ASPECT_RATIO * movement[1]) ^ 2 + movement[2] ^ 2)
+	if movement_magnitude <= config.min_distance_emit_particles then
+		previous_center = center
+		return
+	end
+
 	local num_new_particles = movement_magnitude * config.particle_density * (time_interval / 1000)
 	num_new_particles = math.floor(num_new_particles) + (math.random() < (num_new_particles % 1) and 1 or 0)
 	num_new_particles = math.max(0, math.min(num_new_particles, config.particle_max_num - #particles))
