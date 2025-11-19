@@ -139,9 +139,12 @@ M.max_length_insert_mode = 1
 -- Particles configuration -----------------------------------------------------
 
 M.particles_enabled = false
+M.particle_max_num = 100
 M.particle_density = 20 -- per character width per second
 M.particle_max_lifetime = 200 -- milliseconds
-M.particle_max_initial_velocity = 10 -- characters width per second
+M.particle_lifetime_distribution_exponent = 2
+M.particle_max_initial_velocity = 5 -- characters width per second
+M.particle_velocity_from_cursor = 0.05 -- 0: none, 1: full
 
 -- For debugging ---------------------------------------------------------------
 
