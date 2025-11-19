@@ -877,14 +877,14 @@ M.draw_quad = function(corners, target_position, vertical_bar, gradient_origin, 
 end
 
 local function draw_braille_character(row, col, cell, hl_group, zindex)
-	local braille_index = cell[1][1] * 1
-		+ cell[2][1] * 2
-		+ cell[3][1] * 4
-		+ cell[1][2] * 8
-		+ cell[2][2] * 16
-		+ cell[3][2] * 32
-		+ cell[4][1] * 64
-		+ cell[4][2] * 128
+	local braille_index = (cell[1][1] > 0 and 1 or 0)
+		+ (cell[2][1] > 0 and 2 or 0)
+		+ (cell[3][1] > 0 and 4 or 0)
+		+ (cell[1][2] > 0 and 8 or 0)
+		+ (cell[2][2] > 0 and 16 or 0)
+		+ (cell[3][2] > 0 and 32 or 0)
+		+ (cell[4][1] > 0 and 64 or 0)
+		+ (cell[4][2] > 0 and 128 or 0)
 
 	if braille_index == 0 then return end
 
@@ -903,18 +903,39 @@ M.draw_particles = function(particles)
 		if cells[row] == nil then cells[row] = {} end
 		if cells[row][col] == nil then cells[row][col] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } end
 		local cell = cells[row][col]
-		cell[sub_row][sub_col] = 1
+		cell[sub_row][sub_col] = cell[sub_row][sub_col] + particle.lifetime
 	end
 
 	for row, row_cells in pairs(cells) do
 		for col, cell in pairs(row_cells) do
-			draw_braille_character(
-				row,
-				col,
-				cell,
-				color.get_hl_group({ level = config.color_levels }),
-				config.windows_zindex - 1
-			)
+			local num_dots = (cell[1][1] > 0 and 1 or 0)
+				+ (cell[2][1] > 0 and 1 or 0)
+				+ (cell[3][1] > 0 and 1 or 0)
+				+ (cell[1][2] > 0 and 1 or 0)
+				+ (cell[2][2] > 0 and 1 or 0)
+				+ (cell[3][2] > 0 and 1 or 0)
+				+ (cell[4][1] > 0 and 1 or 0)
+				+ (cell[4][2] > 0 and 1 or 0)
+			local lifetime_sum = cell[1][1]
+				+ cell[2][1]
+				+ cell[3][1]
+				+ cell[1][2]
+				+ cell[2][2]
+				+ cell[3][2]
+				+ cell[4][1]
+				+ cell[4][2]
+			local shade = math.min(1, lifetime_sum / num_dots / config.particle_max_lifetime)
+			local hl_group_index = round(shade * config.color_levels)
+
+			if hl_group_index > 0 then
+				draw_braille_character(
+					row,
+					col,
+					cell,
+					color.get_hl_group({ level = hl_group_index }),
+					config.windows_zindex - 1
+				)
+			end
 		end
 	end
 end
