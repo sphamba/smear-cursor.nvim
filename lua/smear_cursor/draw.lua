@@ -876,15 +876,46 @@ M.draw_quad = function(corners, target_position, vertical_bar, gradient_origin, 
 	end
 end
 
+local function draw_braille_character(row, col, cell, hl_group, zindex)
+	local braille_index = cell[1][1] * 1
+		+ cell[2][1] * 2
+		+ cell[3][1] * 4
+		+ cell[1][2] * 8
+		+ cell[2][2] * 16
+		+ cell[3][2] * 32
+		+ cell[4][1] * 64
+		+ cell[4][2] * 128
+
+	if braille_index == 0 then return end
+
+	M.draw_character(row, col, braille_characters[braille_index], hl_group, zindex)
+end
+
 M.draw_particles = function(particles)
+	local cells = {}
+
 	for _, particle in ipairs(particles) do
-		M.draw_character(
-			particle.position[1],
-			particle.position[2],
-			"*",
-			color.get_hl_group({ level = config.color_levels }),
-			config.windows_zindex - 1
-		)
+		local row = math.floor(particle.position[1])
+		local col = math.floor(particle.position[2])
+		local sub_row = round(4 * (particle.position[1] % 1) + 0.5)
+		local sub_col = round(2 * (particle.position[2] % 1) + 0.5)
+
+		if cells[row] == nil then cells[row] = {} end
+		if cells[row][col] == nil then cells[row][col] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } } end
+		local cell = cells[row][col]
+		cell[sub_row][sub_col] = 1
+	end
+
+	for row, row_cells in pairs(cells) do
+		for col, cell in pairs(row_cells) do
+			draw_braille_character(
+				row,
+				col,
+				cell,
+				color.get_hl_group({ level = config.color_levels }),
+				config.windows_zindex - 1
+			)
+		end
 	end
 end
 
