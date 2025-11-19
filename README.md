@@ -19,7 +19,7 @@ Some configuration examples:
 
 | Smooth cursor without smear | Fire hazard |
 | --- | --- |
-| ![Image](https://github.com/user-attachments/assets/47950a0c-2bbe-4148-b633-fea6d5e1f985) | ![Image](https://github.com/user-attachments/assets/ba847071-f918-4e8f-ae74-169a31e05368) |
+| ![Image](https://github.com/user-attachments/assets/47950a0c-2bbe-4148-b633-fea6d5e1f985) | ![Image](https://github.com/user-attachments/assets/b938ba82-6238-4113-b253-a52421828f85) |
 
 <!-- panvimdoc-ignore-end -->
 
@@ -141,16 +141,27 @@ You can also change the "bounciness" of the smear by adjusting the `damping` and
 >
 > Feel free to experiment with all the configuration options, but be aware that some combinations may cause your cursor to flicker or even **catch fire**. That can happen with the following settings:
 > ```lua
->   opts = {
->     cursor_color = "#ff8800",
->     stiffness = 0.3,
->     trailing_stiffness = 0.1,
->     damping = 0.5,
->     trailing_exponent = 5,
->     never_draw_over_target = true,
->     hide_target_hack = true,
->     gamma = 1,
->   }
+>  opts = {
+>    cursor_color = "#ff4000",
+>    particles_enabled = true,
+>    stiffness = 0.5,
+>    trailing_stiffness = 0.2,
+>    trailing_exponent = 5,
+>    damping = 0.6,
+>    gradient_exponent = 0,
+>    gamma = 1,
+>    never_draw_over_target = true, -- if you want to actually see under the cursor
+>    hide_target_hack = true,       -- same
+>    particle_spread = 1,
+>    particles_per_second = 500,
+>    particles_per_length = 50,
+>    particle_max_lifetime = 800,
+>    particle_max_initial_velocity = 20,
+>    particle_velocity_from_cursor = 0.5,
+>    particle_damping = 0.15,
+>    particle_gravity = -50,
+>    min_distance_emit_particles = 0,
+> }
 > ```
 
 </details>

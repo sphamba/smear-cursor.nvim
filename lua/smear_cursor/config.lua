@@ -138,7 +138,7 @@ M.max_length_insert_mode = 1
 
 -- Particles configuration -----------------------------------------------------
 
-M.particles_enabled = false
+M.particles_enabled = false -- When true, better to also set `never_draw_over_target` to true
 M.particle_max_num = 100
 M.particle_spread = 0.5 -- 0: no spread, 1: spread over entire cursor
 M.particles_per_second = 200
