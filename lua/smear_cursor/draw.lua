@@ -154,7 +154,7 @@ local function set_buffer_options(buffer_id, options)
 	end
 end
 
-local function get_window(tab, row, col)
+local function get_window(tab, row, col, zindex)
 	all_tab_windows[tab] = all_tab_windows[tab] or { active = 0, windows = {} }
 	local tab_windows = all_tab_windows[tab]
 
@@ -165,7 +165,8 @@ local function get_window(tab, row, col)
 
 		if vim.api.nvim_win_is_valid(wb.window_id) and vim.api.nvim_buf_is_valid(wb.buffer_id) then
 			---@type vim.api.keyset.win_config
-			local window_config = { relative = "editor", border = "none", row = row - 1, col = col - 1 }
+			local window_config =
+				{ relative = "editor", border = "none", row = row - 1, col = col - 1, zindex = zindex }
 			if can_hide then window_config.hide = false end
 			vim.api.nvim_win_set_config(wb.window_id, window_config)
 			return wb.window_id, wb.buffer_id
@@ -190,7 +191,7 @@ local function get_window(tab, row, col)
 		border = "none",
 		focusable = false,
 		noautocmd = true,
-		zindex = config.windows_zindex,
+		zindex = zindex,
 	})
 
 	set_buffer_options(
@@ -204,12 +205,14 @@ local function get_window(tab, row, col)
 	return window_id, buffer_id
 end
 
-M.draw_character = function(row, col, character, hl_group)
+M.draw_character = function(row, col, character, hl_group, zindex)
+	zindex = zindex or config.windows_zindex
+
 	-- logging.debug("Drawing character " .. character .. " at (" .. row .. ", " .. col .. ")")
 	if row < 1 or row > vim.o.lines - vim.opt.cmdheight._value or col < 1 or col > vim.o.columns then return end
 
 	local current_tab = vim.api.nvim_get_current_tabpage()
-	local _, buffer_id = get_window(current_tab, row, col)
+	local _, buffer_id = get_window(current_tab, row, col, zindex)
 
 	vim.api.nvim_buf_set_extmark(buffer_id, cursor_namespace, 0, 0, {
 		id = extmark_id, -- use a fixed extmark id
@@ -879,7 +882,8 @@ M.draw_particles = function(particles)
 			particle.position[1],
 			particle.position[2],
 			"*",
-			color.get_hl_group({ level = config.color_levels })
+			color.get_hl_group({ level = config.color_levels }),
+			config.windows_zindex - 1
 		)
 	end
 end
