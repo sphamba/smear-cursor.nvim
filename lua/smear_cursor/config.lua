@@ -140,11 +140,15 @@ M.max_length_insert_mode = 1
 
 M.particles_enabled = false
 M.particle_max_num = 100
-M.particle_density = 50 -- per character width per second
-M.particle_max_lifetime = 200 -- milliseconds
-M.particle_lifetime_distribution_exponent = 2
-M.particle_max_initial_velocity = 8 -- characters width per second
-M.particle_velocity_from_cursor = 0.05 -- 0: none, 1: full
+M.particle_spread = 0.5 -- 0: no spread, 1: spread over entire cursor
+M.particles_per_second = 200
+M.particles_per_length = 1 -- per character width
+M.particle_max_lifetime = 300 -- milliseconds
+M.particle_lifetime_distribution_exponent = 5
+M.particle_max_initial_velocity = 10 -- characters width per second
+M.particle_velocity_from_cursor = 0.2 -- 0: none, 1: full
+M.particle_damping = 0.2
+M.particle_gravity = 20 -- characters width per second squared
 M.min_distance_emit_particles = 1.5 -- character widths
 
 -- For debugging ---------------------------------------------------------------

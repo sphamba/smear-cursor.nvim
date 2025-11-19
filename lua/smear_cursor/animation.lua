@@ -207,15 +207,18 @@ local function add_particles(time_interval)
 		return
 	end
 
-	local num_new_particles = movement_magnitude * config.particle_density * (time_interval / 1000)
+	local num_new_particles = config.particles_per_second * (time_interval / 1000)
+		+ movement_magnitude * config.particles_per_length
 	num_new_particles = math.floor(num_new_particles) + (math.random() < (num_new_particles % 1) and 1 or 0)
 	num_new_particles = math.max(0, math.min(num_new_particles, config.particle_max_num - #particles))
+	local row_spread = config.particle_spread * (cursor_is_vertical_bar() and 1 / 8 or 1)
+	local col_spread = config.particle_spread * (cursor_is_horizontal_bar() and 1 / 8 or 1)
 
 	for _ = 1, num_new_particles do
 		local s = math.random()
 		local particle_position = {
-			previous_center[1] + s * movement[1],
-			previous_center[2] + s * movement[2],
+			previous_center[1] + s * movement[1] + (math.random() - 0.5) * row_spread,
+			previous_center[2] + s * movement[2] + (math.random() - 0.5) * col_spread,
 		}
 
 		local velocity_magnitude = config.particle_max_initial_velocity * math.sqrt(math.random())
@@ -237,26 +240,23 @@ local function add_particles(time_interval)
 end
 
 local function update_particles(time_interval)
-	local window_origin = vim.api.nvim_win_get_position(current_window_id)
-	local window_row = window_origin[1] + 1
-	local window_height = vim.api.nvim_win_get_height(current_window_id)
+	local speed_correction = time_interval / BASE_TIME_INTERVAL
+	local velocity_conservation_factor = math.exp(math.log(1 - config.particle_damping) * speed_correction)
 
 	local i = 1
 	while i <= #particles do
 		local particle = particles[i]
-
-		particle.position[1] = particle.position[1]
-			+ (particle.velocity[1] * (time_interval / 1000)) / draw.BLOCK_ASPECT_RATIO
-		particle.position[2] = particle.position[2] + (particle.velocity[2] * (time_interval / 1000))
 		particle.lifetime = particle.lifetime - config.time_interval
 
-		if
-			particle.lifetime <= 0
-			or particle.position[1] < window_row
-			or particle.position[1] >= window_row + window_height
-		then
+		if particle.lifetime <= 0 then
 			table.remove(particles, i)
 		else
+			particle.velocity[1] = particle.velocity[1] * velocity_conservation_factor
+				+ config.particle_gravity * (time_interval / 1000)
+			particle.velocity[2] = particle.velocity[2] * velocity_conservation_factor
+			particle.position[1] = particle.position[1]
+				+ (particle.velocity[1] * (time_interval / 1000)) / draw.BLOCK_ASPECT_RATIO
+			particle.position[2] = particle.position[2] + (particle.velocity[2] * (time_interval / 1000))
 			i = i + 1
 		end
 	end
