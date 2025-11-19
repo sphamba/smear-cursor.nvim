@@ -147,6 +147,7 @@ M.particle_max_lifetime = 300 -- milliseconds
 M.particle_lifetime_distribution_exponent = 5
 M.particle_max_initial_velocity = 10 -- characters width per second
 M.particle_velocity_from_cursor = 0.2 -- 0: none, 1: full
+M.particle_random_velocity = 100 -- characters width per second
 M.particle_damping = 0.2
 M.particle_gravity = 20 -- characters width per second squared
 M.min_distance_emit_particles = 1.5 -- character widths

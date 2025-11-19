@@ -252,8 +252,10 @@ local function update_particles(time_interval)
 			table.remove(particles, i)
 		else
 			particle.velocity[1] = particle.velocity[1] * velocity_conservation_factor
-				+ config.particle_gravity * (time_interval / 1000)
+				+ (config.particle_gravity + config.particle_random_velocity * (math.random() - 0.5))
+					* (time_interval / 1000)
 			particle.velocity[2] = particle.velocity[2] * velocity_conservation_factor
+				+ config.particle_random_velocity * (math.random() - 0.5) * (time_interval / 1000)
 			particle.position[1] = particle.position[1]
 				+ (particle.velocity[1] * (time_interval / 1000)) / draw.BLOCK_ASPECT_RATIO
 			particle.position[2] = particle.position[2] + (particle.velocity[2] * (time_interval / 1000))
@@ -420,7 +422,12 @@ local function animate()
 		or math.abs(target_center[2] - current_center[2]) < 1 / 8
 	local drawn_corners = straight_line and current_corners or shrink_volume(current_corners)
 
-	local target_reached = false
+	local target_reached = (
+		current_center[1] >= target_corners[1][1]
+		and current_center[1] <= target_corners[3][1]
+		and current_center[2] >= target_corners[1][2]
+		and current_center[2] <= target_corners[3][2]
+	)
 	for i = 1, 4 do
 		-- stylua: ignore
 		if (
@@ -451,7 +458,7 @@ local function animate()
 		gradient_length_squared > 1 and gradient_direction[2] / gradient_length_squared or 0,
 	}
 
-	draw.draw_particles(particles)
+	draw.draw_particles(particles, target_position)
 	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar(), gradient_origin, gradient_direction_scaled)
 	redraw_cmd_mode(must_redraw_cmd_mode)
 end

@@ -891,7 +891,8 @@ local function draw_braille_character(row, col, cell, hl_group, zindex)
 	M.draw_character(row, col, braille_characters[braille_index], hl_group, zindex)
 end
 
-M.draw_particles = function(particles)
+M.draw_particles = function(particles, target_position)
+	if target_position == nil then target_position = { 0, 0 } end
 	local cells = {}
 
 	for _, particle in ipairs(particles) do
@@ -908,6 +909,8 @@ M.draw_particles = function(particles)
 
 	for row, row_cells in pairs(cells) do
 		for col, cell in pairs(row_cells) do
+			if row == target_position[1] and col == target_position[2] then goto continue end
+
 			local num_dots = (cell[1][1] > 0 and 1 or 0)
 				+ (cell[2][1] > 0 and 1 or 0)
 				+ (cell[3][1] > 0 and 1 or 0)
@@ -927,15 +930,17 @@ M.draw_particles = function(particles)
 			local shade = math.min(1, lifetime_sum / num_dots / config.particle_max_lifetime)
 			local hl_group_index = round(shade * config.color_levels)
 
-			if hl_group_index > 0 then
-				draw_braille_character(
-					row,
-					col,
-					cell,
-					color.get_hl_group({ level = hl_group_index }),
-					config.windows_zindex - 1
-				)
-			end
+			if hl_group_index == 0 then goto continue end
+
+			draw_braille_character(
+				row,
+				col,
+				cell,
+				color.get_hl_group({ level = hl_group_index }),
+				config.windows_zindex - 1
+			)
+
+			::continue::
 		end
 	end
 end
