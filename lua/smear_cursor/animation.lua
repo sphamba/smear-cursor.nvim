@@ -7,7 +7,6 @@ local M = {}
 local BASE_TIME_INTERVAL = 17
 
 local animating = false
-local timer = nil
 local previous_time = 0
 local target_position = { 0, 0 }
 local current_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
@@ -246,7 +245,7 @@ local function update_particles(time_interval)
 	local i = 1
 	while i <= #particles do
 		local particle = particles[i]
-		particle.lifetime = particle.lifetime - config.time_interval
+		particle.lifetime = particle.lifetime - time_interval
 
 		if particle.lifetime <= 0 then
 			table.remove(particles, i)
@@ -311,10 +310,6 @@ local function shrink_volume(corners)
 end
 
 local function stop_animation()
-	if timer == nil then return end
-	timer:stop()
-	timer:close()
-	timer = nil
 	animating = false
 	previous_time = 0
 end
@@ -373,7 +368,9 @@ local function redraw_cmd_mode(force)
 end
 
 local function animate()
-	animating = true
+	local start_time = vim.uv.now()
+	if not animating then return end
+
 	local must_redraw_cmd_mode = check_smear_outside_cmd_row()
 	local time_interval = get_effective_time_interval()
 	local index_head, index_tail = update(time_interval)
@@ -461,12 +458,15 @@ local function animate()
 	draw.draw_particles(particles, target_position)
 	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar(), gradient_origin, gradient_direction_scaled)
 	redraw_cmd_mode(must_redraw_cmd_mode)
+
+	local end_time = vim.uv.now()
+	vim.defer_fn(animate, math.max(0, config.time_interval - (end_time - start_time)))
 end
 
 local function start_anination()
-	if timer ~= nil then return end
-	timer = vim.uv.new_timer()
-	timer:start(0, config.time_interval, vim.schedule_wrap(animate))
+	if animating then return end
+	animating = true
+	animate()
 end
 
 local function set_stiffnesses()
