@@ -84,7 +84,7 @@ return {
     scroll_buffer_space = true,
 
     -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
-    -- Smears will blend better on all backgrounds.
+    -- Smears and particles will look a lot less blocky.
     legacy_computing_symbols_support = false,
 
     -- Smear cursor in insert mode.

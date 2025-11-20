@@ -151,6 +151,7 @@ M.particle_random_velocity = 100 -- characters width per second
 M.particle_damping = 0.2
 M.particle_gravity = 20 -- characters width per second squared
 M.min_distance_emit_particles = 1.5 -- character widths
+M.particle_switch_octant_braille = 0.3 -- fraction of lifetime, used if `legacy_computing_symbols_support` is true
 M.particles_over_text = false
 
 -- For debugging ---------------------------------------------------------------

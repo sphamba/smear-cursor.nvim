@@ -104,13 +104,31 @@ local RIGHT_DIAGONAL_BLOCKS = {
 	},
 }
 M.BLOCK_ASPECT_RATIO = 2.0 -- height / width
+
+local OCTANT_CHARACTERS = {
+	     "𜺨", "𜺫", "🮂", "𜴀", "▘", "𜴁", "𜴂", "𜴃", "𜴄", "▝", "𜴅", "𜴆", "𜴇", "𜴈", "▀",
+	"𜴉", "𜴊", "𜴋", "𜴌", "🯦", "𜴍", "𜴎", "𜴏", "𜴐", "𜴑", "𜴒", "𜴓", "𜴔", "𜴕", "𜴖", "𜴗",
+	"𜴘", "𜴙", "𜴚", "𜴛", "𜴜", "𜴝", "𜴞", "𜴟", "🯧", "𜴠", "𜴡", "𜴢", "𜴣", "𜴤", "𜴥", "𜴦",
+	"𜴧", "𜴨", "𜴩", "𜴪", "𜴫", "𜴬", "𜴭", "𜴮", "𜴯", "𜴰", "𜴱", "𜴲", "𜴳", "𜴴", "𜴵", "🮅",
+	"𜺣", "𜴶", "𜴷", "𜴸", "𜴹", "𜴺", "𜴻", "𜴼", "𜴽", "𜴾", "𜴿", "𜵀", "𜵁", "𜵂", "𜵃", "𜵄",
+	"▖", "𜵅", "𜵆", "𜵇", "𜵈", "▌", "𜵉", "𜵊", "𜵋", "𜵌", "▞", "𜵍", "𜵎", "𜵏", "𜵐", "▛",
+	"𜵑", "𜵒", "𜵓", "𜵔", "𜵕", "𜵖", "𜵗", "𜵘", "𜵙", "𜵚", "𜵛", "𜵜", "𜵝", "𜵞", "𜵟", "𜵠",
+	"𜵡", "𜵢", "𜵣", "𜵤", "𜵥", "𜵦", "𜵧", "𜵨", "𜵩", "𜵪", "𜵫", "𜵬", "𜵭", "𜵮", "𜵯", "𜵰",
+	"𜺠", "𜵱", "𜵲", "𜵳", "𜵴", "𜵵", "𜵶", "𜵷", "𜵸", "𜵹", "𜵺", "𜵻", "𜵼", "𜵽", "𜵾", "𜵿",
+	"𜶀", "𜶁", "𜶂", "𜶃", "𜶄", "𜶅", "𜶆", "𜶇", "𜶈", "𜶉", "𜶊", "𜶋", "𜶌", "𜶍", "𜶎", "𜶏",
+	"▗", "𜶐", "𜶑", "𜶒", "𜶓", "▚", "𜶔", "𜶕", "𜶖", "𜶗", "▐", "𜶘", "𜶙", "𜶚", "𜶛", "▜",
+	"𜶜", "𜶝", "𜶞", "𜶟", "𜶠", "𜶡", "𜶢", "𜶣", "𜶤", "𜶥", "𜶦", "𜶧", "𜶨", "𜶩", "𜶪", "𜶫",
+	"▂", "𜶬", "𜶭", "𜶮", "𜶯", "𜶰", "𜶱", "𜶲", "𜶳", "𜶴", "𜶵", "𜶶", "𜶷", "𜶸", "𜶹", "𜶺",
+	"𜶻", "𜶼", "𜶽", "𜶾", "𜶿", "𜷀", "𜷁", "𜷂", "𜷃", "𜷄", "𜷅", "𜷆", "𜷇", "𜷈", "𜷉", "𜷊",
+	"𜷋", "𜷌", "𜷍", "𜷎", "𜷏", "𜷐", "𜷑", "𜷒", "𜷓", "𜷔", "𜷕", "𜷖", "𜷗", "𜷘", "𜷙", "𜷚",
+	"▄", "𜷛", "𜷜", "𜷝", "𜷞", "▙", "𜷟", "𜷠", "𜷡", "𜷢", "▟", "𜷣", "▆", "𜷤", "𜷥", "█",
+}
 -- stylua: ignore end
 
 local braille_characters = {}
 for i = 1, 255 do
 	local code = 0x2800 + i
-	braille_characters[i] =
-		string.char(0xE0 + math.floor(code / 0x1000), 0x80 + (math.floor(code / 0x40) % 0x40), 0x80 + (code % 0x40))
+	braille_characters[i] = vim.fn.nr2char(code)
 end
 
 -- Enums for drawing quad
@@ -876,6 +894,21 @@ M.draw_quad = function(corners, target_position, vertical_bar, gradient_origin, 
 	end
 end
 
+local function draw_octant_character(row, col, cell, hl_group, zindex)
+	local octant_index = (cell[1][1] > 0 and 1 or 0)
+		+ (cell[1][2] > 0 and 2 or 0)
+		+ (cell[2][1] > 0 and 4 or 0)
+		+ (cell[2][2] > 0 and 8 or 0)
+		+ (cell[3][1] > 0 and 16 or 0)
+		+ (cell[3][2] > 0 and 32 or 0)
+		+ (cell[4][1] > 0 and 64 or 0)
+		+ (cell[4][2] > 0 and 128 or 0)
+
+	if octant_index == 0 then return end
+
+	M.draw_character(row, col, OCTANT_CHARACTERS[octant_index], hl_group, zindex)
+end
+
 local function draw_braille_character(row, col, cell, hl_group, zindex)
 	local braille_index = (cell[1][1] > 0 and 1 or 0)
 		+ (cell[2][1] > 0 and 2 or 0)
@@ -893,6 +926,9 @@ end
 
 M.draw_particles = function(particles, target_position)
 	if target_position == nil then target_position = { 0, 0 } end
+
+	local lifetime_switch_octant_braille = config.particle_max_lifetime
+		* (config.legacy_computing_symbols_support and config.particle_switch_octant_braille or math.huge)
 	local cells = {}
 
 	for _, particle in ipairs(particles) do
@@ -928,18 +964,29 @@ M.draw_particles = function(particles, target_position)
 				+ cell[3][2]
 				+ cell[4][1]
 				+ cell[4][2]
-			local shade = math.min(1, lifetime_sum / num_dots / config.particle_max_lifetime)
+
+			local lifetime_average = lifetime_sum / num_dots
+			local draw_function
+			local shade
+			if lifetime_average > lifetime_switch_octant_braille then
+				draw_function = draw_octant_character
+				shade = math.min(
+					1,
+					(lifetime_average - lifetime_switch_octant_braille)
+						/ (config.particle_max_lifetime - lifetime_switch_octant_braille)
+				)
+			else
+				draw_function = draw_braille_character
+				shade = math.min(
+					1,
+					lifetime_average / math.min(config.particle_max_lifetime, lifetime_switch_octant_braille)
+				)
+			end
 			local hl_group_index = round(shade * config.color_levels)
 
 			if hl_group_index == 0 then goto continue end
 
-			draw_braille_character(
-				row,
-				col,
-				cell,
-				color.get_hl_group({ level = hl_group_index }),
-				config.windows_zindex - 1
-			)
+			draw_function(row, col, cell, color.get_hl_group({ level = hl_group_index }), config.windows_zindex - 1)
 
 			::continue::
 		end
