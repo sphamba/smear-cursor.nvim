@@ -17,9 +17,13 @@ Some configuration examples:
 | --- | --- |
 | ![Image](https://github.com/user-attachments/assets/8d4ea0e6-6764-48ce-a182-7f1a63ffd762) | ![Image](https://github.com/user-attachments/assets/6c2ae042-55df-48a3-8e18-57517dc06633) |
 
-| Smooth cursor without smear | Fire hazard |
+| Smooth cursor without smear | Smooth caret |
 | --- | --- |
-| ![Image](https://github.com/user-attachments/assets/47950a0c-2bbe-4148-b633-fea6d5e1f985) | ![Image](https://github.com/user-attachments/assets/b938ba82-6238-4113-b253-a52421828f85) |
+| ![Image](https://github.com/user-attachments/assets/47950a0c-2bbe-4148-b633-fea6d5e1f985) | ![Image](https://github.com/user-attachments/assets/4ce13647-62fa-4f11-9d05-83c5b1ab4c7c) |
+
+| Fire hazard |
+| --- |
+| ![Image](https://github.com/user-attachments/assets/b938ba82-6238-4113-b253-a52421828f85) |
 
 <!-- panvimdoc-ignore-end -->
 
