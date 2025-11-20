@@ -23,8 +23,7 @@ Some configuration examples:
 
 | Fire hazard |
 | --- |
-|
-![Image](https://github.com/user-attachments/assets/ebb37a37-04dd-4400-b22c-d7be86a8b939) |
+| ![Image](https://github.com/user-attachments/assets/ebb37a37-04dd-4400-b22c-d7be86a8b939) |
 
 <!-- panvimdoc-ignore-end -->
 
