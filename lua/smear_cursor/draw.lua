@@ -946,7 +946,15 @@ M.draw_particles = function(particles, target_position)
 	for row, row_cells in pairs(cells) do
 		for col, cell in pairs(row_cells) do
 			if row == target_position[1] and col == target_position[2] then goto continue end
-			if not config.particles_over_text and vim.fn.screenstring(row, col) ~= " " then goto continue end
+			local bg_char_code = vim.fn.screenchar(row, col)
+			if
+				not config.particles_over_text
+				and bg_char_code ~= 32
+				and not (bg_char_code >= 0x2800 and bg_char_code <= 0x28FF)
+				and not (bg_char_code >= 0x1CD00 and bg_char_code <= 0x1CDE7)
+			then
+				goto continue
+			end
 
 			local num_dots = (cell[1][1] > 0 and 1 or 0)
 				+ (cell[2][1] > 0 and 1 or 0)
