@@ -88,6 +88,12 @@ function M.clear_cache()
 	cache = {}
 end
 
+local function resolve_color(str)
+	if not str then return nil end
+	if str:match("^#") then return str end
+	return get_hl_color(str, "bg")
+end
+
 function M.get_color_at_cursor()
 	local cursor = vim.api.nvim_win_get_cursor(0)
 	cursor[1] = cursor[1] - 1
@@ -115,7 +121,8 @@ end
 ---@param opts? {level?: number, inverted?: boolean}
 function M.get_hl_group(opts)
 	opts = opts or {}
-	local _cursor_color = (vim.api.nvim_get_mode().mode == "i") and C.cursor_color_insert_mode or C.cursor_color
+	local _cursor_color = (vim.api.nvim_get_mode().mode == "i") and resolve_color(C.cursor_color_insert_mode)
+		or resolve_color(C.cursor_color)
 
 	local hl_group = ("SmearCursor%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level or ""))
 
