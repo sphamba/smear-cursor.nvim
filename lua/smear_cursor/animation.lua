@@ -189,13 +189,11 @@ local function update(time_interval)
 	return index_head, index_tail
 end
 
-local function add_particles(time_interval)
+local function add_particles()
 	local center = get_center(current_corners)
 	local center_velocity = get_center(velocity_corners)
-	center_velocity[1] = center_velocity[1]
-		/ (math.max(time_interval, config.time_interval) / 1000)
-		* draw.BLOCK_ASPECT_RATIO
-	center_velocity[2] = center_velocity[2] / (math.max(time_interval, config.time_interval) / 1000)
+	center_velocity[1] = center_velocity[1] / (config.time_interval / 1000) * draw.BLOCK_ASPECT_RATIO
+	center_velocity[2] = center_velocity[2] / (config.time_interval / 1000)
 	local movement = {
 		center[1] - previous_center[1],
 		center[2] - previous_center[2],
@@ -206,7 +204,7 @@ local function add_particles(time_interval)
 		return
 	end
 
-	local num_new_particles = config.particles_per_second * (time_interval / 1000)
+	local num_new_particles = config.particles_per_second * (config.time_interval / 1000)
 		+ movement_magnitude * config.particles_per_length
 	num_new_particles = math.floor(num_new_particles) + (math.random() < (num_new_particles % 1) and 1 or 0)
 	num_new_particles = math.max(0, math.min(num_new_particles, config.particle_max_num - #particles))
@@ -250,19 +248,21 @@ local function update_particles(time_interval)
 		if particle.lifetime <= 0 then
 			table.remove(particles, i)
 		else
-			particle.velocity[1] = particle.velocity[1] * velocity_conservation_factor
+			particle.velocity[1] = (
+				particle.velocity[1]
 				+ (config.particle_gravity + config.particle_random_velocity * (math.random() - 0.5))
-					* (time_interval / 1000)
+					* (config.time_interval / 1000)
+			) * velocity_conservation_factor
 			particle.velocity[2] = particle.velocity[2] * velocity_conservation_factor
-				+ config.particle_random_velocity * (math.random() - 0.5) * (time_interval / 1000)
+				+ config.particle_random_velocity * (math.random() - 0.5) * (config.time_interval / 1000)
 			particle.position[1] = particle.position[1]
-				+ (particle.velocity[1] * (time_interval / 1000)) / draw.BLOCK_ASPECT_RATIO
-			particle.position[2] = particle.position[2] + (particle.velocity[2] * (time_interval / 1000))
+				+ (particle.velocity[1] * (config.time_interval / 1000)) / draw.BLOCK_ASPECT_RATIO
+			particle.position[2] = particle.position[2] + (particle.velocity[2] * (config.time_interval / 1000))
 			i = i + 1
 		end
 	end
 
-	if config.particles_enabled then add_particles(time_interval) end
+	if config.particles_enabled then add_particles() end
 end
 
 local function normalize(v)
