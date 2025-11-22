@@ -10,6 +10,7 @@ local M = {}
 
 -- Smear cursor color. Defaults to Cursor GUI color if not set.
 -- Set to "none" to match the text color at the target cursor position.
+-- Can be a hex color code, or a highlight group name.
 C.cursor_color = nil
 C.cursor_color_insert_mode = nil
 
