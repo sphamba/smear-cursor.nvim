@@ -36,7 +36,7 @@ M.get_screen_cmd_cursor_position = function()
 	return row, col
 end
 
-M.get_screen_distance = function(row_start, row_end)
+M.get_screen_distance = function(row_start, row_end, window_id)
 	local reversed = false
 
 	if row_start > row_end then
@@ -44,16 +44,22 @@ M.get_screen_distance = function(row_start, row_end)
 		reversed = true
 	end
 
-	local text_height
-	local success = pcall(function()
-		text_height = vim.api.nvim_win_text_height(0, {
-			start_row = row_start - 1,
-			end_row = row_end - 1,
-		})
-	end)
+	local window_height = vim.api.nvim_win_get_height(window_id)
 
-	if not success then -- line is not visible
-		text_height = { all = 1 }
+	local text_height
+	if row_end - row_start >= window_height then
+		text_height = { all = window_height }
+	else
+		local success = pcall(function()
+			text_height = vim.api.nvim_win_text_height(0, {
+				start_row = row_start - 1,
+				end_row = row_end - 1,
+			})
+		end)
+
+		if not success then -- line is not visible
+			text_height = { all = 1 }
+		end
 	end
 
 	local distance = text_height.all - 1
