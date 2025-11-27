@@ -8,6 +8,7 @@ local BASE_TIME_INTERVAL = 17
 
 local animating = false
 local previous_time = 0
+local lag = 0
 local target_position = { 0, 0 }
 local current_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local target_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
@@ -103,10 +104,10 @@ local function get_effective_time_interval()
 	local time_interval
 
 	if previous_time == 0 then
-		previous_time = vim.uv.now()
+		previous_time = vim.uv.hrtime() / 1000000
 		time_interval = BASE_TIME_INTERVAL
 	else
-		local current_time = vim.uv.now()
+		local current_time = vim.uv.hrtime() / 1000000
 		time_interval = current_time - previous_time
 		previous_time = current_time
 	end
@@ -368,11 +369,10 @@ local function redraw_cmd_mode(force)
 end
 
 local function animate()
-	local start_time = vim.uv.now()
 	if not animating then return end
 
-	local must_redraw_cmd_mode = check_smear_outside_cmd_row()
 	local time_interval = get_effective_time_interval()
+	local must_redraw_cmd_mode = check_smear_outside_cmd_row()
 	local index_head, index_tail = update(time_interval)
 	update_particles(time_interval)
 
@@ -392,8 +392,6 @@ local function animate()
 	end
 	local thickness = right_bound - left_bound
 
-	draw.clear()
-
 	if
 		(
 			(max_distance <= config.distance_stop_animating and max_velocity <= config.distance_stop_animating)
@@ -404,11 +402,13 @@ local function animate()
 			)
 		) and #particles == 0
 	then
+		draw.clear()
 		set_corners(current_corners, target_position[1], target_position[2])
 		reset_velocity()
 		redraw_cmd_mode(must_redraw_cmd_mode)
 		unhide_real_cursor()
 		stop_animation()
+		lag = 0
 		return
 	end
 
@@ -455,12 +455,32 @@ local function animate()
 		gradient_length_squared > 1 and gradient_direction[2] / gradient_length_squared or 0,
 	}
 
-	draw.draw_particles(particles, target_position)
-	draw.draw_quad(drawn_corners, target_position, cursor_is_vertical_bar(), gradient_origin, gradient_direction_scaled)
-	redraw_cmd_mode(must_redraw_cmd_mode)
+	if lag == 0 then
+		draw.clear()
+		draw.draw_particles(particles, target_position)
+		draw.draw_quad(
+			drawn_corners,
+			target_position,
+			cursor_is_vertical_bar(),
+			gradient_origin,
+			gradient_direction_scaled
+		)
+		redraw_cmd_mode(must_redraw_cmd_mode)
+	end
 
-	local end_time = vim.uv.now()
-	vim.defer_fn(animate, math.max(0, config.time_interval - (end_time - start_time)))
+	lag = math.max(0, lag + time_interval - config.time_interval)
+	local call_duration = vim.uv.hrtime() / 1000000 - previous_time
+	local delay_next_call = config.time_interval - call_duration
+
+	if lag <= delay_next_call then
+		delay_next_call = delay_next_call - lag
+		lag = 0
+	else
+		lag = lag - delay_next_call
+		delay_next_call = 0
+	end
+
+	vim.defer_fn(animate, delay_next_call)
 end
 
 local function start_anination()
