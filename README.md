@@ -106,6 +106,19 @@ Refer to [`lua/smear_cursor/config.lua`](https://github.com/sphamba/smear-cursor
 >     cursor_color = "#d3cdc3",
 >   }
 > ```
+>
+> Mode-specific cursor colors are also supported:
+> ```lua
+>   opts = {
+>     cursor_color_normal_mode = "SmearCursorNormal",
+>     cursor_color_insert_mode = "SmearCursorInsert",
+>     cursor_color_visual_mode = "SmearCursorVisual",
+>     cursor_color_command_mode = "SmearCursorCommand",
+>     cursor_color_replace_mode = "SmearCursorReplace",
+>   }
+> ```
+>
+> Highlight groups can provide the color with either `bg` or `fg`.
 
 > [!NOTE]
 > Fonts with legacy computing symbols support seems to be rare. One notable example is [Cascadia Code](https://github.com/microsoft/cascadia-code/releases). You can still use smear-cursor.nvim without such a font.

@@ -12,7 +12,11 @@ local M = {}
 -- Set to "none" to match the text color at the target cursor position.
 -- Can be a hex color code, or a highlight group name.
 C.cursor_color = nil
+C.cursor_color_normal_mode = nil
 C.cursor_color_insert_mode = nil
+C.cursor_color_visual_mode = nil
+C.cursor_color_command_mode = nil
+C.cursor_color_replace_mode = nil
 
 -- Background color. Defaults to Normal GUI background color if not set.
 C.normal_bg = nil
@@ -47,7 +51,11 @@ C.cterm_bg = 235
 
 M.config_variables = {
 	"cursor_color",
+	"cursor_color_normal_mode",
 	"cursor_color_insert_mode",
+	"cursor_color_visual_mode",
+	"cursor_color_command_mode",
+	"cursor_color_replace_mode",
 	"normal_bg",
 	"transparent_bg_fallback_color",
 	"cterm_cursor_colors",
@@ -91,8 +99,48 @@ end
 
 local function resolve_color(str)
 	if not str then return nil end
+	if str == "none" then return str end
 	if str:match("^#") then return str end
-	return get_hl_color(str, "bg")
+	return get_hl_color(str, "bg") or get_hl_color(str, "fg")
+end
+
+local function get_mode_cursor_color(mode)
+	local mode_prefix = mode:sub(1, 1)
+
+	if mode_prefix == "i" and C.cursor_color_insert_mode ~= nil then return C.cursor_color_insert_mode end
+
+	if (mode_prefix == "R" or mode_prefix == "r") and C.cursor_color_replace_mode ~= nil then
+		return C.cursor_color_replace_mode
+	end
+
+	if mode_prefix == "c" and C.cursor_color_command_mode ~= nil then return C.cursor_color_command_mode end
+
+	if
+		mode == "v"
+		or mode == "V"
+		or mode == "\22"
+		or mode == "s"
+		or mode == "S"
+		or mode == "\19"
+	then
+		if C.cursor_color_visual_mode ~= nil then return C.cursor_color_visual_mode end
+	end
+
+	return C.cursor_color_normal_mode ~= nil and C.cursor_color_normal_mode or C.cursor_color
+end
+
+local function any_mode_uses_cursor_text_color()
+	return C.cursor_color == "none"
+		or C.cursor_color_normal_mode == "none"
+		or C.cursor_color_insert_mode == "none"
+		or C.cursor_color_visual_mode == "none"
+		or C.cursor_color_command_mode == "none"
+		or C.cursor_color_replace_mode == "none"
+end
+
+local function make_hl_group_name(opts, cursor_color)
+	local suffix = cursor_color and ("_" .. cursor_color:gsub("[^%w]", "")) or ""
+	return ("SmearCursor%s%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level or ""), suffix)
 end
 
 function M.get_color_at_cursor()
@@ -115,24 +163,22 @@ function M.get_color_at_cursor()
 end
 
 function M.update_color_at_cursor()
-	if C.cursor_color ~= "none" and C.cursor_color_insert_mode ~= "none" then return end
+	if not any_mode_uses_cursor_text_color() then return end
 	color_at_cursor = M.get_color_at_cursor()
 end
 
 ---@param opts? {level?: number, inverted?: boolean}
 function M.get_hl_group(opts)
 	opts = opts or {}
-	local _cursor_color = (vim.api.nvim_get_mode().mode == "i") and resolve_color(C.cursor_color_insert_mode)
-		or resolve_color(C.cursor_color)
-
-	local hl_group = ("SmearCursor%s%s"):format(opts.inverted and "Inverted" or "", tostring(opts.level or ""))
+	local _cursor_color = resolve_color(get_mode_cursor_color(vim.api.nvim_get_mode().mode))
+	local hl_group
 
 	-- Get the cursor color from the treesitter highlight group at the cursor.
 	if _cursor_color == "none" then
 		_cursor_color = color_at_cursor
-		if _cursor_color then hl_group = hl_group .. "_" .. _cursor_color:sub(2) end
 	end
 
+	hl_group = make_hl_group_name(opts, _cursor_color)
 	if cache[hl_group] then return hl_group end
 
 	-- Retrieve the cursor color and the normal background color if not set by the user
