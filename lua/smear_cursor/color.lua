@@ -71,6 +71,8 @@ end
 
 local color_at_cursor = nil
 local cache = {} ---@type table<string, boolean>
+local visible_guicursor = type(vim.o.guicursor) == "string" and vim.o.guicursor or nil
+local hidden_guicursor = nil
 
 local function hex_to_rgb(hex)
 	hex = hex:gsub("#", "")
@@ -241,13 +243,19 @@ setmetatable(M, {
 	end,
 })
 
--- Make the real cursor hideable
-if type(vim.o.guicursor) == "string" then
-	if vim.o.guicursor ~= "" then vim.o.guicursor = vim.o.guicursor .. "," end
-	vim.o.guicursor = vim.o.guicursor .. "a:SmearCursorHideable"
+local function make_hidden_guicursor(guicursor)
+	if guicursor == nil then return nil end
+	if guicursor == "" then return "a:SmearCursorHideable" end
+	return guicursor .. ",a:SmearCursorHideable"
 end
 
 M.hide_real_cursor = function()
+	if type(vim.o.guicursor) == "string" and vim.o.guicursor ~= hidden_guicursor then
+		visible_guicursor = vim.o.guicursor
+		hidden_guicursor = make_hidden_guicursor(visible_guicursor)
+		vim.o.guicursor = hidden_guicursor
+	end
+
 	vim.api.nvim_set_hl(0, "SmearCursorHideable", {
 		fg = "white",
 		blend = 100,
@@ -255,6 +263,10 @@ M.hide_real_cursor = function()
 end
 
 M.unhide_real_cursor = function()
+	if type(vim.o.guicursor) == "string" and hidden_guicursor ~= nil and vim.o.guicursor == hidden_guicursor then
+		vim.o.guicursor = visible_guicursor or ""
+	end
+
 	vim.api.nvim_set_hl(0, "SmearCursorHideable", {
 		fg = "none",
 		blend = 0,
