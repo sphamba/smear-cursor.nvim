@@ -38,6 +38,17 @@ Some configuration examples:
 
 - Neovim 0.10.2
 
+### Using [vim.pack](https://neovim.io/doc/user/pack/)
+
+In `~/.config/nvim/lua/plugins/smear_cursor.lua`, add:
+```lua
+vim.pack.add({
+  "https://github.com/sphamba/smear-cursor.nvim",
+})
+require('smear_cursor').setup({
+  --your options here
+})
+```
 
 ### Using [lazy.nvim](https://lazy.folke.io/)
 
