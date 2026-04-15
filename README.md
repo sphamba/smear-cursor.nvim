@@ -40,13 +40,14 @@ Some configuration examples:
 
 ### Using [vim.pack](https://neovim.io/doc/user/pack/)
 
-In `~/.config/nvim/lua/plugins/smear_cursor.lua`, add:
+In your `~/.config/nvim/init.lua`, add:
 ```lua
 vim.pack.add({
   "https://github.com/sphamba/smear-cursor.nvim",
 })
+
 require('smear_cursor').setup({
-  --your options here
+  -- Your options
 })
 ```
 
