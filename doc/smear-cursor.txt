@@ -1,10 +1,12 @@
 *smear-cursor.txt*     Neovim plugin to animate the cursor with a smear effect
+                                For NVIM v0.10.2    Last change: 2026 April 15
 
 ==============================================================================
 Table of Contents                             *smear-cursor-table-of-contents*
 
 1. Installation                                    |smear-cursor-installation|
   - Minimum requirements      |smear-cursor-installation-minimum-requirements|
+  - Using vim.pack                  |smear-cursor-installation-using-vim.pack|
   - Using lazy.nvim                |smear-cursor-installation-using-lazy.nvim|
   - Using vim-plug                  |smear-cursor-installation-using-vim-plug|
 2. Configuration                                  |smear-cursor-configuration|
@@ -24,6 +26,21 @@ Table of Contents                             *smear-cursor-table-of-contents*
 MINIMUM REQUIREMENTS          *smear-cursor-installation-minimum-requirements*
 
 - Neovim 0.10.2
+
+
+USING VIM.PACK                      *smear-cursor-installation-using-vim.pack*
+
+In your `~/.config/nvim/init.lua`, add:
+
+>lua
+    vim.pack.add({
+      "https://github.com/sphamba/smear-cursor.nvim",
+    })
+    
+    require('smear_cursor').setup({
+      -- Your options
+    })
+<
 
 
 USING LAZY.NVIM                    *smear-cursor-installation-using-lazy.nvim*
