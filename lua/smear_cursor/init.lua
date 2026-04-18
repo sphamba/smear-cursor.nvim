@@ -39,6 +39,7 @@ local metatable = {
 	end,
 }
 
+--- @param opts? SmearCursor.Config
 M.setup = function(opts)
 	opts = opts or {}
 	if opts.enabled == nil then opts.enabled = true end

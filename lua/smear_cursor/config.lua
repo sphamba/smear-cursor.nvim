@@ -1,6 +1,82 @@
 -- All the following options can be set using the `setup` function.
 -- Refer to the README for more information.
 
+--- @class SmearCursor.Config
+--- @field enabled? boolean
+--- @field smear_between_buffers? boolean
+--- @field smear_between_neighbor_lines? boolean
+--- @field min_horizontal_distance_smear? integer
+--- @field min_vertical_distance_smear? integer
+--- @field smear_horizontally? boolean
+--- @field smear_vertically? boolean
+--- @field smear_diagonally? boolean
+--- @field smear_to_cmd? boolean
+--- @field scroll_buffer_space? boolean
+--- @field legacy_computing_symbols_support? boolean
+--- @field legacy_computing_symbols_support_vertical_bars? boolean
+--- @field use_diagonal_blocks? boolean
+--- @field vertical_bar_cursor? boolean
+--- @field smear_insert_mode? boolean
+--- @field vertical_bar_cursor_insert_mode? boolean
+--- @field smear_replace_mode? boolean
+--- @field smear_terminal_mode? boolean
+--- @field horizontal_bar_cursor_replace_mode? boolean
+--- @field never_draw_over_target? boolean
+--- @field hide_target_hack? boolean
+--- @field max_kept_windows? integer
+--- @field windows_zindex? integer
+--- @field filetypes_disabled? string[]
+--- @field time_interval? integer
+--- @field delay_disable? integer
+--- @field delay_event_to_smear? integer
+--- @field delay_after_key? integer
+--- @field stiffness? number
+--- @field trailing_stiffness? number
+--- @field anticipation? number
+--- @field damping? number
+--- @field trailing_exponent? number
+--- @field distance_stop_animating? number
+--- @field stiffness_insert_mode? number
+--- @field trailing_stiffness_insert_mode? number
+--- @field damping_insert_mode? number
+--- @field trailing_exponent_insert_mode? number
+--- @field distance_stop_animating_vertical_bar? number
+--- @field max_slope_horizontal? number
+--- @field min_slope_vertical? number
+--- @field max_angle_difference_diagonal? number
+--- @field max_offset_diagonal? number
+--- @field min_shade_no_diagonal? number
+--- @field min_shade_no_diagonal_vertical_bar? number
+--- @field color_levels? integer
+--- @field gamma? number
+--- @field gradient_exponent? number
+--- @field max_shade_no_matrix? number
+--- @field matrix_pixel_threshold? number
+--- @field matrix_pixel_threshold_vertical_bar? number
+--- @field matrix_pixel_min_factor? number
+--- @field volume_reduction_exponent? number
+--- @field minimum_volume_factor? number
+--- @field max_length? number
+--- @field max_length_insert_mode? number
+--- @field particles_enabled? boolean
+--- @field particle_max_num? integer
+--- @field particle_spread? number
+--- @field particles_per_second? number
+--- @field particles_per_length? number
+--- @field particle_max_lifetime? number
+--- @field particle_lifetime_distribution_exponent? number
+--- @field particle_max_initial_velocity? number
+--- @field particle_velocity_from_cursor? number
+--- @field particle_random_velocity? number
+--- @field particle_damping? number
+--- @field particle_gravity? number
+--- @field min_distance_emit_particles? number
+--- @field particle_switch_octant_braille? number
+--- @field particles_over_text? boolean
+--- @field logging_level? vim.log.levels
+
+
+--- @type SmearCursor.Config
 local M = {}
 
 -- General configuration -------------------------------------------------------
