@@ -1,6 +1,7 @@
 -- All the following options can be set using the `setup` function.
 -- Refer to the README for more information.
 
+-- BEGIN generated luadoc, do not edit (run scripts/generate_config_luadoc.py to update)
 --- @class SmearCursor.Config
 --- @field enabled? boolean
 --- @field smear_between_buffers? boolean
@@ -74,7 +75,7 @@
 --- @field particle_switch_octant_braille? number
 --- @field particles_over_text? boolean
 --- @field logging_level? vim.log.levels
-
+-- END generated luadoc
 
 --- @type SmearCursor.Config
 local M = {}
@@ -180,7 +181,7 @@ M.damping = 0.85
 
 -- Controls if middle points are closer to the head or the tail.
 -- < 1: closer to the tail, > 1: closer to the head
-M.trailing_exponent = 3
+M.trailing_exponent = 3.0
 
 -- Stop animating when the smear's tail is within this distance (in characters) from the target.
 M.distance_stop_animating = 0.1
@@ -189,7 +190,7 @@ M.distance_stop_animating = 0.1
 M.stiffness_insert_mode = 0.5
 M.trailing_stiffness_insert_mode = 0.5
 M.damping_insert_mode = 0.9
-M.trailing_exponent_insert_mode = 1
+M.trailing_exponent_insert_mode = 1.0
 M.distance_stop_animating_vertical_bar = 0.875 -- Can be decreased (e.g. to 0.1) if using legacy computing symbols
 
 -- When to switch between rasterization methods
@@ -209,23 +210,23 @@ M.matrix_pixel_threshold_vertical_bar = 0.25 -- 0: all pixels, 1: no pixel
 M.matrix_pixel_min_factor = 0.5 -- 0: all pixels, 1: no pixel
 M.volume_reduction_exponent = 0.3 -- 0: no reduction, 1: full reduction
 M.minimum_volume_factor = 0.7 -- 0: no limit, 1: no reduction
-M.max_length = 25 -- Maximum smear length
-M.max_length_insert_mode = 1
+M.max_length = 25.0 -- Maximum smear length
+M.max_length_insert_mode = 1.0
 
 -- Particles configuration -----------------------------------------------------
 
 M.particles_enabled = false -- When true, better to also set `never_draw_over_target` to true
 M.particle_max_num = 100
 M.particle_spread = 0.5 -- 0: no spread, 1: spread over entire cursor
-M.particles_per_second = 200
+M.particles_per_second = 200.0
 M.particles_per_length = 1.0 -- per character width
-M.particle_max_lifetime = 300 -- milliseconds
-M.particle_lifetime_distribution_exponent = 5
-M.particle_max_initial_velocity = 10 -- characters width per second
+M.particle_max_lifetime = 300.0 -- milliseconds
+M.particle_lifetime_distribution_exponent = 5.0
+M.particle_max_initial_velocity = 10.0 -- characters width per second
 M.particle_velocity_from_cursor = 0.2 -- 0: none, 1: full
-M.particle_random_velocity = 100 -- characters width per second
+M.particle_random_velocity = 100.0 -- characters width per second
 M.particle_damping = 0.2
-M.particle_gravity = 20 -- characters width per second squared
+M.particle_gravity = 20.0 -- characters width per second squared
 M.min_distance_emit_particles = 1.5 -- character widths
 M.particle_switch_octant_braille = 0.3 -- fraction of lifetime, used if `legacy_computing_symbols_support` is true
 M.particles_over_text = false

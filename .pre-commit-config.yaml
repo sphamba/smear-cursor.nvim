@@ -27,3 +27,12 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
+  - repo: local
+    hooks:
+      - id: config-luadoc
+        name: config-luadoc
+        entry: python3 scripts/generate_config_luadoc.py
+        language: system
+        stages: [pre-commit]
+        files: ^(lua/smear_cursor/config\.lua|scripts/generate_config_luadoc\.py)$
+        pass_filenames: false

@@ -30,3 +30,9 @@ jobs:
         uses: pre-commit/action@v3.0.1
         with:
           extra_args: codespell --all-files
+
+      - name: config luadoc
+        if: success() || failure()
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: config-luadoc --all-files
