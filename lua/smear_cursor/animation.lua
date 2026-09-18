@@ -29,6 +29,7 @@ local particles = {}
 local previous_center = { 0, 0 }
 
 M.disabled_in_buffer = false
+M.waiting_for_cursor_to_stop = false
 
 local function cursor_is_vertical_bar()
 	if vim.api.nvim_get_mode().mode == "i" then
@@ -400,7 +401,9 @@ local function animate()
 				and max_distance <= config.distance_stop_animating_vertical_bar
 				and max_velocity <= config.distance_stop_animating_vertical_bar
 			)
-		) and #particles == 0
+		)
+		and #particles == 0
+		and not M.waiting_for_cursor_to_stop
 	then
 		draw.clear()
 		set_corners(current_corners, target_position[1], target_position[2])

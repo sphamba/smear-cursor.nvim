@@ -18,6 +18,7 @@ local function move_cursor(trigger, jump)
 	trigger = trigger or EVENT_TRIGGER
 	local row, col
 	local mode = vim.api.nvim_get_mode().mode
+	animation.waiting_for_cursor_to_stop = false
 
 	if mode == "i" and not config.smear_insert_mode then jump = true end
 	if mode == "R" and not config.smear_replace_mode then jump = true end
@@ -47,6 +48,7 @@ local function move_cursor(trigger, jump)
 		latest_mode = mode
 		latest_row = row
 		latest_col = col
+		animation.waiting_for_cursor_to_stop = true
 
 		timer = vim.uv.new_timer()
 		timer:start(
