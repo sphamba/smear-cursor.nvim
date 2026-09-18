@@ -196,23 +196,27 @@ setmetatable(M, {
 })
 
 -- Make the real cursor hideable
-if type(vim.o.guicursor) == "string" then
-	if vim.o.guicursor ~= "" then vim.o.guicursor = vim.o.guicursor .. "," end
-	vim.o.guicursor = vim.o.guicursor .. "a:SmearCursorHideable"
-end
+local HIDE_GROUP = "SmearCursorHide"
+
+vim.api.nvim_set_hl(0, HIDE_GROUP, {
+	fg = "white",
+	blend = 100,
+})
 
 M.hide_real_cursor = function()
-	vim.api.nvim_set_hl(0, "SmearCursorHideable", {
-		fg = "white",
-		blend = 100,
-	})
+	if type(vim.o.guicursor) ~= "string" then return end
+	if vim.o.guicursor ~= "" then vim.o.guicursor = vim.o.guicursor .. "," end
+	vim.o.guicursor = vim.o.guicursor .. "a:" .. HIDE_GROUP
 end
 
 M.unhide_real_cursor = function()
-	vim.api.nvim_set_hl(0, "SmearCursorHideable", {
-		fg = "none",
-		blend = 0,
-	})
+	if type(vim.o.guicursor) ~= "string" then return end
+	for _, sep in ipairs({ ",", ";" }) do
+		local pattern = sep .. "a:" .. HIDE_GROUP
+		if vim.o.guicursor:find(pattern, 1, true) then
+			vim.o.guicursor = vim.o.guicursor:gsub(pattern, "")
+		end
+	end
 end
 
 return M
