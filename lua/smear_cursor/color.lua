@@ -211,7 +211,7 @@ end
 
 M.unhide_real_cursor = function()
 	if type(vim.o.guicursor) ~= "string" then return end
-	for _, sep in ipairs({ ",", ";" }) do
+	for _, sep in ipairs({ ",", "" }) do
 		local pattern = sep .. "a:" .. HIDE_GROUP
 		if vim.o.guicursor:find(pattern, 1, true) then
 			vim.o.guicursor = vim.o.guicursor:gsub(pattern, "")

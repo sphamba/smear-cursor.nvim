@@ -408,8 +408,8 @@ local function animate()
 		draw.clear()
 		set_corners(current_corners, target_position[1], target_position[2])
 		reset_velocity()
-		redraw_cmd_mode(must_redraw_cmd_mode)
 		unhide_real_cursor()
+		redraw_cmd_mode(must_redraw_cmd_mode)
 		stop_animation()
 		lag = 0
 		return
