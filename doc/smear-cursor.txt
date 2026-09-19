@@ -1,5 +1,5 @@
 *smear-cursor.txt*     Neovim plugin to animate the cursor with a smear effect
-                            For NVIM v0.10.2    Last change: 2026 September 18
+                            For NVIM v0.10.2    Last change: 2026 September 19
 
 ==============================================================================
 Table of Contents                             *smear-cursor-table-of-contents*
