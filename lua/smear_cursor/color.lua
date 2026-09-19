@@ -215,6 +215,9 @@ M.unhide_real_cursor = function()
 		local pattern = sep .. "a:" .. HIDE_GROUP
 		if vim.o.guicursor:find(pattern, 1, true) then vim.o.guicursor = vim.o.guicursor:gsub(pattern, "") end
 	end
+
+	if vim.o.guicursor == "" then vim.o.guicursor = vim.api.nvim_get_option_info2("guicursor", {}).default end
+	if vim.o.guicursor == "" then vim.o.guicursor = "a:Cursor" end
 end
 
 return M
