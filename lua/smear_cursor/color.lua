@@ -197,6 +197,7 @@ setmetatable(M, {
 
 -- Make the real cursor hideable
 local HIDE_GROUP = "SmearCursorHide"
+local COLLIDING_GROUPS = { "NeoscrollHiddenCursor" }
 
 vim.api.nvim_set_hl(0, HIDE_GROUP, {
 	fg = "white",
@@ -205,12 +206,28 @@ vim.api.nvim_set_hl(0, HIDE_GROUP, {
 
 M.hide_real_cursor = function()
 	if type(vim.o.guicursor) ~= "string" then return end
+
+	for _, colliding_group in ipairs(COLLIDING_GROUPS) do
+		if vim.o.guicursor:find(colliding_group, 1, true) then
+			vim.defer_fn(M.hide_real_cursor, config.delay_after_key)
+			return
+		end
+	end
+
 	if vim.o.guicursor ~= "" then vim.o.guicursor = vim.o.guicursor .. "," end
 	vim.o.guicursor = vim.o.guicursor .. "a:" .. HIDE_GROUP
 end
 
 M.unhide_real_cursor = function()
 	if type(vim.o.guicursor) ~= "string" then return end
+
+	for _, colliding_group in ipairs(COLLIDING_GROUPS) do
+		if vim.o.guicursor:find(colliding_group, 1, true) then
+			vim.defer_fn(M.unhide_real_cursor, config.delay_after_key)
+			return
+		end
+	end
+
 	for _, sep in ipairs({ ",", "" }) do
 		local pattern = sep .. "a:" .. HIDE_GROUP
 		if vim.o.guicursor:find(pattern, 1, true) then vim.o.guicursor = vim.o.guicursor:gsub(pattern, "") end
