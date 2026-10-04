@@ -15,6 +15,7 @@ local target_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local velocity_corners = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 local stiffnesses = { 0, 0, 0, 0 }
 local cursor_hidden = false
+local cursor_visibility_pending = false
 
 local previous_window_id = -1
 local current_window_id = -1
@@ -316,11 +317,32 @@ local function stop_animation()
 	previous_time = 0
 end
 
+local function apply_cursor_visibility()
+	if config.hide_target_hack or type(vim.o.guicursor) ~= "string" then return end
+
+	if color.is_colliding() then
+		if not cursor_visibility_pending then
+			cursor_visibility_pending = true
+			vim.defer_fn(function()
+				cursor_visibility_pending = false
+				apply_cursor_visibility()
+			end, config.delay_retry_update_highlight_group)
+		end
+		return
+	end
+
+	if cursor_hidden then
+		color.hide_real_cursor()
+	else
+		color.unhide_real_cursor()
+	end
+end
+
 local function hide_real_cursor()
 	if cursor_hidden or vim.api.nvim_get_mode().mode == "c" then return end
 	cursor_hidden = true
 	if not config.hide_target_hack then
-		color.hide_real_cursor()
+		apply_cursor_visibility()
 	elseif not cursor_is_vertical_bar() then
 		local character = "█"
 		draw.draw_character(target_position[1], target_position[2], character, color.get_hl_group())
@@ -330,7 +352,7 @@ end
 local function unhide_real_cursor()
 	if not cursor_hidden then return end
 	cursor_hidden = false
-	if not config.hide_target_hack then color.unhide_real_cursor() end
+	if not config.hide_target_hack then apply_cursor_visibility() end
 end
 
 local function check_smear_outside_cmd_row()
@@ -359,7 +381,7 @@ M.replace_real_cursor = function(only_hide)
 	end
 	if not cursor_hidden then
 		cursor_hidden = true
-		color.hide_real_cursor()
+		apply_cursor_visibility()
 	end
 	if not only_hide then draw.draw_quad(current_corners, { -1, -1 }, cursor_is_vertical_bar()) end
 end

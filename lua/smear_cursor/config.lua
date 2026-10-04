@@ -31,6 +31,7 @@
 --- @field delay_disable? integer
 --- @field delay_event_to_smear? integer
 --- @field delay_after_key? integer
+--- @field delay_retry_update_highlight_group? integer
 --- @field stiffness? number
 --- @field trailing_stiffness? number
 --- @field anticipation? number
@@ -162,6 +163,9 @@ M.delay_event_to_smear = 1 -- milliseconds
 
 -- Delay for `vim.on_key` to avoid redundancy with vim events triggers.
 M.delay_after_key = 5 -- milliseconds
+
+-- Delay for changing the highlight groups in `guicursor` in caes of collision with another plugin
+M.delay_retry_update_highlight_group = 5 -- milliseconds
 
 -- Smear configuration ---------------------------------------------------------
 
